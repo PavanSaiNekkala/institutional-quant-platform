@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: institutional-quant
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: institutional-quant
+
+  template:
+
+    metadata:
+      labels:
+        app: institutional-quant
+
+    spec:
+
+      containers:
+
+      - name: institutional-quant
+
+        image: institutional-quant:latest
+
+        imagePullPolicy: Never
+
+        ports:
+
+        - containerPort: 8501
