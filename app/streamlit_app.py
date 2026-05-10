@@ -74,30 +74,53 @@ top_n = st.sidebar.slider(
 
     10
 )
-
 # =========================================================
-# SAMPLE UNIVERSE
+# LOAD DYNAMIC UNIVERSE
 # =========================================================
 
-stocks = [
+universe_path = (
+    ROOT_DIR
+    / "data"
+    / "valid_stocks.xlsx"
+)
 
-    "RELIANCE.NS",
-    "TCS.NS",
-    "INFY.NS",
-    "HDFCBANK.NS",
-    "ICICIBANK.NS",
-    "LT.NS",
-    "ITC.NS",
-    "SUNPHARMA.NS",
-    "BHARTIARTL.NS",
-    "MARUTI.NS",
-    "AXISBANK.NS",
-    "ASIANPAINT.NS",
-    "BAJFINANCE.NS",
-    "SBIN.NS",
-    "ULTRACEMCO.NS"
-]
+try:
 
+    universe_df = pd.read_excel(
+        universe_path
+    )
+
+    stocks = (
+
+        universe_df.iloc[:, 0]
+
+        .dropna()
+
+        .astype(str)
+
+        .unique()
+
+        .tolist()
+    )
+
+    # =====================================================
+    # NSE FILTER
+    # =====================================================
+
+    stocks = [
+
+        stock for stock in stocks
+
+        if ".NS" in stock
+    ]
+
+except Exception as e:
+
+    st.error(
+        f"Universe load failed: {e}"
+    )
+
+    st.stop()
 # =========================================================
 # RUN ORCHESTRATOR
 # =========================================================
