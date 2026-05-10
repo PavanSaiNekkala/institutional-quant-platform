@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL SPEED-OPTIMIZED INSTITUTIONAL QUANT PLATFORM
+# FIXED + OPTIMIZED INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -51,7 +51,7 @@ st.title(
 st.markdown("---")
 
 # =========================================================
-# LIVE MARKET REGIME
+# LIVE REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
@@ -117,7 +117,7 @@ max_universe = st.sidebar.slider(
 )
 
 # =========================================================
-# LOAD DYNAMIC UNIVERSE
+# LOAD UNIVERSE
 # =========================================================
 
 universe_path = (
@@ -147,12 +147,22 @@ try:
         .tolist()
     )
 
+    # =====================================================
+    # CLEAN NSE STOCKS
+    # =====================================================
+
     stocks = [
 
-        stock for stock in stocks
+        stock.strip().upper()
+
+        for stock in stocks
 
         if ".NS" in stock
     ]
+
+    # =====================================================
+    # REMOVE DUPLICATES
+    # =====================================================
 
     stocks = list(
 
@@ -160,7 +170,7 @@ try:
     )
 
     # =====================================================
-    # LIMIT UNIVERSE FOR SPEED
+    # LIMIT UNIVERSE
     # =====================================================
 
     stocks = stocks[:max_universe]
@@ -186,6 +196,30 @@ st.sidebar.metric(
 )
 
 # =========================================================
+# SAFE ROUND
+# =========================================================
+
+def safe_round(value, digits=4):
+
+    try:
+
+        if value is None:
+            return 0
+
+        if np.isnan(value):
+            return 0
+
+        if np.isinf(value):
+            return 0
+
+        return round(float(value), digits)
+
+    except Exception:
+
+        return 0
+
+
+# =========================================================
 # STOCK ANALYZER
 # =========================================================
 
@@ -199,86 +233,85 @@ def analyze_stock(symbol, regime):
         # FAST INFO
         # =================================================
 
-        info = ticker.fast_info
+        try:
 
-        market_cap = info.get(
+            info = ticker.info
 
-            "market_cap",
-
-            0
-        )
-
-        if market_cap < 1_000_000_000:
+        except Exception:
 
             return None
 
         # =================================================
-        # BASIC INFO
+        # FUNDAMENTALS
         # =================================================
 
-        try:
+        sector = info.get(
 
-            detailed = ticker.info
+            "sector",
 
-            sector = detailed.get(
+            "Unknown"
+        )
 
-                "sector",
+        market_cap = info.get(
 
-                "Unknown"
-            )
+            "marketCap",
 
-            revenue_growth = detailed.get(
+            0
+        )
 
-                "revenueGrowth",
+        revenue_growth = info.get(
 
-                0
-            )
+            "revenueGrowth",
 
-            profit_margin = detailed.get(
+            0
+        )
 
-                "profitMargins",
+        profit_margin = info.get(
 
-                0
-            )
+            "profitMargins",
 
-            roe = detailed.get(
+            0
+        )
 
-                "returnOnEquity",
+        roe = info.get(
 
-                0
-            )
+            "returnOnEquity",
 
-            operating_margin = detailed.get(
+            0
+        )
 
-                "operatingMargins",
+        operating_margin = info.get(
 
-                0
-            )
+            "operatingMargins",
 
-            debt_to_equity = detailed.get(
+            0
+        )
 
-                "debtToEquity",
+        debt_to_equity = info.get(
 
-                0
-            )
+            "debtToEquity",
 
-            dividend_yield = detailed.get(
+            0
+        )
 
-                "dividendYield",
+        dividend_yield = info.get(
 
-                0
-            )
+            "dividendYield",
 
-        except Exception:
+            0
+        )
 
-            sector = "Unknown"
+        # =================================================
+        # QUALITY FILTER
+        # =================================================
 
-            revenue_growth = 0
-            profit_margin = 0
-            roe = 0
-            operating_margin = 0
-            debt_to_equity = 0
-            dividend_yield = 0
+        if market_cap is None:
+
+            return None
+
+        if market_cap < 1_000_000_000:
+
+            return None
 
         # =================================================
         # PRICE DATA
@@ -288,18 +321,32 @@ def analyze_stock(symbol, regime):
 
             symbol,
 
-            period="3mo",
+            period="6mo",
+
+            interval="1d",
 
             progress=False,
 
-            auto_adjust=True
+            auto_adjust=True,
+
+            threads=False
         )
 
         if data.empty:
 
             return None
 
-        close = data["Close"].dropna()
+        close = data["Close"]
+
+        # =================================================
+        # FIX MULTIINDEX ISSUE
+        # =================================================
+
+        if isinstance(close, pd.DataFrame):
+
+            close = close.iloc[:, 0]
+
+        close = close.dropna()
 
         if len(close) < 50:
 
@@ -307,7 +354,7 @@ def analyze_stock(symbol, regime):
 
         returns = close.pct_change().dropna()
 
-        if returns.empty:
+        if len(returns) < 20:
 
             return None
 
@@ -327,11 +374,21 @@ def analyze_stock(symbol, regime):
             * np.sqrt(252)
         )
 
-        sharpe = (
+        # =================================================
+        # SHARPE FIX
+        # =================================================
 
-            returns.mean()
-            / returns.std()
-        ) * np.sqrt(252)
+        if returns.std() == 0:
+
+            sharpe = 0
+
+        else:
+
+            sharpe = (
+
+                returns.mean()
+                / returns.std()
+            ) * np.sqrt(252)
 
         total_return = (
 
@@ -353,11 +410,16 @@ def analyze_stock(symbol, regime):
             .iloc[-1]
         )
 
-        trend_strength = (
+        if sma50 == 0:
 
-            sma20 / sma50
+            trend_strength = 0
 
-        ) if sma50 != 0 else 0
+        else:
+
+            trend_strength = (
+
+                sma20 / sma50
+            )
 
         # =================================================
         # REGIME ADAPTATION
@@ -379,7 +441,7 @@ def analyze_stock(symbol, regime):
             trend_strength *= 0.80
 
         # =================================================
-        # METRICS
+        # FACTOR METRICS
         # =================================================
 
         metrics = {
@@ -430,6 +492,14 @@ def analyze_stock(symbol, regime):
         )
 
         # =================================================
+        # FILTER BAD SCORES
+        # =================================================
+
+        if np.isnan(final_score):
+
+            return None
+
+        # =================================================
         # CLASSIFICATION
         # =================================================
 
@@ -458,7 +528,14 @@ def analyze_stock(symbol, regime):
 
             classification = "AVOID"
 
-        percentile = final_score * 100
+        percentile = (
+
+            final_score * 100
+        )
+
+        # =================================================
+        # FINAL OUTPUT
+        # =================================================
 
         return {
 
@@ -469,43 +546,43 @@ def analyze_stock(symbol, regime):
                 sector,
 
             "Market Cap":
-                market_cap,
+                safe_round(market_cap, 0),
 
             "Revenue Growth":
-                round(revenue_growth, 4),
+                safe_round(revenue_growth),
 
             "Profit Margin":
-                round(profit_margin, 4),
+                safe_round(profit_margin),
 
             "ROE":
-                round(roe, 4),
+                safe_round(roe),
 
             "Operating Margin":
-                round(operating_margin, 4),
+                safe_round(operating_margin),
 
             "Momentum":
-                round(momentum, 4),
+                safe_round(momentum),
 
             "Volatility":
-                round(volatility, 4),
+                safe_round(volatility),
 
             "Sharpe":
-                round(sharpe, 4),
+                safe_round(sharpe),
 
             "Trend Strength":
-                round(trend_strength, 4),
+                safe_round(trend_strength),
 
             "Dividend Yield":
-                round(dividend_yield, 4),
+                safe_round(dividend_yield),
 
             "Debt To Equity":
-                round(debt_to_equity, 4),
+                safe_round(debt_to_equity),
 
             "Final Score":
-                round(final_score, 4),
+                safe_round(final_score),
 
             "Percentile":
-                round(percentile, 2),
+                safe_round(percentile, 2),
 
             "Classification":
                 classification
@@ -514,6 +591,7 @@ def analyze_stock(symbol, regime):
     except Exception:
 
         return None
+
 
 # =========================================================
 # MAIN ENGINE
@@ -529,7 +607,7 @@ status = st.empty()
 # PARALLEL EXECUTION
 # =========================================================
 
-with ThreadPoolExecutor(max_workers=10) as executor:
+with ThreadPoolExecutor(max_workers=8) as executor:
 
     futures = {
 
@@ -553,7 +631,7 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 
         result = future.result()
 
-        if result:
+        if result is not None:
 
             ranking_data.append(result)
 
@@ -583,14 +661,30 @@ results = pd.DataFrame(
     ranking_data
 )
 
+# =========================================================
+# FIX EMPTY OUTPUT
+# =========================================================
+
 if results.empty:
 
     st.error(
 
-        "No valid stocks ranked"
+        """
+        No valid stocks ranked.
+
+        Possible reasons:
+        - Invalid stock symbols
+        - Yahoo Finance rate limit
+        - Empty Excel universe
+        - Network/API issue
+        """
     )
 
     st.stop()
+
+# =========================================================
+# SORTING
+# =========================================================
 
 results = results.sort_values(
 
@@ -631,16 +725,14 @@ with col3:
 
         "Top Alpha Score",
 
-        round(
+        safe_round(
 
-            results["Final Score"].max(),
-
-            4
+            results["Final Score"].max()
         )
     )
 
 # =========================================================
-# RANKINGS TABLE
+# TABLE
 # =========================================================
 
 st.subheader(
