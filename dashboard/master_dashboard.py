@@ -1,7 +1,6 @@
 # =========================================================
 # INSTITUTIONAL QUANT RESEARCH PLATFORM
-# FUNDAMENTAL + TECHNICAL + SECTOR RANKING ENGINE
-# FINAL OPTIMIZED VERSION
+# FINAL WORKING VERSION (NO STALE CACHE)
 # =========================================================
 
 import sys
@@ -64,11 +63,6 @@ def safe(value, default=0):
 
 st.sidebar.header("Institutional Controls")
 
-use_cache = st.sidebar.checkbox(
-    "Use Cached Rankings",
-    value=False
-)
-
 refresh_rankings = st.sidebar.button(
     "Regenerate Rankings"
 )
@@ -93,55 +87,19 @@ ranked_file = Path(CACHE_FILE)
 
 if refresh_rankings:
 
+    st.cache_data.clear()
+
     if ranked_file.exists():
 
         ranked_file.unlink()
 
-        st.sidebar.success(
-            "Old rankings deleted"
-        )
+    st.success("Fresh ranking generation started")
 
 # =========================================================
 # LOAD RANKED UNIVERSE
 # =========================================================
 
-@st.cache_data(ttl=86400)
 def load_ranked_universe():
-
-    ranked_file = Path(CACHE_FILE)
-
-    # =====================================================
-    # LOAD CACHE
-    # =====================================================
-
-    if use_cache and ranked_file.exists():
-
-        try:
-
-            ranking_df = pd.read_excel(ranked_file)
-
-            ranking_df = ranking_df.sort_values(
-                by="Institutional Score",
-                ascending=False
-            )
-
-            ranking_df = ranking_df.reset_index(drop=True)
-
-            st.sidebar.success(
-                "Loaded Cached Rankings"
-            )
-
-            return ranking_df
-
-        except Exception as e:
-
-            st.warning(
-                f"Cached ranking load failed: {e}"
-            )
-
-    # =====================================================
-    # LOAD STOCK UNIVERSE
-    # =====================================================
 
     try:
 
@@ -158,19 +116,13 @@ def load_ranked_universe():
         )
 
         # =====================================================
-        # REMOVE INVALID SYMBOLS
+        # VALID NSE STOCKS ONLY
         # =====================================================
 
         symbols = [
             s for s in symbols
             if ".NS" in s
         ]
-
-        # =====================================================
-        # LIMIT FOR STREAMLIT CLOUD
-        # =====================================================
-
-        symbols = symbols[:2500]
 
         ranking_data = []
 
@@ -181,7 +133,7 @@ def load_ranked_universe():
         total_symbols = len(symbols)
 
         # =====================================================
-        # LOOP THROUGH STOCKS
+        # MAIN LOOP
         # =====================================================
 
         for idx, symbol in enumerate(symbols):
@@ -255,7 +207,7 @@ def load_ranked_universe():
                 )
 
                 # =================================================
-                # FILTER LOW QUALITY STOCKS
+                # QUALITY FILTER
                 # =================================================
 
                 if market_cap < 1_000_000_000:
@@ -367,72 +319,32 @@ def load_ranked_universe():
 
                 score = (
 
-                    # Fundamental Growth
-                    revenue_growth * 0.15
+                    revenue_growth * 0.15 +
 
-                    +
+                    profit_margin * 0.15 +
 
-                    # Profitability
-                    profit_margin * 0.15
+                    roe * 0.15 +
 
-                    +
+                    operating_margin * 0.10 +
 
-                    # ROE
-                    roe * 0.15
+                    momentum * 0.10 +
 
-                    +
+                    sharpe * 0.10 +
 
-                    # Operating Margin
-                    operating_margin * 0.10
+                    trend_strength * 0.05 +
 
-                    +
+                    total_return * 0.05 +
 
-                    # Momentum
-                    momentum * 0.10
+                    (rsi / 100) * 0.05 +
 
-                    +
+                    np.log1p(avg_volume) * 0.05 +
 
-                    # Sharpe Ratio
-                    sharpe * 0.10
+                    dividend_yield * 0.05 -
 
-                    +
+                    volatility * 0.03 -
 
-                    # Trend Strength
-                    trend_strength * 0.05
+                    debt_to_equity * 0.015 -
 
-                    +
-
-                    # Total Return
-                    total_return * 0.05
-
-                    +
-
-                    # RSI Strength
-                    (rsi / 100) * 0.05
-
-                    +
-
-                    # Liquidity
-                    np.log1p(avg_volume) * 0.05
-
-                    +
-
-                    # Dividend Yield
-                    dividend_yield * 0.05
-
-                    -
-
-                    # Volatility Penalty
-                    volatility * 0.03
-
-                    -
-
-                    # Debt Penalty
-                    debt_to_equity * 0.015
-
-                    -
-
-                    # Beta Penalty
                     beta * 0.015
                 )
 
@@ -555,7 +467,7 @@ def load_ranked_universe():
         )
 
         # =====================================================
-        # SECTOR-WISE BALANCING
+        # SECTOR BALANCING
         # =====================================================
 
         sectors = (
@@ -577,7 +489,7 @@ def load_ranked_universe():
                 ascending=False
             )
 
-            # TAKE BEST STOCKS
+            # TAKE TOP STOCKS FROM EACH SECTOR
             top_sector = sector_df.head(50)
 
             sector_selected.append(
@@ -611,7 +523,7 @@ def load_ranked_universe():
         )
 
         # =====================================================
-        # SAVE CACHE
+        # SAVE OUTPUT
         # =====================================================
 
         final_df.to_excel(
@@ -630,7 +542,7 @@ def load_ranked_universe():
         return pd.DataFrame()
 
 # =========================================================
-# LOAD DATA
+# GENERATE FRESH DATA EVERY RUN
 # =========================================================
 
 ranking_df = load_ranked_universe()
@@ -720,40 +632,18 @@ if not display_df.empty:
         height=700
     )
 
-else:
-
-    st.warning(
-        "No rankings available"
-    )
-
 # =========================================================
-# SYMBOLS
+# SIGNALS
 # =========================================================
 
 all_symbols = (
     ranking_df["Symbol"]
     .tolist()
-    if not ranking_df.empty
-    else []
 )
 
 symbols = all_symbols[
     :watchlist_size
 ]
-
-# =========================================================
-# EMPTY CHECK
-# =========================================================
-
-if len(symbols) == 0:
-
-    st.error("No symbols available")
-
-    st.stop()
-
-# =========================================================
-# EQUAL WEIGHTS
-# =========================================================
 
 weights = np.array(
     [1 / len(symbols)]
@@ -770,55 +660,27 @@ def cached_signal(symbol):
     return generate_live_signal(symbol)
 
 # =========================================================
-# LIVE AI SIGNALS
+# LIVE SIGNALS
 # =========================================================
 
 st.subheader("Live AI Signals")
 
 signal_reports = []
 
-signal_progress = st.progress(0)
-
-signal_status = st.empty()
-
-live_signal_symbols = symbols[:50]
-
-for idx, symbol in enumerate(
-    live_signal_symbols
-):
+for symbol in symbols[:50]:
 
     try:
-
-        signal_status.text(
-            f"Generating Signal: {symbol}"
-        )
 
         report = cached_signal(symbol)
 
         signal_reports.append(report)
 
-    except Exception as e:
-
-        st.warning(
-            f"Signal Error {symbol}: {e}"
-        )
-
-    signal_progress.progress(
-        (idx + 1)
-        / len(live_signal_symbols)
-    )
-
-signal_status.text(
-    "Signal Generation Completed"
-)
+    except Exception:
+        continue
 
 signal_df = pd.DataFrame(
     signal_reports
 )
-
-# =========================================================
-# SIGNAL TABLE
-# =========================================================
 
 if not signal_df.empty:
 
@@ -841,7 +703,6 @@ if not signal_df.empty:
     fig = go.Figure()
 
     fig.add_trace(
-
         go.Bar(
             x=signal_df["Symbol"],
             y=signal_df["Signal Score"]
@@ -856,26 +717,6 @@ if not signal_df.empty:
 
     st.plotly_chart(
         fig,
-        width="stretch"
-    )
-
-# =========================================================
-# TOP SIGNALS
-# =========================================================
-
-st.subheader(
-    "Top Institutional Signals"
-)
-
-if not signal_df.empty:
-
-    top_signals = signal_df.sort_values(
-        by="Signal Score",
-        ascending=False
-    ).head(25)
-
-    st.dataframe(
-        top_signals,
         width="stretch"
     )
 
@@ -958,7 +799,7 @@ st.download_button(
 )
 
 # =========================================================
-# SYSTEM STATUS
+# STATUS
 # =========================================================
 
 st.success(
