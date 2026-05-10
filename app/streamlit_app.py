@@ -1,9 +1,10 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL STABLE + FAST INSTITUTIONAL QUANT PLATFORM
+# FINAL STABLE + RATE-LIMIT SAFE INSTITUTIONAL PLATFORM
 # =========================================================
 
 import sys
+import time
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +52,7 @@ st.title(
 st.markdown("---")
 
 # =========================================================
-# CACHE REGIME
+# CACHE LIVE REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
@@ -152,7 +153,7 @@ try:
     )
 
     # =====================================================
-    # NSE FILTER
+    # CLEAN NSE STOCKS
     # =====================================================
 
     stocks = [
@@ -228,13 +229,23 @@ def safe_round(value, digits=4):
 
 def analyze_stock(symbol, regime):
 
+    # =====================================================
+    # SMALL DELAY TO REDUCE RATE LIMITING
+    # =====================================================
+
+    time.sleep(0.25)
+
     try:
 
         # =================================================
-        # FAST INFO ONLY
+        # TICKER
         # =================================================
 
         ticker = yf.Ticker(symbol)
+
+        # =================================================
+        # FAST INFO
+        # =================================================
 
         try:
 
@@ -242,7 +253,7 @@ def analyze_stock(symbol, regime):
 
         except Exception:
 
-            return None
+            fast_info = {}
 
         # =================================================
         # MARKET CAP
@@ -252,16 +263,16 @@ def analyze_stock(symbol, regime):
 
             "market_cap",
 
-            0
+            None
         )
+
+        # =================================================
+        # FALLBACK MARKET CAP
+        # =================================================
 
         if market_cap is None:
 
             market_cap = 0
-
-        if market_cap < 1_000_000_000:
-
-            return None
 
         # =================================================
         # DEFAULT FUNDAMENTALS
@@ -341,7 +352,12 @@ def analyze_stock(symbol, regime):
         # SHARPE
         # =================================================
 
-        if returns.std() == 0:
+        if (
+
+            returns.std() is None or
+
+            returns.std() == 0
+        ):
 
             sharpe = 0
 
@@ -443,7 +459,7 @@ def analyze_stock(symbol, regime):
         }
 
         # =================================================
-        # SECTOR SCORE
+        # FINAL SCORE
         # =================================================
 
         final_score = sector_score(
@@ -492,7 +508,7 @@ def analyze_stock(symbol, regime):
         )
 
         # =================================================
-        # FINAL OUTPUT
+        # OUTPUT
         # =================================================
 
         return {
@@ -549,7 +565,7 @@ status = st.empty()
 # PARALLEL EXECUTION
 # =========================================================
 
-with ThreadPoolExecutor(max_workers=5) as executor:
+with ThreadPoolExecutor(max_workers=3) as executor:
 
     futures = {
 
@@ -612,16 +628,16 @@ if results.empty:
 
         Possible reasons:
         - Invalid symbols
-        - Yahoo rate limiting
-        - Empty Excel file
-        - Network issue
+        - Yahoo Finance rate limiting
+        - Empty Excel universe
+        - Network/API issue
         """
     )
 
     st.stop()
 
 # =========================================================
-# SORT
+# SORT RESULTS
 # =========================================================
 
 results = results.sort_values(
@@ -634,7 +650,7 @@ results = results.sort_values(
 results = results.head(top_n)
 
 # =========================================================
-# METRICS
+# DASHBOARD METRICS
 # =========================================================
 
 col1, col2, col3 = st.columns(3)
