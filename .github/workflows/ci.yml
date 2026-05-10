@@ -81,3 +81,32 @@ jobs:
       run: |
 
         docker build -t institutional-quant .
+        # =====================================================
+    # INTEGRATION TESTS
+    # =====================================================
+
+    - name: Run Integration Tests
+
+      run: |
+
+        python tests/integration_test.py
+
+    # =====================================================
+    # RELEASE VALIDATION
+    # =====================================================
+
+    - name: Run Release Validation
+
+      run: |
+
+        python app/test_release_validator.py
+
+    # =====================================================
+    # PRODUCTION CHECKLIST
+    # =====================================================
+
+    - name: Run Production Checklist
+
+      run: |
+
+        python app/test_production_checklist.py

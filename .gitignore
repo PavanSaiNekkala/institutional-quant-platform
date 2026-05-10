@@ -1,6 +1,32 @@
-venv/
+# ENV
+.env
+
+# PYTHON
 __pycache__/
 *.pyc
-.env
-exports/
+*.pyo
+
+# DATABASES
+*.db
+
+# LOGS
+logs/
+*.log
+
+# BACKUPS
+backups/
+
+# STREAMLIT
 .streamlit/
+
+# VENV
+venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
