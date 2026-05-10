@@ -1,127 +1,9 @@
 # =========================================================
 # FILE: core/sector_models.py
-# FINAL DYNAMIC INSTITUTIONAL SECTOR ENGINE
+# FINAL LIGHTWEIGHT INSTITUTIONAL SECTOR ENGINE
 # =========================================================
 
 import numpy as np
-import pandas as pd
-
-# =========================================================
-# DYNAMIC SECTOR KEYWORDS
-# =========================================================
-
-SECTOR_KEYWORDS = {
-
-    # =====================================================
-    # BANKS & FINANCIALS
-    # =====================================================
-
-    "BANK": "PRIVATE_BANKS",
-    "FINANCE": "PRIVATE_BANKS",
-    "FINANCIAL": "PRIVATE_BANKS",
-    "NBFC": "PRIVATE_BANKS",
-
-    # =====================================================
-    # IT & SOFTWARE
-    # =====================================================
-
-    "IT": "PRIVATE_IT",
-    "TECH": "PRIVATE_IT",
-    "SOFTWARE": "PRIVATE_IT",
-    "DIGITAL": "PRIVATE_IT",
-
-    # =====================================================
-    # PHARMA
-    # =====================================================
-
-    "PHARMA": "PRIVATE_PHARMA",
-    "HEALTH": "PRIVATE_PHARMA",
-    "BIO": "PRIVATE_PHARMA",
-    "LIFE SCIENCE": "PRIVATE_PHARMA",
-
-    # =====================================================
-    # AUTO
-    # =====================================================
-
-    "AUTO": "PRIVATE_AUTO",
-    "MOTOR": "PRIVATE_AUTO",
-    "TYRE": "PRIVATE_AUTO",
-    "AUTOMOBILE": "PRIVATE_AUTO",
-
-    # =====================================================
-    # ENERGY
-    # =====================================================
-
-    "ENERGY": "PRIVATE_ENERGY",
-    "POWER": "PSU_ENERGY",
-    "OIL": "PSU_ENERGY",
-    "GAS": "PSU_ENERGY",
-    "PETROLEUM": "PSU_ENERGY",
-    "COAL": "PSU_ENERGY",
-
-    # =====================================================
-    # FMCG
-    # =====================================================
-
-    "FMCG": "PRIVATE_FMCG",
-    "CONSUMER": "PRIVATE_CONSUMER",
-    "FOOD": "PRIVATE_FMCG",
-    "BEVERAGE": "PRIVATE_FMCG",
-
-    # =====================================================
-    # REALTY
-    # =====================================================
-
-    "REALTY": "PRIVATE_REALTY",
-    "REAL ESTATE": "PRIVATE_REALTY",
-    "PROPERTY": "PRIVATE_REALTY",
-
-    # =====================================================
-    # CHEMICALS
-    # =====================================================
-
-    "CHEMICAL": "PRIVATE_CHEMICALS",
-    "FERTILIZER": "PRIVATE_CHEMICALS",
-    "SPECIALTY": "PRIVATE_CHEMICALS",
-
-    # =====================================================
-    # METALS
-    # =====================================================
-
-    "METAL": "PRIVATE_METALS",
-    "STEEL": "PRIVATE_METALS",
-    "MINING": "PRIVATE_METALS",
-    "ALUMINIUM": "PRIVATE_METALS",
-
-    # =====================================================
-    # DEFENCE
-    # =====================================================
-
-    "DEFENCE": "PSU_DEFENCE",
-    "AEROSPACE": "PSU_DEFENCE",
-    "SHIP": "PSU_DEFENCE",
-
-    # =====================================================
-    # TELECOM
-    # =====================================================
-
-    "TELECOM": "PRIVATE_TELECOM",
-    "COMMUNICATION": "PRIVATE_TELECOM",
-
-    # =====================================================
-    # CEMENT
-    # =====================================================
-
-    "CEMENT": "PRIVATE_CEMENT",
-
-    # =====================================================
-    # INFRA
-    # =====================================================
-
-    "INFRA": "PRIVATE_INFRA",
-    "ENGINEERING": "PRIVATE_INFRA",
-    "CONSTRUCTION": "PRIVATE_INFRA"
-}
 
 # =========================================================
 # SECTOR IMPACT WEIGHTS
@@ -163,133 +45,233 @@ SECTOR_IMPACT = {
 }
 
 # =========================================================
-# PSU DETECTION WORDS
+# LIGHTWEIGHT SECTOR DETECTION
 # =========================================================
 
-PSU_WORDS = [
+def detect_sector(symbol):
 
-    "STATE",
-    "INDIA",
-    "POWER",
-    "OIL",
-    "COAL",
-    "RAIL",
-    "NTPC",
-    "GAIL",
-    "ONGC",
-    "IOC",
-    "BPCL",
-    "SAIL",
-    "NMDC",
-    "HAL",
-    "BEL"
-]
+    symbol = symbol.upper()
 
-# =========================================================
-# DYNAMIC SECTOR DETECTION
-# =========================================================
+    # =====================================================
+    # PRIVATE / PSU BANKS
+    # =====================================================
 
-def detect_sector(symbol, info):
+    if any(
 
-    try:
+        x in symbol
 
-        # =================================================
-        # YAHOO METADATA
-        # =================================================
+        for x in [
 
-        sector_name = str(
+            "BANK",
+            "FIN",
+            "HDFC",
+            "ICICI",
+            "SBI",
+            "KOTAK",
+            "AXIS",
+            "IDFC"
+        ]
+    ):
 
-            info.get(
-                "sector",
-                ""
-            )
-        ).upper()
+        if any(
 
-        industry_name = str(
+            x in symbol
 
-            info.get(
-                "industry",
-                ""
-            )
-        ).upper()
+            for x in [
 
-        long_name = str(
-
-            info.get(
-                "longName",
-                ""
-            )
-        ).upper()
-
-        combined = (
-
-            sector_name
-            + " "
-            + industry_name
-            + " "
-            + long_name
-        )
-
-        # =================================================
-        # PSU DETECTION
-        # =================================================
-
-        is_psu = False
-
-        for word in PSU_WORDS:
-
-            if word in combined:
-
-                is_psu = True
-                break
-
-        # =================================================
-        # KEYWORD MATCHING
-        # =================================================
-
-        for keyword, sector in (
-
-            SECTOR_KEYWORDS.items()
+                "SBI",
+                "PNB",
+                "BANKBARODA",
+                "CANBK",
+                "UNIONBANK",
+                "IOB",
+                "PSB"
+            ]
         ):
 
-            if keyword in combined:
+            return "PSU_BANKS"
 
-                # =========================================
-                # PSU OVERRIDE
-                # =========================================
+        return "PRIVATE_BANKS"
 
-                if is_psu:
+    # =====================================================
+    # IT
+    # =====================================================
 
-                    if sector == "PRIVATE_BANKS":
+    elif any(
 
-                        return "PSU_BANKS"
+        x in symbol
 
-                    elif sector == "PRIVATE_ENERGY":
+        for x in [
 
-                        return "PSU_ENERGY"
+            "TCS",
+            "INFY",
+            "WIPRO",
+            "TECH",
+            "SOFT",
+            "LTIM",
+            "HCL",
+            "KPIT",
+            "PERSISTENT"
+        ]
+    ):
 
-                    elif sector == "PRIVATE_METALS":
+        return "PRIVATE_IT"
 
-                        return "PSU_METALS"
+    # =====================================================
+    # PHARMA
+    # =====================================================
 
-                return sector
+    elif any(
 
-        # =================================================
-        # FALLBACK PSU
-        # =================================================
+        x in symbol
 
-        if is_psu:
+        for x in [
 
-            return "PSU_ENERGY"
+            "PHARMA",
+            "LAB",
+            "MED",
+            "DRREDDY",
+            "SUN",
+            "LUPIN",
+            "CIPLA"
+        ]
+    ):
 
-        return "OTHER"
+        return "PRIVATE_PHARMA"
 
-    except Exception:
+    # =====================================================
+    # AUTO
+    # =====================================================
 
-        return "OTHER"
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "AUTO",
+            "MOTOR",
+            "MARUTI",
+            "M&M",
+            "TATA",
+            "EICHER",
+            "BAJAJ"
+        ]
+    ):
+
+        return "PRIVATE_AUTO"
+
+    # =====================================================
+    # ENERGY
+    # =====================================================
+
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "POWER",
+            "OIL",
+            "GAS",
+            "ENERGY",
+            "ONGC",
+            "IOC",
+            "BPCL",
+            "NTPC",
+            "GAIL"
+        ]
+    ):
+
+        return "PSU_ENERGY"
+
+    # =====================================================
+    # FMCG
+    # =====================================================
+
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "CONSUM",
+            "NESTLE",
+            "DABUR",
+            "MARICO",
+            "HINDUNILVR",
+            "BRITANNIA"
+        ]
+    ):
+
+        return "PRIVATE_FMCG"
+
+    # =====================================================
+    # METALS
+    # =====================================================
+
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "STEEL",
+            "METAL",
+            "HINDALCO",
+            "JSW",
+            "TATASTEEL",
+            "SAIL",
+            "NMDC"
+        ]
+    ):
+
+        return "PRIVATE_METALS"
+
+    # =====================================================
+    # REALTY
+    # =====================================================
+
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "REAL",
+            "PROP",
+            "DLF",
+            "LODHA",
+            "OBEROI"
+        ]
+    ):
+
+        return "PRIVATE_REALTY"
+
+    # =====================================================
+    # DEFENCE
+    # =====================================================
+
+    elif any(
+
+        x in symbol
+
+        for x in [
+
+            "HAL",
+            "BEL",
+            "BDL",
+            "MAZDOCK",
+            "SHIP"
+        ]
+    ):
+
+        return "PSU_DEFENCE"
+
+    return "OTHER"
 
 # =========================================================
-# SECTOR FACTOR ENGINE
+# INSTITUTIONAL FACTOR ENGINE
 # =========================================================
 
 def sector_factor_score(
@@ -347,7 +329,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PRIVATE FMCG
+    # FMCG
     # =====================================================
 
     elif sector == "PRIVATE_FMCG":
@@ -361,7 +343,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PRIVATE AUTO
+    # AUTO
     # =====================================================
 
     elif sector == "PRIVATE_AUTO":
@@ -375,7 +357,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PRIVATE PHARMA
+    # PHARMA
     # =====================================================
 
     elif sector == "PRIVATE_PHARMA":
@@ -389,21 +371,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PRIVATE ENERGY
-    # =====================================================
-
-    elif sector == "PRIVATE_ENERGY":
-
-        raw_score = (
-
-            total_return * 0.30 +
-            trend_strength * 0.25 +
-            sharpe * 0.25 +
-            momentum * 0.20
-        )
-
-    # =====================================================
-    # PSU ENERGY
+    # ENERGY
     # =====================================================
 
     elif sector == "PSU_ENERGY":
@@ -417,7 +385,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PSU DEFENCE
+    # DEFENCE
     # =====================================================
 
     elif sector == "PSU_DEFENCE":
@@ -431,7 +399,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PRIVATE METALS
+    # METALS
     # =====================================================
 
     elif sector == "PRIVATE_METALS":
@@ -445,21 +413,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # PSU METALS
-    # =====================================================
-
-    elif sector == "PSU_METALS":
-
-        raw_score = (
-
-            momentum * 0.30 +
-            total_return * 0.25 +
-            sharpe * 0.25 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # PRIVATE REALTY
+    # REALTY
     # =====================================================
 
     elif sector == "PRIVATE_REALTY":
@@ -470,76 +424,6 @@ def sector_factor_score(
             total_return * 0.30 +
             trend_strength * 0.20 -
             volatility * 0.20
-        )
-
-    # =====================================================
-    # PRIVATE CONSUMER
-    # =====================================================
-
-    elif sector == "PRIVATE_CONSUMER":
-
-        raw_score = (
-
-            sharpe * 0.30 +
-            trend_strength * 0.25 +
-            total_return * 0.25 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # PRIVATE CHEMICALS
-    # =====================================================
-
-    elif sector == "PRIVATE_CHEMICALS":
-
-        raw_score = (
-
-            momentum * 0.30 +
-            sharpe * 0.25 +
-            total_return * 0.25 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # TELECOM
-    # =====================================================
-
-    elif sector == "PRIVATE_TELECOM":
-
-        raw_score = (
-
-            sharpe * 0.30 +
-            total_return * 0.30 +
-            trend_strength * 0.20 +
-            momentum * 0.20
-        )
-
-    # =====================================================
-    # CEMENT
-    # =====================================================
-
-    elif sector == "PRIVATE_CEMENT":
-
-        raw_score = (
-
-            momentum * 0.30 +
-            total_return * 0.25 +
-            sharpe * 0.25 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # INFRA
-    # =====================================================
-
-    elif sector == "PRIVATE_INFRA":
-
-        raw_score = (
-
-            momentum * 0.35 +
-            total_return * 0.30 +
-            trend_strength * 0.20 -
-            volatility * 0.15
         )
 
     # =====================================================
@@ -558,7 +442,7 @@ def sector_factor_score(
         )
 
     # =====================================================
-    # MARKET IMPACT
+    # SECTOR IMPACT
     # =====================================================
 
     sector_weight = SECTOR_IMPACT.get(
@@ -594,8 +478,7 @@ def sector_factor_score(
         if sector in [
 
             "PRIVATE_FMCG",
-            "PRIVATE_PHARMA",
-            "PRIVATE_CONSUMER"
+            "PRIVATE_PHARMA"
         ]:
 
             impact_adjusted_score *= 1.10
