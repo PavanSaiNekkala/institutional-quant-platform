@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL INSTITUTIONAL QUANT RESEARCH PLATFORM
+# FINAL STABLE INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -54,7 +54,7 @@ st.title(
 st.markdown("---")
 
 # =========================================================
-# LIVE REGIME
+# LIVE MARKET REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
@@ -123,7 +123,7 @@ max_universe = st.sidebar.slider(
 )
 
 # =========================================================
-# LOAD UNIVERSE
+# LOAD STOCK UNIVERSE
 # =========================================================
 
 universe_path = (
@@ -200,7 +200,7 @@ def safe_round(value, digits=4):
 
             return 0
 
-        if np.isnan(value):
+        if pd.isna(value):
 
             return 0
 
@@ -225,23 +225,19 @@ def safe_round(value, digits=4):
 
 def analyze_stock(symbol, regime):
 
-    time.sleep(0.10)
+    # =============================================
+    # THROTTLE
+    # =============================================
+
+    time.sleep(0.15)
 
     try:
 
         ticker = yf.Ticker(symbol)
 
-        # =================================================
-        # INFO
-        # =================================================
-
-        try:
-
-            info = ticker.info
-
-        except Exception:
-
-            info = {}
+        # =========================================
+        # FAST INFO ONLY
+        # =========================================
 
         try:
 
@@ -250,10 +246,6 @@ def analyze_stock(symbol, regime):
         except Exception:
 
             fast_info = {}
-
-        # =================================================
-        # MARKET CAP
-        # =================================================
 
         market_cap = fast_info.get(
 
@@ -266,19 +258,15 @@ def analyze_stock(symbol, regime):
 
             market_cap = 0
 
-        # =================================================
+        # =========================================
         # SECTOR DETECTION
-        # =================================================
+        # =========================================
 
-        sector = detect_sector(
+        sector = detect_sector(symbol)
 
-            symbol,
-            info
-        )
-
-        # =================================================
+        # =========================================
         # PRICE DATA
-        # =================================================
+        # =========================================
 
         data = yf.download(
 
@@ -311,19 +299,24 @@ def analyze_stock(symbol, regime):
 
             return None
 
+        # =========================================
+        # RETURNS
+        # =========================================
+
         returns = close.pct_change().dropna()
 
         if len(returns) < 20:
 
             return None
 
-        # =================================================
-        # TECHNICALS
-        # =================================================
+        # =========================================
+        # TECHNICAL FACTORS
+        # =========================================
 
         momentum = (
 
             close.iloc[-1]
+
             / close.iloc[-20]
 
         ) - 1
@@ -352,6 +345,7 @@ def analyze_stock(symbol, regime):
         total_return = (
 
             close.iloc[-1]
+
             / close.iloc[0]
 
         ) - 1
@@ -380,11 +374,15 @@ def analyze_stock(symbol, regime):
 
         ) if sma50 != 0 else 0
 
-        # =================================================
-        # PRICE MODEL
-        # =================================================
+        # =========================================
+        # CURRENT PRICE
+        # =========================================
 
         cmp = close.iloc[-1]
+
+        # =========================================
+        # VOLATILITY MODEL
+        # =========================================
 
         recent_volatility = (
 
@@ -433,9 +431,9 @@ def analyze_stock(symbol, regime):
             )
         )
 
-        # =================================================
-        # FACTOR SCORE
-        # =================================================
+        # =========================================
+        # FINAL SCORE
+        # =========================================
 
         final_score = sector_factor_score(
 
@@ -456,9 +454,9 @@ def analyze_stock(symbol, regime):
             regime=regime
         )
 
-        # =================================================
+        # =========================================
         # CLASSIFICATION
-        # =================================================
+        # =========================================
 
         if final_score >= 1.20:
 
@@ -543,7 +541,7 @@ progress_bar = st.progress(0)
 
 status_text = st.empty()
 
-live_metrics = st.empty()
+metric_placeholder = st.empty()
 
 start_time = time.time()
 
@@ -552,7 +550,7 @@ success_count = 0
 failed_count = 0
 
 # =========================================================
-# PROCESSING
+# PROCESSING ENGINE
 # =========================================================
 
 with st.spinner(
@@ -560,7 +558,7 @@ with st.spinner(
     "Running Institutional Quant Engine..."
 ):
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=3) as executor:
 
         futures = {
 
@@ -604,20 +602,17 @@ with st.spinner(
 
                 failed_count += 1
 
-            # =============================================
+            # =====================================
             # PROGRESS
-            # =============================================
+            # =====================================
 
-            progress_percent = (
+            progress = (
 
                 processed_count
                 / len(stocks)
             )
 
-            progress_bar.progress(
-
-                progress_percent
-            )
+            progress_bar.progress(progress)
 
             elapsed = (
 
@@ -654,9 +649,9 @@ with st.spinner(
                 """
             )
 
-            live_metrics.metric(
+            metric_placeholder.metric(
 
-                "Progress",
+                "Processing Progress",
 
                 f"{processed_count}/{len(stocks)}"
             )
@@ -687,7 +682,7 @@ if results.empty:
     st.stop()
 
 # =========================================================
-# SECTOR RELATIVE RANKING
+# SECTOR RANKING
 # =========================================================
 
 results["Sector Rank"] = (
@@ -735,7 +730,7 @@ results = results.sort_values(
 results = results.head(top_n)
 
 # =========================================================
-# METRICS
+# DASHBOARD METRICS
 # =========================================================
 
 col1, col2, col3, col4 = st.columns(4)
@@ -766,9 +761,7 @@ with col3:
 
         safe_round(
 
-            results["Final Score"]
-
-            .mean()
+            results["Final Score"].mean()
         )
     )
 
@@ -776,13 +769,11 @@ with col4:
 
     st.metric(
 
-        "Avg Risk Reward",
+        "Average RR",
 
         safe_round(
 
-            results["Risk Reward"]
-
-            .mean()
+            results["Risk Reward"].mean()
         )
     )
 
@@ -883,11 +874,11 @@ st.plotly_chart(
 # RISK REWARD MATRIX
 # =========================================================
 
-rr_plot = results.copy()
+scatter_data = results.copy()
 
-rr_plot["Bubble Size"] = (
+scatter_data["Bubble"] = (
 
-    rr_plot["Momentum"]
+    scatter_data["Momentum"]
 
     .abs()
 
@@ -898,22 +889,15 @@ rr_plot["Bubble Size"] = (
     + 0.05
 )
 
-rr_plot["Bubble Size"] = (
-
-    rr_plot["Bubble Size"]
-
-    .clip(lower=0.05)
-)
-
 rr_fig = px.scatter(
 
-    rr_plot,
+    scatter_data,
 
     x="Risk Reward",
 
     y="Final Score",
 
-    size="Bubble Size",
+    size="Bubble",
 
     color="Classification",
 
@@ -966,7 +950,7 @@ st.dataframe(
 )
 
 # =========================================================
-# DOWNLOAD
+# DOWNLOAD CSV
 # =========================================================
 
 csv = results.to_csv(
