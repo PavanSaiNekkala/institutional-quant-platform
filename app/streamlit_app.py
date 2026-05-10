@@ -26,10 +26,6 @@ from core.live_regime import (
     detect_market_regime
 )
 
-from core.sector_models import (
-    sector_score
-)
-
 # =========================================================
 # PAGE CONFIG
 # =========================================================
@@ -179,6 +175,147 @@ except Exception as e:
     st.stop()
 
 # =========================================================
+# PUBLIC VS PRIVATE SECTOR MAP
+# =========================================================
+
+SECTOR_MAP = {
+
+    "PRIVATE_BANKS": [
+
+        "HDFCBANK.NS",
+        "ICICIBANK.NS",
+        "AXISBANK.NS",
+        "KOTAKBANK.NS",
+        "INDUSINDBK.NS",
+        "IDFCFIRSTB.NS",
+        "AUBANK.NS",
+        "BANDHANBNK.NS",
+        "FEDERALBNK.NS"
+    ],
+
+    "PSU_BANKS": [
+
+        "SBIN.NS",
+        "BANKBARODA.NS",
+        "PNB.NS",
+        "CANBK.NS",
+        "UNIONBANK.NS",
+        "IOB.NS",
+        "BANKINDIA.NS"
+    ],
+
+    "PRIVATE_IT": [
+
+        "TCS.NS",
+        "INFY.NS",
+        "WIPRO.NS",
+        "HCLTECH.NS",
+        "TECHM.NS",
+        "LTIM.NS",
+        "PERSISTENT.NS",
+        "COFORGE.NS",
+        "KPITTECH.NS"
+    ],
+
+    "PRIVATE_FMCG": [
+
+        "HINDUNILVR.NS",
+        "NESTLEIND.NS",
+        "BRITANNIA.NS",
+        "DABUR.NS",
+        "MARICO.NS",
+        "COLPAL.NS"
+    ],
+
+    "PRIVATE_AUTO": [
+
+        "MARUTI.NS",
+        "TATAMOTORS.NS",
+        "M&M.NS",
+        "BAJAJ-AUTO.NS",
+        "HEROMOTOCO.NS",
+        "TVSMOTOR.NS"
+    ],
+
+    "PRIVATE_PHARMA": [
+
+        "SUNPHARMA.NS",
+        "DRREDDY.NS",
+        "CIPLA.NS",
+        "DIVISLAB.NS",
+        "LUPIN.NS",
+        "ZYDUSLIFE.NS"
+    ],
+
+    "PRIVATE_ENERGY": [
+
+        "RELIANCE.NS",
+        "ATGL.NS",
+        "PETRONET.NS"
+    ],
+
+    "PSU_ENERGY": [
+
+        "ONGC.NS",
+        "IOC.NS",
+        "BPCL.NS",
+        "HINDPETRO.NS",
+        "GAIL.NS",
+        "NTPC.NS",
+        "POWERGRID.NS"
+    ],
+
+    "PSU_DEFENCE": [
+
+        "HAL.NS",
+        "BEL.NS",
+        "BDL.NS",
+        "MAZDOCK.NS",
+        "COCHINSHIP.NS"
+    ],
+
+    "PRIVATE_METALS": [
+
+        "TATASTEEL.NS",
+        "JSWSTEEL.NS",
+        "HINDALCO.NS",
+        "VEDL.NS"
+    ],
+
+    "PSU_METALS": [
+
+        "SAIL.NS",
+        "NMDC.NS",
+        "NATIONALUM.NS",
+        "MOIL.NS"
+    ],
+
+    "PRIVATE_REALTY": [
+
+        "DLF.NS",
+        "LODHA.NS",
+        "PRESTIGE.NS",
+        "OBEROIRLTY.NS"
+    ],
+
+    "PRIVATE_CONSUMER": [
+
+        "TITAN.NS",
+        "DIXON.NS",
+        "VOLTAS.NS",
+        "HAVELLS.NS"
+    ],
+
+    "PRIVATE_CHEMICALS": [
+
+        "PIDILITIND.NS",
+        "SRF.NS",
+        "AARTIIND.NS",
+        "DEEPAKNTR.NS"
+    ]
+}
+
+# =========================================================
 # SIDEBAR METRIC
 # =========================================================
 
@@ -248,10 +385,22 @@ def analyze_stock(symbol, regime):
             market_cap = 0
 
         # =================================================
-        # DEFAULT FUNDAMENTALS
+        # AUTO SECTOR DETECTION
         # =================================================
 
-        sector = "Unknown"
+        sector = "OTHER"
+
+        for sec, members in SECTOR_MAP.items():
+
+            if symbol in members:
+
+                sector = sec
+
+                break
+
+        # =================================================
+        # DEFAULT FUNDAMENTALS
+        # =================================================
 
         revenue_growth = 0
         profit_margin = 0
@@ -372,7 +521,7 @@ def analyze_stock(symbol, regime):
         cmp = close.iloc[-1]
 
         # =================================================
-        # ATR STYLE VOLATILITY
+        # VOLATILITY MODEL
         # =================================================
 
         recent_volatility = (
@@ -390,10 +539,6 @@ def analyze_stock(symbol, regime):
 
             recent_volatility = 0.02
 
-        # =================================================
-        # STOP LOSS
-        # =================================================
-
         stop_loss = (
 
             cmp
@@ -401,20 +546,12 @@ def analyze_stock(symbol, regime):
             * (1 - recent_volatility * 2)
         )
 
-        # =================================================
-        # TARGET
-        # =================================================
-
         target_price = (
 
             cmp
 
             * (1 + recent_volatility * 4)
         )
-
-        # =================================================
-        # RISK REWARD
-        # =================================================
 
         risk_reward = (
 
@@ -442,59 +579,140 @@ def analyze_stock(symbol, regime):
             trend_strength *= 0.80
 
         # =================================================
-        # FACTOR METRICS
+        # SECTOR ADAPTIVE FACTOR ENGINE
         # =================================================
 
-        metrics = {
+        if sector == "PRIVATE_BANKS":
 
-            "revenue_growth":
-                revenue_growth,
+            final_score = (
 
-            "profit_margin":
-                profit_margin,
+                sharpe * 0.20 +
+                momentum * 0.20 +
+                trend_strength * 0.15 +
+                total_return * 0.20 +
+                roe * 0.25
+            )
 
-            "roe":
-                roe,
+        elif sector == "PSU_BANKS":
 
-            "operating_margin":
-                operating_margin,
+            final_score = (
 
-            "momentum":
-                momentum,
+                momentum * 0.30 +
+                total_return * 0.25 +
+                dividend_yield * 0.20 +
+                sharpe * 0.15 -
+                volatility * 0.10
+            )
 
-            "volatility":
-                volatility,
+        elif sector == "PRIVATE_IT":
 
-            "sharpe":
-                sharpe,
+            final_score = (
 
-            "total_return":
-                total_return,
+                revenue_growth * 0.30 +
+                operating_margin * 0.20 +
+                momentum * 0.20 +
+                sharpe * 0.15 +
+                total_return * 0.15
+            )
 
-            "trend_strength":
-                trend_strength,
+        elif sector == "PRIVATE_FMCG":
 
-            "dividend_yield":
-                dividend_yield,
+            final_score = (
 
-            "debt_to_equity":
-                debt_to_equity
-        }
+                profit_margin * 0.30 +
+                roe * 0.25 +
+                sharpe * 0.20 -
+                volatility * 0.15 +
+                trend_strength * 0.10
+            )
 
-        # =================================================
-        # FINAL SCORE
-        # =================================================
+        elif sector == "PRIVATE_AUTO":
 
-        final_score = sector_score(
+            final_score = (
 
-            sector,
+                momentum * 0.30 +
+                total_return * 0.25 +
+                revenue_growth * 0.20 +
+                trend_strength * 0.15 +
+                sharpe * 0.10
+            )
 
-            metrics
-        )
+        elif sector == "PRIVATE_PHARMA":
 
-        if np.isnan(final_score):
+            final_score = (
 
-            return None
+                profit_margin * 0.25 +
+                sharpe * 0.25 +
+                momentum * 0.20 +
+                total_return * 0.15 -
+                volatility * 0.15
+            )
+
+        elif sector == "PRIVATE_ENERGY":
+
+            final_score = (
+
+                total_return * 0.25 +
+                momentum * 0.25 +
+                sharpe * 0.20 +
+                trend_strength * 0.15 +
+                dividend_yield * 0.15
+            )
+
+        elif sector == "PSU_ENERGY":
+
+            final_score = (
+
+                dividend_yield * 0.35 +
+                total_return * 0.20 +
+                trend_strength * 0.20 +
+                sharpe * 0.15 -
+                volatility * 0.10
+            )
+
+        elif sector == "PSU_DEFENCE":
+
+            final_score = (
+
+                momentum * 0.35 +
+                total_return * 0.25 +
+                trend_strength * 0.20 +
+                sharpe * 0.10 +
+                revenue_growth * 0.10
+            )
+
+        elif sector == "PRIVATE_METALS":
+
+            final_score = (
+
+                momentum * 0.35 +
+                total_return * 0.25 +
+                trend_strength * 0.20 -
+                volatility * 0.10 +
+                sharpe * 0.10
+            )
+
+        elif sector == "PSU_METALS":
+
+            final_score = (
+
+                dividend_yield * 0.25 +
+                total_return * 0.25 +
+                momentum * 0.20 +
+                sharpe * 0.15 -
+                volatility * 0.15
+            )
+
+        else:
+
+            final_score = (
+
+                momentum * 0.25 +
+                sharpe * 0.25 +
+                total_return * 0.25 +
+                trend_strength * 0.15 -
+                volatility * 0.10
+            )
 
         # =================================================
         # CLASSIFICATION
@@ -521,501 +739,25 @@ def analyze_stock(symbol, regime):
             final_score * 100
         )
 
-        # =================================================
-        # OUTPUT
-        # =================================================
-
         return {
 
-            "Symbol":
-                symbol,
-
-            "Sector":
-                sector,
-
-            "Market Cap":
-                safe_round(market_cap, 0),
-
-            "Current Price":
-                safe_round(cmp, 2),
-
-            "Stop Loss":
-                safe_round(stop_loss, 2),
-
-            "Target":
-                safe_round(target_price, 2),
-
-            "Risk Reward":
-                safe_round(risk_reward, 2),
-
-            "Momentum":
-                safe_round(momentum),
-
-            "Volatility":
-                safe_round(volatility),
-
-            "Sharpe":
-                safe_round(sharpe),
-
-            "Trend Strength":
-                safe_round(trend_strength),
-
-            "Total Return":
-                safe_round(total_return),
-
-            "Final Score":
-                safe_round(final_score),
-
-            "Percentile":
-                safe_round(percentile, 2),
-
-            "Classification":
-                classification
+            "Symbol": symbol,
+            "Sector": sector,
+            "Market Cap": safe_round(market_cap, 0),
+            "Current Price": safe_round(cmp, 2),
+            "Stop Loss": safe_round(stop_loss, 2),
+            "Target": safe_round(target_price, 2),
+            "Risk Reward": safe_round(risk_reward, 2),
+            "Momentum": safe_round(momentum),
+            "Volatility": safe_round(volatility),
+            "Sharpe": safe_round(sharpe),
+            "Trend Strength": safe_round(trend_strength),
+            "Total Return": safe_round(total_return),
+            "Final Score": safe_round(final_score),
+            "Percentile": safe_round(percentile, 2),
+            "Classification": classification
         }
 
     except Exception:
 
         return None
-
-# =========================================================
-# MAIN ENGINE
-# =========================================================
-
-ranking_data = []
-
-progress = st.progress(0)
-
-status = st.empty()
-
-# =========================================================
-# PARALLEL EXECUTION
-# =========================================================
-
-with ThreadPoolExecutor(max_workers=3) as executor:
-
-    futures = {
-
-        executor.submit(
-
-            analyze_stock,
-
-            symbol,
-
-            regime
-
-        ): symbol
-
-        for symbol in stocks
-    }
-
-    for idx, future in enumerate(
-
-        as_completed(futures)
-    ):
-
-        result = future.result()
-
-        if result is not None:
-
-            ranking_data.append(result)
-
-        status.text(
-
-            f"Processed "
-            f"{idx+1}/{len(stocks)} stocks"
-        )
-
-        progress.progress(
-
-            (idx + 1)
-            / len(stocks)
-        )
-
-status.text(
-
-    "Institutional Ranking Completed"
-)
-
-# =========================================================
-# RESULTS
-# =========================================================
-
-results = pd.DataFrame(
-
-    ranking_data
-)
-
-if results.empty:
-
-    st.error(
-
-        """
-        No valid stocks ranked.
-
-        Possible reasons:
-        - Invalid symbols
-        - Yahoo Finance rate limiting
-        - Empty Excel universe
-        - Network/API issue
-        """
-    )
-
-    st.stop()
-
-# =========================================================
-# SORT RESULTS
-# =========================================================
-
-results = results.sort_values(
-
-    by="Final Score",
-
-    ascending=False
-)
-
-results = results.head(top_n)
-
-# =========================================================
-# DASHBOARD METRICS
-# =========================================================
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-
-    st.metric(
-
-        "Live Regime",
-
-        regime
-    )
-
-with col2:
-
-    st.metric(
-
-        "Stocks Ranked",
-
-        len(results)
-    )
-
-with col3:
-
-    st.metric(
-
-        "Top Alpha Score",
-
-        safe_round(
-
-            results["Final Score"].max()
-        )
-    )
-
-# =========================================================
-# COLORED TABLE
-# =========================================================
-
-st.subheader(
-
-    "Institutional Alpha Rankings"
-)
-
-def color_classification(val):
-
-    if val == "STRONG_BUY":
-
-        return (
-
-            "background-color: #00C853; "
-            "color: white; "
-            "font-weight: bold"
-        )
-
-    elif val == "BUY":
-
-        return (
-
-            "background-color: #64DD17; "
-            "color: black; "
-            "font-weight: bold"
-        )
-
-    elif val == "WATCH":
-
-        return (
-
-            "background-color: #FFD600; "
-            "color: black; "
-            "font-weight: bold"
-        )
-
-    elif val == "AVOID":
-
-        return (
-
-            "background-color: #D50000; "
-            "color: white; "
-            "font-weight: bold"
-        )
-
-    return ""
-
-styled_results = (
-
-    results.style
-
-    .applymap(
-
-        color_classification,
-
-        subset=["Classification"]
-    )
-
-    .format({
-
-        "Current Price": "{:.2f}",
-
-        "Stop Loss": "{:.2f}",
-
-        "Target": "{:.2f}",
-
-        "Risk Reward": "{:.2f}",
-
-        "Final Score": "{:.4f}"
-    })
-)
-
-st.dataframe(
-
-    styled_results,
-
-    use_container_width=True,
-
-    height=700
-)
-
-# =========================================================
-# COLOR MAP
-# =========================================================
-
-color_map = {
-
-    "STRONG_BUY": "#00C853",
-
-    "BUY": "#64DD17",
-
-    "WATCH": "#FFD600",
-
-    "AVOID": "#D50000"
-}
-
-# =========================================================
-# BAR CHART
-# =========================================================
-
-fig = px.bar(
-
-    results,
-
-    x="Symbol",
-
-    y="Final Score",
-
-    color="Classification",
-
-    color_discrete_map=color_map,
-
-    title="Institutional Alpha Scores"
-)
-
-fig.update_layout(
-
-    template="plotly_dark",
-
-    height=600
-)
-
-st.plotly_chart(
-
-    fig,
-
-    use_container_width=True
-)
-
-# =========================================================
-# FACTOR MAP
-# =========================================================
-
-plot_results = results.copy()
-
-plot_results["Bubble Size"] = (
-
-    plot_results["Final Score"]
-
-    .abs()
-
-    + 0.05
-)
-
-factor_fig = px.scatter(
-
-    plot_results,
-
-    x="Momentum",
-
-    y="Sharpe",
-
-    size="Bubble Size",
-
-    color="Classification",
-
-    hover_name="Symbol",
-
-    color_discrete_map=color_map,
-
-    title="Institutional Factor Intelligence"
-)
-
-factor_fig.update_layout(
-
-    template="plotly_dark",
-
-    height=650
-)
-
-st.plotly_chart(
-
-    factor_fig,
-
-    use_container_width=True
-)
-
-# =========================================================
-# RISK REWARD MATRIX
-# =========================================================
-
-st.subheader(
-
-    "Risk Reward Opportunities"
-)
-
-rr_fig = px.scatter(
-
-    results,
-
-    x="Risk Reward",
-
-    y="Final Score",
-
-    size="Momentum",
-
-    color="Classification",
-
-    hover_name="Symbol",
-
-    color_discrete_map=color_map,
-
-    title="Institutional Risk Reward Matrix"
-)
-
-rr_fig.update_layout(
-
-    template="plotly_dark",
-
-    height=650
-)
-
-st.plotly_chart(
-
-    rr_fig,
-
-    use_container_width=True
-)
-
-# =========================================================
-# DISTRIBUTION
-# =========================================================
-
-hist_fig = px.histogram(
-
-    results,
-
-    x="Percentile",
-
-    nbins=20,
-
-    title="Alpha Percentile Distribution"
-)
-
-hist_fig.update_layout(
-
-    template="plotly_dark",
-
-    height=500
-)
-
-st.plotly_chart(
-
-    hist_fig,
-
-    use_container_width=True
-)
-
-# =========================================================
-# TOP PICKS
-# =========================================================
-
-st.subheader(
-
-    "Institutional Buy Candidates"
-)
-
-top_picks = results[
-
-    results["Classification"]
-
-    .isin([
-
-        "STRONG_BUY",
-
-        "BUY"
-    ])
-]
-
-st.dataframe(
-
-    top_picks,
-
-    use_container_width=True
-)
-
-# =========================================================
-# DOWNLOAD CSV
-# =========================================================
-
-csv = results.to_csv(
-
-    index=False
-)
-
-st.download_button(
-
-    label="Download Rankings CSV",
-
-    data=csv,
-
-    file_name="institutional_rankings.csv",
-
-    mime="text/csv"
-)
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-st.markdown("---")
-
-st.caption(
-
-    "Institutional Quantamental Intelligence Platform"
-)
