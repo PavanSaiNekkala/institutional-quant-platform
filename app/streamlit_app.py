@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FIXED + OPTIMIZED INSTITUTIONAL QUANT PLATFORM
+# FINAL STABLE + FAST INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -51,7 +51,7 @@ st.title(
 st.markdown("---")
 
 # =========================================================
-# LIVE REGIME
+# CACHE REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
@@ -61,6 +61,10 @@ def cached_regime():
 
 
 regime = cached_regime()
+
+# =========================================================
+# REGIME DISPLAY
+# =========================================================
 
 if "BULLISH" in regime:
 
@@ -117,7 +121,7 @@ max_universe = st.sidebar.slider(
 )
 
 # =========================================================
-# LOAD UNIVERSE
+# LOAD STOCK UNIVERSE
 # =========================================================
 
 universe_path = (
@@ -148,7 +152,7 @@ try:
     )
 
     # =====================================================
-    # CLEAN NSE STOCKS
+    # NSE FILTER
     # =====================================================
 
     stocks = [
@@ -218,7 +222,6 @@ def safe_round(value, digits=4):
 
         return 0
 
-
 # =========================================================
 # STOCK ANALYZER
 # =========================================================
@@ -227,91 +230,51 @@ def analyze_stock(symbol, regime):
 
     try:
 
-        ticker = yf.Ticker(symbol)
+        # =================================================
+        # FAST INFO ONLY
+        # =================================================
 
-        # =================================================
-        # FAST INFO
-        # =================================================
+        ticker = yf.Ticker(symbol)
 
         try:
 
-            info = ticker.info
+            fast_info = ticker.fast_info
 
         except Exception:
 
             return None
 
         # =================================================
-        # FUNDAMENTALS
+        # MARKET CAP
         # =================================================
 
-        sector = info.get(
+        market_cap = fast_info.get(
 
-            "sector",
-
-            "Unknown"
-        )
-
-        market_cap = info.get(
-
-            "marketCap",
+            "market_cap",
 
             0
         )
-
-        revenue_growth = info.get(
-
-            "revenueGrowth",
-
-            0
-        )
-
-        profit_margin = info.get(
-
-            "profitMargins",
-
-            0
-        )
-
-        roe = info.get(
-
-            "returnOnEquity",
-
-            0
-        )
-
-        operating_margin = info.get(
-
-            "operatingMargins",
-
-            0
-        )
-
-        debt_to_equity = info.get(
-
-            "debtToEquity",
-
-            0
-        )
-
-        dividend_yield = info.get(
-
-            "dividendYield",
-
-            0
-        )
-
-        # =================================================
-        # QUALITY FILTER
-        # =================================================
 
         if market_cap is None:
 
-            return None
+            market_cap = 0
 
         if market_cap < 1_000_000_000:
 
             return None
+
+        # =================================================
+        # DEFAULT FUNDAMENTALS
+        # =================================================
+
+        sector = "Unknown"
+
+        revenue_growth = 0
+        profit_margin = 0
+        roe = 0
+        operating_margin = 0
+        debt_to_equity = 0
+        dividend_yield = 0
 
         # =================================================
         # PRICE DATA
@@ -339,8 +302,8 @@ def analyze_stock(symbol, regime):
         close = data["Close"]
 
         # =================================================
-        # FIX MULTIINDEX ISSUE
-        # =================================================
+        # MULTIINDEX FIX
+        # =====================================================
 
         if isinstance(close, pd.DataFrame):
 
@@ -375,7 +338,7 @@ def analyze_stock(symbol, regime):
         )
 
         # =================================================
-        # SHARPE FIX
+        # SHARPE
         # =================================================
 
         if returns.std() == 0:
@@ -433,7 +396,6 @@ def analyze_stock(symbol, regime):
         elif "BEARISH" in regime:
 
             volatility *= 1.30
-            dividend_yield *= 1.20
 
         elif "SIDEWAYS" in regime:
 
@@ -441,7 +403,7 @@ def analyze_stock(symbol, regime):
             trend_strength *= 0.80
 
         # =================================================
-        # FACTOR METRICS
+        # METRICS
         # =================================================
 
         metrics = {
@@ -490,10 +452,6 @@ def analyze_stock(symbol, regime):
 
             metrics
         )
-
-        # =================================================
-        # FILTER BAD SCORES
-        # =================================================
 
         if np.isnan(final_score):
 
@@ -548,18 +506,6 @@ def analyze_stock(symbol, regime):
             "Market Cap":
                 safe_round(market_cap, 0),
 
-            "Revenue Growth":
-                safe_round(revenue_growth),
-
-            "Profit Margin":
-                safe_round(profit_margin),
-
-            "ROE":
-                safe_round(roe),
-
-            "Operating Margin":
-                safe_round(operating_margin),
-
             "Momentum":
                 safe_round(momentum),
 
@@ -572,11 +518,8 @@ def analyze_stock(symbol, regime):
             "Trend Strength":
                 safe_round(trend_strength),
 
-            "Dividend Yield":
-                safe_round(dividend_yield),
-
-            "Debt To Equity":
-                safe_round(debt_to_equity),
+            "Total Return":
+                safe_round(total_return),
 
             "Final Score":
                 safe_round(final_score),
@@ -592,7 +535,6 @@ def analyze_stock(symbol, regime):
 
         return None
 
-
 # =========================================================
 # MAIN ENGINE
 # =========================================================
@@ -607,7 +549,7 @@ status = st.empty()
 # PARALLEL EXECUTION
 # =========================================================
 
-with ThreadPoolExecutor(max_workers=8) as executor:
+with ThreadPoolExecutor(max_workers=5) as executor:
 
     futures = {
 
@@ -653,17 +595,13 @@ status.text(
 )
 
 # =========================================================
-# DATAFRAME
+# RESULTS
 # =========================================================
 
 results = pd.DataFrame(
 
     ranking_data
 )
-
-# =========================================================
-# FIX EMPTY OUTPUT
-# =========================================================
 
 if results.empty:
 
@@ -673,17 +611,17 @@ if results.empty:
         No valid stocks ranked.
 
         Possible reasons:
-        - Invalid stock symbols
-        - Yahoo Finance rate limit
-        - Empty Excel universe
-        - Network/API issue
+        - Invalid symbols
+        - Yahoo rate limiting
+        - Empty Excel file
+        - Network issue
         """
     )
 
     st.stop()
 
 # =========================================================
-# SORTING
+# SORT
 # =========================================================
 
 results = results.sort_values(
@@ -696,7 +634,7 @@ results = results.sort_values(
 results = results.head(top_n)
 
 # =========================================================
-# DASHBOARD METRICS
+# METRICS
 # =========================================================
 
 col1, col2, col3 = st.columns(3)
@@ -777,17 +715,28 @@ st.plotly_chart(
 # FACTOR MAP
 # =========================================================
 
+plot_results = results.copy()
+
+plot_results["Bubble Size"] = (
+
+    plot_results["Final Score"]
+
+    .abs()
+
+    + 0.05
+)
+
 factor_fig = px.scatter(
 
-    results,
+    plot_results,
 
     x="Momentum",
 
     y="Sharpe",
 
-    size="Final Score",
+    size="Bubble Size",
 
-    color="Sector",
+    color="Classification",
 
     hover_name="Symbol",
 
@@ -847,7 +796,7 @@ st.dataframe(
 )
 
 # =========================================================
-# DOWNLOAD
+# DOWNLOAD CSV
 # =========================================================
 
 csv = results.to_csv(
