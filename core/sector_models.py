@@ -1,489 +1,546 @@
 # =========================================================
 # FILE: core/sector_models.py
-# FINAL INSTITUTIONAL SECTOR ADAPTIVE ENGINE
+# FINAL DYNAMIC INSTITUTIONAL SECTOR ENGINE
 # =========================================================
 
 import numpy as np
-
-
-# =========================================================
-# SAFE VALUE HANDLER
-# =========================================================
-
-def safe(value, default=0):
-
-    try:
-
-        if value is None:
-            return default
-
-        if np.isnan(value):
-            return default
-
-        if np.isinf(value):
-            return default
-
-        return value
-
-    except Exception:
-
-        return default
-
+import pandas as pd
 
 # =========================================================
-# NORMALIZATION
+# DYNAMIC SECTOR KEYWORDS
 # =========================================================
 
-def normalize(value, min_val=-1, max_val=1):
-
-    value = safe(value)
-
-    try:
-
-        value = max(min(value, max_val), min_val)
-
-        return value
-
-    except Exception:
-
-        return 0
-
-
-# =========================================================
-# BANKING MODEL
-# =========================================================
-
-def banking_model(m):
-
-    score = (
-
-        normalize(m["roe"]) * 0.25 +
-
-        normalize(m["profit_margin"]) * 0.20 +
-
-        normalize(m["revenue_growth"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.10 +
-
-        normalize(m["trend_strength"]) * 0.05 -
-
-        normalize(m["debt_to_equity"]) * 0.05 -
-
-        normalize(m["volatility"]) * 0.05
-    )
-
-    return score
-
-
-# =========================================================
-# INFORMATION TECHNOLOGY MODEL
-# =========================================================
-
-def it_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.30 +
-
-        normalize(m["operating_margin"]) * 0.25 +
-
-        normalize(m["roe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.10 +
-
-        normalize(m["sharpe"]) * 0.10 +
-
-        normalize(m["total_return"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# PHARMA MODEL
-# =========================================================
-
-def pharma_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.20 +
-
-        normalize(m["profit_margin"]) * 0.20 +
-
-        normalize(m["roe"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.10 +
-
-        normalize(m["dividend_yield"]) * 0.10 -
-
-        normalize(m["volatility"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# FMCG MODEL
-# =========================================================
-
-def fmcg_model(m):
-
-    score = (
-
-        normalize(m["profit_margin"]) * 0.25 +
-
-        normalize(m["dividend_yield"]) * 0.20 +
-
-        normalize(m["roe"]) * 0.20 +
-
-        normalize(m["sharpe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.10 +
-
-        normalize(m["trend_strength"]) * 0.05 -
-
-        normalize(m["volatility"]) * 0.05
-    )
-
-    return score
-
-
-# =========================================================
-# AUTOMOBILE MODEL
-# =========================================================
-
-def auto_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.25 +
-
-        normalize(m["momentum"]) * 0.20 +
-
-        normalize(m["total_return"]) * 0.15 +
-
-        normalize(m["operating_margin"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.15 +
-
-        normalize(m["trend_strength"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# METALS & MINING MODEL
-# =========================================================
-
-def metals_model(m):
-
-    score = (
-
-        normalize(m["momentum"]) * 0.30 +
-
-        normalize(m["total_return"]) * 0.20 +
-
-        normalize(m["sharpe"]) * 0.20 +
-
-        normalize(m["revenue_growth"]) * 0.10 +
-
-        normalize(m["trend_strength"]) * 0.10 -
-
-        normalize(m["volatility"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# ENERGY MODEL
-# =========================================================
-
-def energy_model(m):
-
-    score = (
-
-        normalize(m["dividend_yield"]) * 0.20 +
-
-        normalize(m["profit_margin"]) * 0.20 +
-
-        normalize(m["roe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.15 +
-
-        normalize(m["total_return"]) * 0.15
-    )
-
-    return score
-
-
-# =========================================================
-# REAL ESTATE MODEL
-# =========================================================
-
-def real_estate_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.20 +
-
-        normalize(m["roe"]) * 0.20 +
-
-        normalize(m["profit_margin"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.15 +
-
-        normalize(m["trend_strength"]) * 0.10 +
-
-        normalize(m["total_return"]) * 0.10 -
-
-        normalize(m["debt_to_equity"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# TELECOM MODEL
-# =========================================================
-
-def telecom_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.25 +
-
-        normalize(m["operating_margin"]) * 0.20 +
-
-        normalize(m["roe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.10 +
-
-        normalize(m["trend_strength"]) * 0.10 -
-
-        normalize(m["volatility"]) * 0.05
-    )
-
-    return score
-
-
-# =========================================================
-# INFRASTRUCTURE MODEL
-# =========================================================
-
-def infra_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.20 +
-
-        normalize(m["operating_margin"]) * 0.20 +
-
-        normalize(m["momentum"]) * 0.20 +
-
-        normalize(m["total_return"]) * 0.15 +
-
-        normalize(m["trend_strength"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.10
-    )
-
-    return score
-
-
-# =========================================================
-# DEFAULT MODEL
-# =========================================================
-
-def default_model(m):
-
-    score = (
-
-        normalize(m["revenue_growth"]) * 0.15 +
-
-        normalize(m["profit_margin"]) * 0.15 +
-
-        normalize(m["roe"]) * 0.15 +
-
-        normalize(m["momentum"]) * 0.15 +
-
-        normalize(m["sharpe"]) * 0.10 +
-
-        normalize(m["trend_strength"]) * 0.10 +
-
-        normalize(m["total_return"]) * 0.10 +
-
-        normalize(m["dividend_yield"]) * 0.05 -
-
-        normalize(m["volatility"]) * 0.05
-    )
-
-    return score
-
-
-# =========================================================
-# SECTOR ROUTER
-# =========================================================
-
-def sector_score(sector, metrics):
-
-    sector = str(sector).lower()
+SECTOR_KEYWORDS = {
 
     # =====================================================
-    # BANKING & FINANCIALS
+    # BANKS & FINANCIALS
     # =====================================================
 
-    if (
-
-        "bank" in sector or
-
-        "financial" in sector or
-
-        "insurance" in sector
-    ):
-
-        return banking_model(metrics)
+    "BANK": "PRIVATE_BANKS",
+    "FINANCE": "PRIVATE_BANKS",
+    "FINANCIAL": "PRIVATE_BANKS",
+    "NBFC": "PRIVATE_BANKS",
 
     # =====================================================
-    # INFORMATION TECHNOLOGY
+    # IT & SOFTWARE
     # =====================================================
 
-    elif (
-
-        "technology" in sector or
-
-        "software" in sector or
-
-        "it" in sector
-    ):
-
-        return it_model(metrics)
+    "IT": "PRIVATE_IT",
+    "TECH": "PRIVATE_IT",
+    "SOFTWARE": "PRIVATE_IT",
+    "DIGITAL": "PRIVATE_IT",
 
     # =====================================================
-    # PHARMA & HEALTHCARE
+    # PHARMA
     # =====================================================
 
-    elif (
-
-        "health" in sector or
-
-        "pharma" in sector or
-
-        "biotech" in sector
-    ):
-
-        return pharma_model(metrics)
+    "PHARMA": "PRIVATE_PHARMA",
+    "HEALTH": "PRIVATE_PHARMA",
+    "BIO": "PRIVATE_PHARMA",
+    "LIFE SCIENCE": "PRIVATE_PHARMA",
 
     # =====================================================
-    # FMCG & CONSUMER
+    # AUTO
     # =====================================================
 
-    elif (
-
-        "consumer" in sector or
-
-        "fmcg" in sector or
-
-        "staples" in sector
-    ):
-
-        return fmcg_model(metrics)
-
-    # =====================================================
-    # AUTOMOBILE
-    # =====================================================
-
-    elif (
-
-        "auto" in sector or
-
-        "vehicle" in sector
-    ):
-
-        return auto_model(metrics)
-
-    # =====================================================
-    # METALS & MINING
-    # =====================================================
-
-    elif (
-
-        "metal" in sector or
-
-        "mining" in sector or
-
-        "steel" in sector
-    ):
-
-        return metals_model(metrics)
+    "AUTO": "PRIVATE_AUTO",
+    "MOTOR": "PRIVATE_AUTO",
+    "TYRE": "PRIVATE_AUTO",
+    "AUTOMOBILE": "PRIVATE_AUTO",
 
     # =====================================================
     # ENERGY
     # =====================================================
 
-    elif (
-
-        "energy" in sector or
-
-        "oil" in sector or
-
-        "gas" in sector
-    ):
-
-        return energy_model(metrics)
+    "ENERGY": "PRIVATE_ENERGY",
+    "POWER": "PSU_ENERGY",
+    "OIL": "PSU_ENERGY",
+    "GAS": "PSU_ENERGY",
+    "PETROLEUM": "PSU_ENERGY",
+    "COAL": "PSU_ENERGY",
 
     # =====================================================
-    # REAL ESTATE
+    # FMCG
     # =====================================================
 
-    elif (
+    "FMCG": "PRIVATE_FMCG",
+    "CONSUMER": "PRIVATE_CONSUMER",
+    "FOOD": "PRIVATE_FMCG",
+    "BEVERAGE": "PRIVATE_FMCG",
 
-        "real estate" in sector or
+    # =====================================================
+    # REALTY
+    # =====================================================
 
-        "realty" in sector or
+    "REALTY": "PRIVATE_REALTY",
+    "REAL ESTATE": "PRIVATE_REALTY",
+    "PROPERTY": "PRIVATE_REALTY",
 
-        "property" in sector
-    ):
+    # =====================================================
+    # CHEMICALS
+    # =====================================================
 
-        return real_estate_model(metrics)
+    "CHEMICAL": "PRIVATE_CHEMICALS",
+    "FERTILIZER": "PRIVATE_CHEMICALS",
+    "SPECIALTY": "PRIVATE_CHEMICALS",
+
+    # =====================================================
+    # METALS
+    # =====================================================
+
+    "METAL": "PRIVATE_METALS",
+    "STEEL": "PRIVATE_METALS",
+    "MINING": "PRIVATE_METALS",
+    "ALUMINIUM": "PRIVATE_METALS",
+
+    # =====================================================
+    # DEFENCE
+    # =====================================================
+
+    "DEFENCE": "PSU_DEFENCE",
+    "AEROSPACE": "PSU_DEFENCE",
+    "SHIP": "PSU_DEFENCE",
 
     # =====================================================
     # TELECOM
     # =====================================================
 
-    elif (
-
-        "telecom" in sector or
-
-        "communication" in sector
-    ):
-
-        return telecom_model(metrics)
+    "TELECOM": "PRIVATE_TELECOM",
+    "COMMUNICATION": "PRIVATE_TELECOM",
 
     # =====================================================
-    # INFRASTRUCTURE
+    # CEMENT
     # =====================================================
 
-    elif (
+    "CEMENT": "PRIVATE_CEMENT",
 
-        "infra" in sector or
+    # =====================================================
+    # INFRA
+    # =====================================================
 
-        "construction" in sector or
+    "INFRA": "PRIVATE_INFRA",
+    "ENGINEERING": "PRIVATE_INFRA",
+    "CONSTRUCTION": "PRIVATE_INFRA"
+}
 
-        "engineering" in sector
-    ):
+# =========================================================
+# SECTOR IMPACT WEIGHTS
+# =========================================================
 
-        return infra_model(metrics)
+SECTOR_IMPACT = {
+
+    "PRIVATE_BANKS": 1.40,
+    "PSU_BANKS": 1.20,
+
+    "PRIVATE_IT": 1.30,
+
+    "PRIVATE_FMCG": 1.10,
+
+    "PRIVATE_AUTO": 1.05,
+
+    "PRIVATE_PHARMA": 1.00,
+
+    "PRIVATE_ENERGY": 1.25,
+    "PSU_ENERGY": 1.20,
+
+    "PSU_DEFENCE": 1.10,
+
+    "PRIVATE_METALS": 0.95,
+
+    "PRIVATE_REALTY": 0.90,
+
+    "PRIVATE_CONSUMER": 1.00,
+
+    "PRIVATE_CHEMICALS": 0.95,
+
+    "PRIVATE_TELECOM": 1.00,
+
+    "PRIVATE_CEMENT": 0.90,
+
+    "PRIVATE_INFRA": 1.05,
+
+    "OTHER": 0.70
+}
+
+# =========================================================
+# PSU DETECTION WORDS
+# =========================================================
+
+PSU_WORDS = [
+
+    "STATE",
+    "INDIA",
+    "POWER",
+    "OIL",
+    "COAL",
+    "RAIL",
+    "NTPC",
+    "GAIL",
+    "ONGC",
+    "IOC",
+    "BPCL",
+    "SAIL",
+    "NMDC",
+    "HAL",
+    "BEL"
+]
+
+# =========================================================
+# DYNAMIC SECTOR DETECTION
+# =========================================================
+
+def detect_sector(symbol, info):
+
+    try:
+
+        # =================================================
+        # YAHOO METADATA
+        # =================================================
+
+        sector_name = str(
+
+            info.get(
+                "sector",
+                ""
+            )
+        ).upper()
+
+        industry_name = str(
+
+            info.get(
+                "industry",
+                ""
+            )
+        ).upper()
+
+        long_name = str(
+
+            info.get(
+                "longName",
+                ""
+            )
+        ).upper()
+
+        combined = (
+
+            sector_name
+            + " "
+            + industry_name
+            + " "
+            + long_name
+        )
+
+        # =================================================
+        # PSU DETECTION
+        # =================================================
+
+        is_psu = False
+
+        for word in PSU_WORDS:
+
+            if word in combined:
+
+                is_psu = True
+                break
+
+        # =================================================
+        # KEYWORD MATCHING
+        # =================================================
+
+        for keyword, sector in (
+
+            SECTOR_KEYWORDS.items()
+        ):
+
+            if keyword in combined:
+
+                # =========================================
+                # PSU OVERRIDE
+                # =========================================
+
+                if is_psu:
+
+                    if sector == "PRIVATE_BANKS":
+
+                        return "PSU_BANKS"
+
+                    elif sector == "PRIVATE_ENERGY":
+
+                        return "PSU_ENERGY"
+
+                    elif sector == "PRIVATE_METALS":
+
+                        return "PSU_METALS"
+
+                return sector
+
+        # =================================================
+        # FALLBACK PSU
+        # =================================================
+
+        if is_psu:
+
+            return "PSU_ENERGY"
+
+        return "OTHER"
+
+    except Exception:
+
+        return "OTHER"
+
+# =========================================================
+# SECTOR FACTOR ENGINE
+# =========================================================
+
+def sector_factor_score(
+
+    sector,
+    momentum,
+    sharpe,
+    trend_strength,
+    total_return,
+    volatility,
+    risk_reward,
+    regime
+):
+
+    # =====================================================
+    # PRIVATE BANKS
+    # =====================================================
+
+    if sector == "PRIVATE_BANKS":
+
+        raw_score = (
+
+            sharpe * 0.30 +
+            momentum * 0.25 +
+            trend_strength * 0.20 +
+            total_return * 0.25
+        )
+
+    # =====================================================
+    # PSU BANKS
+    # =====================================================
+
+    elif sector == "PSU_BANKS":
+
+        raw_score = (
+
+            momentum * 0.35 +
+            total_return * 0.30 +
+            sharpe * 0.20 -
+            volatility * 0.15
+        )
+
+    # =====================================================
+    # PRIVATE IT
+    # =====================================================
+
+    elif sector == "PRIVATE_IT":
+
+        raw_score = (
+
+            momentum * 0.30 +
+            sharpe * 0.25 +
+            total_return * 0.25 +
+            trend_strength * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE FMCG
+    # =====================================================
+
+    elif sector == "PRIVATE_FMCG":
+
+        raw_score = (
+
+            sharpe * 0.35 -
+            volatility * 0.25 +
+            trend_strength * 0.20 +
+            total_return * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE AUTO
+    # =====================================================
+
+    elif sector == "PRIVATE_AUTO":
+
+        raw_score = (
+
+            momentum * 0.35 +
+            total_return * 0.30 +
+            trend_strength * 0.20 +
+            sharpe * 0.15
+        )
+
+    # =====================================================
+    # PRIVATE PHARMA
+    # =====================================================
+
+    elif sector == "PRIVATE_PHARMA":
+
+        raw_score = (
+
+            sharpe * 0.30 +
+            momentum * 0.25 +
+            total_return * 0.25 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE ENERGY
+    # =====================================================
+
+    elif sector == "PRIVATE_ENERGY":
+
+        raw_score = (
+
+            total_return * 0.30 +
+            trend_strength * 0.25 +
+            sharpe * 0.25 +
+            momentum * 0.20
+        )
+
+    # =====================================================
+    # PSU ENERGY
+    # =====================================================
+
+    elif sector == "PSU_ENERGY":
+
+        raw_score = (
+
+            total_return * 0.25 +
+            momentum * 0.25 +
+            sharpe * 0.25 -
+            volatility * 0.15
+        )
+
+    # =====================================================
+    # PSU DEFENCE
+    # =====================================================
+
+    elif sector == "PSU_DEFENCE":
+
+        raw_score = (
+
+            momentum * 0.40 +
+            total_return * 0.30 +
+            trend_strength * 0.20 -
+            volatility * 0.10
+        )
+
+    # =====================================================
+    # PRIVATE METALS
+    # =====================================================
+
+    elif sector == "PRIVATE_METALS":
+
+        raw_score = (
+
+            momentum * 0.35 +
+            total_return * 0.30 +
+            trend_strength * 0.20 -
+            volatility * 0.15
+        )
+
+    # =====================================================
+    # PSU METALS
+    # =====================================================
+
+    elif sector == "PSU_METALS":
+
+        raw_score = (
+
+            momentum * 0.30 +
+            total_return * 0.25 +
+            sharpe * 0.25 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE REALTY
+    # =====================================================
+
+    elif sector == "PRIVATE_REALTY":
+
+        raw_score = (
+
+            momentum * 0.30 +
+            total_return * 0.30 +
+            trend_strength * 0.20 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE CONSUMER
+    # =====================================================
+
+    elif sector == "PRIVATE_CONSUMER":
+
+        raw_score = (
+
+            sharpe * 0.30 +
+            trend_strength * 0.25 +
+            total_return * 0.25 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # PRIVATE CHEMICALS
+    # =====================================================
+
+    elif sector == "PRIVATE_CHEMICALS":
+
+        raw_score = (
+
+            momentum * 0.30 +
+            sharpe * 0.25 +
+            total_return * 0.25 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # TELECOM
+    # =====================================================
+
+    elif sector == "PRIVATE_TELECOM":
+
+        raw_score = (
+
+            sharpe * 0.30 +
+            total_return * 0.30 +
+            trend_strength * 0.20 +
+            momentum * 0.20
+        )
+
+    # =====================================================
+    # CEMENT
+    # =====================================================
+
+    elif sector == "PRIVATE_CEMENT":
+
+        raw_score = (
+
+            momentum * 0.30 +
+            total_return * 0.25 +
+            sharpe * 0.25 -
+            volatility * 0.20
+        )
+
+    # =====================================================
+    # INFRA
+    # =====================================================
+
+    elif sector == "PRIVATE_INFRA":
+
+        raw_score = (
+
+            momentum * 0.35 +
+            total_return * 0.30 +
+            trend_strength * 0.20 -
+            volatility * 0.15
+        )
 
     # =====================================================
     # DEFAULT
@@ -491,4 +548,66 @@ def sector_score(sector, metrics):
 
     else:
 
-        return default_model(metrics)
+        raw_score = (
+
+            momentum * 0.25 +
+            sharpe * 0.25 +
+            total_return * 0.25 +
+            trend_strength * 0.15 -
+            volatility * 0.10
+        )
+
+    # =====================================================
+    # MARKET IMPACT
+    # =====================================================
+
+    sector_weight = SECTOR_IMPACT.get(
+
+        sector,
+        0.70
+    )
+
+    impact_adjusted_score = (
+
+        raw_score
+        * sector_weight
+    )
+
+    # =====================================================
+    # REGIME BOOST
+    # =====================================================
+
+    if "BULLISH" in regime:
+
+        if sector in [
+
+            "PRIVATE_BANKS",
+            "PRIVATE_IT",
+            "PRIVATE_AUTO",
+            "PRIVATE_REALTY"
+        ]:
+
+            impact_adjusted_score *= 1.10
+
+    elif "BEARISH" in regime:
+
+        if sector in [
+
+            "PRIVATE_FMCG",
+            "PRIVATE_PHARMA",
+            "PRIVATE_CONSUMER"
+        ]:
+
+            impact_adjusted_score *= 1.10
+
+    # =====================================================
+    # FINAL SCORE
+    # =====================================================
+
+    final_score = (
+
+        impact_adjusted_score
+        * risk_reward
+    )
+
+    return final_score
