@@ -1,13 +1,12 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL INSTITUTIONAL QUANT PLATFORM
+# FINAL SPEED-OPTIMIZED INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-
 sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
@@ -15,6 +14,11 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
+
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
 
 from core.live_regime import (
     detect_market_regime
@@ -50,7 +54,13 @@ st.markdown("---")
 # LIVE MARKET REGIME
 # =========================================================
 
-regime = detect_market_regime()
+@st.cache_data(ttl=1800)
+def cached_regime():
+
+    return detect_market_regime()
+
+
+regime = cached_regime()
 
 if "BULLISH" in regime:
 
@@ -93,6 +103,19 @@ top_n = st.sidebar.slider(
     100
 )
 
+max_universe = st.sidebar.slider(
+
+    "Universe Limit",
+
+    100,
+
+    2000,
+
+    500,
+
+    step=100
+)
+
 # =========================================================
 # LOAD DYNAMIC UNIVERSE
 # =========================================================
@@ -124,10 +147,6 @@ try:
         .tolist()
     )
 
-    # =====================================================
-    # NSE FILTER
-    # =====================================================
-
     stocks = [
 
         stock for stock in stocks
@@ -135,14 +154,16 @@ try:
         if ".NS" in stock
     ]
 
-    # =====================================================
-    # REMOVE DUPLICATES
-    # =====================================================
-
     stocks = list(
 
         dict.fromkeys(stocks)
     )
+
+    # =====================================================
+    # LIMIT UNIVERSE FOR SPEED
+    # =====================================================
+
+    stocks = stocks[:max_universe]
 
 except Exception as e:
 
@@ -165,100 +186,99 @@ st.sidebar.metric(
 )
 
 # =========================================================
-# MAIN ENGINE
+# STOCK ANALYZER
 # =========================================================
 
-ranking_data = []
-
-progress = st.progress(0)
-
-status = st.empty()
-
-# =========================================================
-# STOCK LOOP
-# =========================================================
-
-for idx, symbol in enumerate(stocks):
+def analyze_stock(symbol, regime):
 
     try:
 
-        status.text(
-
-            f"Analyzing {symbol} "
-            f"({idx+1}/{len(stocks)})"
-        )
-
         ticker = yf.Ticker(symbol)
 
-        info = ticker.info
-
         # =================================================
-        # FUNDAMENTALS
+        # FAST INFO
         # =================================================
 
-        sector = info.get(
-
-            "sector",
-
-            "Unknown"
-        )
+        info = ticker.fast_info
 
         market_cap = info.get(
 
-            "marketCap",
+            "market_cap",
 
             0
         )
-
-        revenue_growth = info.get(
-
-            "revenueGrowth",
-
-            0
-        )
-
-        profit_margin = info.get(
-
-            "profitMargins",
-
-            0
-        )
-
-        roe = info.get(
-
-            "returnOnEquity",
-
-            0
-        )
-
-        operating_margin = info.get(
-
-            "operatingMargins",
-
-            0
-        )
-
-        debt_to_equity = info.get(
-
-            "debtToEquity",
-
-            0
-        )
-
-        dividend_yield = info.get(
-
-            "dividendYield",
-
-            0
-        )
-
-        # =================================================
-        # FILTER LOW QUALITY STOCKS
-        # =================================================
 
         if market_cap < 1_000_000_000:
 
-            continue
+            return None
+
+        # =================================================
+        # BASIC INFO
+        # =================================================
+
+        try:
+
+            detailed = ticker.info
+
+            sector = detailed.get(
+
+                "sector",
+
+                "Unknown"
+            )
+
+            revenue_growth = detailed.get(
+
+                "revenueGrowth",
+
+                0
+            )
+
+            profit_margin = detailed.get(
+
+                "profitMargins",
+
+                0
+            )
+
+            roe = detailed.get(
+
+                "returnOnEquity",
+
+                0
+            )
+
+            operating_margin = detailed.get(
+
+                "operatingMargins",
+
+                0
+            )
+
+            debt_to_equity = detailed.get(
+
+                "debtToEquity",
+
+                0
+            )
+
+            dividend_yield = detailed.get(
+
+                "dividendYield",
+
+                0
+            )
+
+        except Exception:
+
+            sector = "Unknown"
+
+            revenue_growth = 0
+            profit_margin = 0
+            roe = 0
+            operating_margin = 0
+            debt_to_equity = 0
+            dividend_yield = 0
 
         # =================================================
         # PRICE DATA
@@ -268,7 +288,7 @@ for idx, symbol in enumerate(stocks):
 
             symbol,
 
-            period="6mo",
+            period="3mo",
 
             progress=False,
 
@@ -277,15 +297,19 @@ for idx, symbol in enumerate(stocks):
 
         if data.empty:
 
-            continue
+            return None
 
         close = data["Close"].dropna()
 
         if len(close) < 50:
 
-            continue
+            return None
 
         returns = close.pct_change().dropna()
+
+        if returns.empty:
+
+            return None
 
         # =================================================
         # TECHNICALS
@@ -336,29 +360,26 @@ for idx, symbol in enumerate(stocks):
         ) if sma50 != 0 else 0
 
         # =================================================
-        # REGIME ADAPTIVE WEIGHTS
+        # REGIME ADAPTATION
         # =================================================
 
         if "BULLISH" in regime:
 
             momentum *= 1.20
-
             sharpe *= 1.10
 
         elif "BEARISH" in regime:
 
             volatility *= 1.30
-
             dividend_yield *= 1.20
 
         elif "SIDEWAYS" in regime:
 
             sharpe *= 1.10
-
             trend_strength *= 0.80
 
         # =================================================
-        # FACTOR METRICS
+        # METRICS
         # =================================================
 
         metrics = {
@@ -398,7 +419,7 @@ for idx, symbol in enumerate(stocks):
         }
 
         # =================================================
-        # SECTOR ADAPTIVE SCORE
+        # SECTOR SCORE
         # =================================================
 
         final_score = sector_score(
@@ -437,16 +458,9 @@ for idx, symbol in enumerate(stocks):
 
             classification = "AVOID"
 
-        percentile = (
+        percentile = final_score * 100
 
-            final_score * 100
-        )
-
-        # =================================================
-        # APPEND
-        # =================================================
-
-        ranking_data.append({
+        return {
 
             "Symbol":
                 symbol,
@@ -495,16 +509,65 @@ for idx, symbol in enumerate(stocks):
 
             "Classification":
                 classification
-        })
+        }
 
     except Exception:
-        continue
 
-    progress.progress(
+        return None
 
-        (idx + 1)
-        / len(stocks)
-    )
+# =========================================================
+# MAIN ENGINE
+# =========================================================
+
+ranking_data = []
+
+progress = st.progress(0)
+
+status = st.empty()
+
+# =========================================================
+# PARALLEL EXECUTION
+# =========================================================
+
+with ThreadPoolExecutor(max_workers=10) as executor:
+
+    futures = {
+
+        executor.submit(
+
+            analyze_stock,
+
+            symbol,
+
+            regime
+
+        ): symbol
+
+        for symbol in stocks
+    }
+
+    for idx, future in enumerate(
+
+        as_completed(futures)
+    ):
+
+        result = future.result()
+
+        if result:
+
+            ranking_data.append(result)
+
+        status.text(
+
+            f"Processed "
+            f"{idx+1}/{len(stocks)} stocks"
+        )
+
+        progress.progress(
+
+            (idx + 1)
+            / len(stocks)
+        )
 
 status.text(
 
@@ -689,6 +752,26 @@ st.dataframe(
     top_picks,
 
     use_container_width=True
+)
+
+# =========================================================
+# DOWNLOAD
+# =========================================================
+
+csv = results.to_csv(
+
+    index=False
+)
+
+st.download_button(
+
+    label="Download Rankings CSV",
+
+    data=csv,
+
+    file_name="institutional_rankings.csv",
+
+    mime="text/csv"
 )
 
 # =========================================================
