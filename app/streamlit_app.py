@@ -15,7 +15,6 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-import plotly.graph_objects as go
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -181,137 +180,71 @@ except Exception as e:
 SECTOR_MAP = {
 
     "PRIVATE_BANKS": [
-
         "HDFCBANK.NS",
         "ICICIBANK.NS",
         "AXISBANK.NS",
         "KOTAKBANK.NS",
         "INDUSINDBK.NS",
-        "IDFCFIRSTB.NS",
-        "AUBANK.NS",
-        "BANDHANBNK.NS",
         "FEDERALBNK.NS"
     ],
 
     "PSU_BANKS": [
-
         "SBIN.NS",
         "BANKBARODA.NS",
         "PNB.NS",
         "CANBK.NS",
-        "UNIONBANK.NS",
-        "IOB.NS",
-        "BANKINDIA.NS"
+        "UNIONBANK.NS"
     ],
 
     "PRIVATE_IT": [
-
         "TCS.NS",
         "INFY.NS",
         "WIPRO.NS",
         "HCLTECH.NS",
         "TECHM.NS",
-        "LTIM.NS",
-        "PERSISTENT.NS",
-        "COFORGE.NS",
-        "KPITTECH.NS"
+        "LTIM.NS"
     ],
 
     "PRIVATE_FMCG": [
-
         "HINDUNILVR.NS",
         "NESTLEIND.NS",
         "BRITANNIA.NS",
         "DABUR.NS",
-        "MARICO.NS",
-        "COLPAL.NS"
+        "MARICO.NS"
     ],
 
     "PRIVATE_AUTO": [
-
         "MARUTI.NS",
         "TATAMOTORS.NS",
         "M&M.NS",
-        "BAJAJ-AUTO.NS",
-        "HEROMOTOCO.NS",
-        "TVSMOTOR.NS"
+        "BAJAJ-AUTO.NS"
     ],
 
     "PRIVATE_PHARMA": [
-
         "SUNPHARMA.NS",
         "DRREDDY.NS",
         "CIPLA.NS",
-        "DIVISLAB.NS",
-        "LUPIN.NS",
-        "ZYDUSLIFE.NS"
+        "DIVISLAB.NS"
     ],
 
     "PRIVATE_ENERGY": [
-
         "RELIANCE.NS",
-        "ATGL.NS",
-        "PETRONET.NS"
+        "ATGL.NS"
     ],
 
     "PSU_ENERGY": [
-
         "ONGC.NS",
         "IOC.NS",
         "BPCL.NS",
-        "HINDPETRO.NS",
-        "GAIL.NS",
         "NTPC.NS",
         "POWERGRID.NS"
     ],
 
     "PSU_DEFENCE": [
-
         "HAL.NS",
         "BEL.NS",
         "BDL.NS",
-        "MAZDOCK.NS",
-        "COCHINSHIP.NS"
-    ],
-
-    "PRIVATE_METALS": [
-
-        "TATASTEEL.NS",
-        "JSWSTEEL.NS",
-        "HINDALCO.NS",
-        "VEDL.NS"
-    ],
-
-    "PSU_METALS": [
-
-        "SAIL.NS",
-        "NMDC.NS",
-        "NATIONALUM.NS",
-        "MOIL.NS"
-    ],
-
-    "PRIVATE_REALTY": [
-
-        "DLF.NS",
-        "LODHA.NS",
-        "PRESTIGE.NS",
-        "OBEROIRLTY.NS"
-    ],
-
-    "PRIVATE_CONSUMER": [
-
-        "TITAN.NS",
-        "DIXON.NS",
-        "VOLTAS.NS",
-        "HAVELLS.NS"
-    ],
-
-    "PRIVATE_CHEMICALS": [
-
-        "PIDILITIND.NS",
-        "SRF.NS",
-        "AARTIIND.NS",
-        "DEEPAKNTR.NS"
+        "MAZDOCK.NS"
     ]
 }
 
@@ -350,7 +283,7 @@ def safe_round(value, digits=4):
         return 0
 
 # =========================================================
-# STOCK ANALYZER
+# ANALYZE STOCK
 # =========================================================
 
 def analyze_stock(symbol, regime):
@@ -360,10 +293,6 @@ def analyze_stock(symbol, regime):
     try:
 
         ticker = yf.Ticker(symbol)
-
-        # =================================================
-        # FAST INFO
-        # =================================================
 
         try:
 
@@ -385,7 +314,7 @@ def analyze_stock(symbol, regime):
             market_cap = 0
 
         # =================================================
-        # AUTO SECTOR DETECTION
+        # SECTOR DETECTION
         # =================================================
 
         sector = "OTHER"
@@ -399,18 +328,7 @@ def analyze_stock(symbol, regime):
                 break
 
         # =================================================
-        # DEFAULT FUNDAMENTALS
-        # =================================================
-
-        revenue_growth = 0
-        profit_margin = 0
-        roe = 0
-        operating_margin = 0
-        debt_to_equity = 0
-        dividend_yield = 0
-
-        # =================================================
-        # PRICE DATA
+        # DOWNLOAD DATA
         # =================================================
 
         data = yf.download(
@@ -446,10 +364,6 @@ def analyze_stock(symbol, regime):
 
         returns = close.pct_change().dropna()
 
-        if len(returns) < 20:
-
-            return None
-
         # =================================================
         # TECHNICALS
         # =================================================
@@ -466,12 +380,7 @@ def analyze_stock(symbol, regime):
             * np.sqrt(252)
         )
 
-        if (
-
-            returns.std() is None or
-
-            returns.std() == 0
-        ):
+        if returns.std() == 0:
 
             sharpe = 0
 
@@ -503,26 +412,17 @@ def analyze_stock(symbol, regime):
             .iloc[-1]
         )
 
-        if sma50 == 0:
+        trend_strength = (
 
-            trend_strength = 0
+            sma20 / sma50
 
-        else:
-
-            trend_strength = (
-
-                sma20 / sma50
-            )
+        ) if sma50 != 0 else 0
 
         # =================================================
-        # CURRENT PRICE
+        # PRICE TARGETS
         # =================================================
 
         cmp = close.iloc[-1]
-
-        # =================================================
-        # VOLATILITY MODEL
-        # =================================================
 
         recent_volatility = (
 
@@ -573,134 +473,125 @@ def analyze_stock(symbol, regime):
 
             volatility *= 1.30
 
-        elif "SIDEWAYS" in regime:
-
-            sharpe *= 1.10
-            trend_strength *= 0.80
-
         # =================================================
-        # SECTOR ADAPTIVE FACTOR ENGINE
+        # SECTOR FACTOR ENGINE
         # =================================================
 
         if sector == "PRIVATE_BANKS":
 
             final_score = (
 
-                sharpe * 0.20 +
-                momentum * 0.20 +
-                trend_strength * 0.15 +
-                total_return * 0.20 +
-                roe * 0.25
+                sharpe * 0.30 +
+
+                momentum * 0.25 +
+
+                trend_strength * 0.20 +
+
+                total_return * 0.25
             )
 
         elif sector == "PSU_BANKS":
 
             final_score = (
 
-                momentum * 0.30 +
-                total_return * 0.25 +
-                dividend_yield * 0.20 +
-                sharpe * 0.15 -
-                volatility * 0.10
+                momentum * 0.35 +
+
+                total_return * 0.30 +
+
+                sharpe * 0.20 -
+
+                volatility * 0.15
             )
 
         elif sector == "PRIVATE_IT":
 
             final_score = (
 
-                revenue_growth * 0.30 +
-                operating_margin * 0.20 +
-                momentum * 0.20 +
-                sharpe * 0.15 +
-                total_return * 0.15
+                momentum * 0.30 +
+
+                sharpe * 0.25 +
+
+                total_return * 0.25 +
+
+                trend_strength * 0.20
             )
 
         elif sector == "PRIVATE_FMCG":
 
             final_score = (
 
-                profit_margin * 0.30 +
-                roe * 0.25 +
-                sharpe * 0.20 -
-                volatility * 0.15 +
-                trend_strength * 0.10
+                sharpe * 0.35 -
+
+                volatility * 0.25 +
+
+                trend_strength * 0.20 +
+
+                total_return * 0.20
             )
 
         elif sector == "PRIVATE_AUTO":
 
             final_score = (
 
-                momentum * 0.30 +
-                total_return * 0.25 +
-                revenue_growth * 0.20 +
-                trend_strength * 0.15 +
-                sharpe * 0.10
+                momentum * 0.35 +
+
+                total_return * 0.30 +
+
+                trend_strength * 0.20 +
+
+                sharpe * 0.15
             )
 
         elif sector == "PRIVATE_PHARMA":
 
             final_score = (
 
-                profit_margin * 0.25 +
-                sharpe * 0.25 +
-                momentum * 0.20 +
-                total_return * 0.15 -
-                volatility * 0.15
+                sharpe * 0.30 +
+
+                momentum * 0.25 +
+
+                total_return * 0.25 -
+
+                volatility * 0.20
             )
 
         elif sector == "PRIVATE_ENERGY":
 
             final_score = (
 
-                total_return * 0.25 +
-                momentum * 0.25 +
-                sharpe * 0.20 +
-                trend_strength * 0.15 +
-                dividend_yield * 0.15
+                total_return * 0.30 +
+
+                trend_strength * 0.25 +
+
+                sharpe * 0.25 +
+
+                momentum * 0.20
             )
 
         elif sector == "PSU_ENERGY":
 
             final_score = (
 
-                dividend_yield * 0.35 +
-                total_return * 0.20 +
-                trend_strength * 0.20 +
-                sharpe * 0.15 -
-                volatility * 0.10
+                total_return * 0.25 +
+
+                momentum * 0.25 +
+
+                sharpe * 0.25 -
+
+                volatility * 0.15
             )
 
         elif sector == "PSU_DEFENCE":
 
             final_score = (
 
-                momentum * 0.35 +
-                total_return * 0.25 +
-                trend_strength * 0.20 +
-                sharpe * 0.10 +
-                revenue_growth * 0.10
-            )
+                momentum * 0.40 +
 
-        elif sector == "PRIVATE_METALS":
+                total_return * 0.30 +
 
-            final_score = (
-
-                momentum * 0.35 +
-                total_return * 0.25 +
                 trend_strength * 0.20 -
-                volatility * 0.10 +
-                sharpe * 0.10
-            )
 
-        elif sector == "PSU_METALS":
-
-            final_score = (
-
-                dividend_yield * 0.25 +
-                total_return * 0.25 +
-                momentum * 0.20 +
-                sharpe * 0.15 -
-                volatility * 0.15
+                volatility * 0.10
             )
 
         else:
@@ -708,9 +599,13 @@ def analyze_stock(symbol, regime):
             final_score = (
 
                 momentum * 0.25 +
+
                 sharpe * 0.25 +
+
                 total_return * 0.25 +
+
                 trend_strength * 0.15 -
+
                 volatility * 0.10
             )
 
@@ -743,7 +638,6 @@ def analyze_stock(symbol, regime):
 
             "Symbol": symbol,
             "Sector": sector,
-            "Market Cap": safe_round(market_cap, 0),
             "Current Price": safe_round(cmp, 2),
             "Stop Loss": safe_round(stop_loss, 2),
             "Target": safe_round(target_price, 2),
@@ -761,3 +655,298 @@ def analyze_stock(symbol, regime):
     except Exception:
 
         return None
+
+# =========================================================
+# MAIN ENGINE
+# =========================================================
+
+ranking_data = []
+
+progress_bar = st.progress(0)
+
+status_text = st.empty()
+
+start_time = time.time()
+
+with st.spinner(
+
+    "Running Institutional Quant Engine..."
+):
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+
+        futures = {
+
+            executor.submit(
+
+                analyze_stock,
+
+                symbol,
+
+                regime
+
+            ): symbol
+
+            for symbol in stocks
+        }
+
+        for idx, future in enumerate(
+
+            as_completed(futures)
+        ):
+
+            result = future.result()
+
+            if result is not None:
+
+                ranking_data.append(result)
+
+            progress_bar.progress(
+
+                (idx + 1) / len(stocks)
+            )
+
+            status_text.info(
+
+                f"Processed {idx+1}/{len(stocks)}"
+            )
+
+# =========================================================
+# RESULTS
+# =========================================================
+
+results = pd.DataFrame(
+
+    ranking_data
+)
+
+if results.empty:
+
+    st.error(
+
+        "No valid stocks ranked."
+    )
+
+    st.stop()
+
+results = results.sort_values(
+
+    by="Final Score",
+
+    ascending=False
+)
+
+results = results.head(top_n)
+
+# =========================================================
+# METRICS
+# =========================================================
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+
+    st.metric(
+
+        "Live Regime",
+
+        regime
+    )
+
+with col2:
+
+    st.metric(
+
+        "Stocks Ranked",
+
+        len(results)
+    )
+
+with col3:
+
+    st.metric(
+
+        "Top Alpha Score",
+
+        safe_round(
+
+            results["Final Score"].max()
+        )
+    )
+
+# =========================================================
+# MAIN TABLE
+# =========================================================
+
+st.subheader(
+
+    "🏦 Institutional Alpha Rankings"
+)
+
+st.dataframe(
+
+    results,
+
+    use_container_width=True,
+
+    height=700
+)
+
+# =========================================================
+# COLOR MAP
+# =========================================================
+
+color_map = {
+
+    "STRONG_BUY": "#00C853",
+
+    "BUY": "#64DD17",
+
+    "WATCH": "#FFD600",
+
+    "AVOID": "#D50000"
+}
+
+# =========================================================
+# BAR CHART
+# =========================================================
+
+fig = px.bar(
+
+    results,
+
+    x="Symbol",
+
+    y="Final Score",
+
+    color="Classification",
+
+    color_discrete_map=color_map,
+
+    title="Institutional Alpha Scores"
+)
+
+fig.update_layout(
+
+    template="plotly_dark",
+
+    height=600
+)
+
+st.plotly_chart(
+
+    fig,
+
+    use_container_width=True
+)
+
+# =========================================================
+# RISK REWARD MATRIX
+# =========================================================
+
+rr_plot = results.copy()
+
+rr_plot["Momentum Size"] = (
+
+    rr_plot["Momentum"]
+
+    .abs()
+
+    .fillna(0)
+
+    .replace([np.inf, -np.inf], 0)
+
+    + 0.05
+)
+
+rr_fig = px.scatter(
+
+    rr_plot,
+
+    x="Risk Reward",
+
+    y="Final Score",
+
+    size="Momentum Size",
+
+    color="Classification",
+
+    hover_name="Symbol",
+
+    color_discrete_map=color_map,
+
+    title="Institutional Risk Reward Matrix"
+)
+
+rr_fig.update_layout(
+
+    template="plotly_dark",
+
+    height=650
+)
+
+st.plotly_chart(
+
+    rr_fig,
+
+    use_container_width=True
+)
+
+# =========================================================
+# TOP PICKS
+# =========================================================
+
+st.subheader(
+
+    "🚀 Institutional Buy Candidates"
+)
+
+top_picks = results[
+
+    results["Classification"]
+
+    .isin([
+
+        "STRONG_BUY",
+
+        "BUY"
+    ])
+]
+
+st.dataframe(
+
+    top_picks,
+
+    use_container_width=True
+)
+
+# =========================================================
+# DOWNLOAD CSV
+# =========================================================
+
+csv = results.to_csv(
+
+    index=False
+)
+
+st.download_button(
+
+    label="Download Institutional Rankings CSV",
+
+    data=csv,
+
+    file_name="institutional_rankings.csv",
+
+    mime="text/csv"
+)
+
+# =========================================================
+# FOOTER
+# =========================================================
+
+st.markdown("---")
+
+st.caption(
+
+    "Institutional Quantamental Intelligence Platform"
+)
