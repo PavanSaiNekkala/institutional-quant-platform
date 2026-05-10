@@ -1,0 +1,87 @@
+name: Institutional Quant Deployment
+
+on:
+
+  workflow_run:
+
+    workflows:
+
+      - Institutional Quant CI/CD
+
+    types:
+
+      - completed
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    if: >
+
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+
+    # =====================================================
+    # CHECKOUT
+    # =====================================================
+
+    - name: Checkout Repository
+
+      uses: actions/checkout@v4
+
+    # =====================================================
+    # PYTHON
+    # =====================================================
+
+    - name: Setup Python
+
+      uses: actions/setup-python@v5
+
+      with:
+
+        python-version: "3.11"
+
+    # =====================================================
+    # INSTALL
+    # =====================================================
+
+    - name: Install Dependencies
+
+      run: |
+
+        python -m pip install --upgrade pip
+
+        pip install -r requirements.txt
+
+    # =====================================================
+    # VALIDATE STREAMLIT
+    # =====================================================
+
+    - name: Validate Streamlit App
+
+      run: |
+
+        python -m py_compile app/streamlit_app.py
+
+    # =====================================================
+    # BUILD DOCKER
+    # =====================================================
+
+    - name: Build Docker Image
+
+      run: |
+
+        docker build -t institutional-quant .
+
+    # =====================================================
+    # DEPLOYMENT MESSAGE
+    # =====================================================
+
+    - name: Deployment Complete
+
+      run: |
+
+        echo "Institutional deployment pipeline successful"
