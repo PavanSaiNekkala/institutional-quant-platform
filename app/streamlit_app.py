@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL STABLE + RATE-LIMIT SAFE INSTITUTIONAL PLATFORM
+# FINAL INSTITUTIONAL QUANT RESEARCH PLATFORM
 # =========================================================
 
 import sys
@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
+import plotly.graph_objects as go
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -152,10 +153,6 @@ try:
         .tolist()
     )
 
-    # =====================================================
-    # CLEAN NSE STOCKS
-    # =====================================================
-
     stocks = [
 
         stock.strip().upper()
@@ -165,18 +162,10 @@ try:
         if ".NS" in stock
     ]
 
-    # =====================================================
-    # REMOVE DUPLICATES
-    # =====================================================
-
     stocks = list(
 
         dict.fromkeys(stocks)
     )
-
-    # =====================================================
-    # LIMIT UNIVERSE
-    # =====================================================
 
     stocks = stocks[:max_universe]
 
@@ -190,7 +179,7 @@ except Exception as e:
     st.stop()
 
 # =========================================================
-# SIDEBAR METRICS
+# SIDEBAR METRIC
 # =========================================================
 
 st.sidebar.metric(
@@ -229,17 +218,9 @@ def safe_round(value, digits=4):
 
 def analyze_stock(symbol, regime):
 
-    # =====================================================
-    # SMALL DELAY TO REDUCE RATE LIMITING
-    # =====================================================
-
     time.sleep(0.25)
 
     try:
-
-        # =================================================
-        # TICKER
-        # =================================================
 
         ticker = yf.Ticker(symbol)
 
@@ -255,20 +236,12 @@ def analyze_stock(symbol, regime):
 
             fast_info = {}
 
-        # =================================================
-        # MARKET CAP
-        # =================================================
-
         market_cap = fast_info.get(
 
             "market_cap",
 
-            None
+            0
         )
-
-        # =================================================
-        # FALLBACK MARKET CAP
-        # =================================================
 
         if market_cap is None:
 
@@ -312,10 +285,6 @@ def analyze_stock(symbol, regime):
 
         close = data["Close"]
 
-        # =================================================
-        # MULTIINDEX FIX
-        # =====================================================
-
         if isinstance(close, pd.DataFrame):
 
             close = close.iloc[:, 0]
@@ -347,10 +316,6 @@ def analyze_stock(symbol, regime):
             returns.std()
             * np.sqrt(252)
         )
-
-        # =================================================
-        # SHARPE
-        # =================================================
 
         if (
 
@@ -401,6 +366,64 @@ def analyze_stock(symbol, regime):
             )
 
         # =================================================
+        # CURRENT PRICE
+        # =================================================
+
+        cmp = close.iloc[-1]
+
+        # =================================================
+        # ATR STYLE VOLATILITY
+        # =================================================
+
+        recent_volatility = (
+
+            close.pct_change()
+
+            .rolling(14)
+
+            .std()
+
+            .iloc[-1]
+        )
+
+        if pd.isna(recent_volatility):
+
+            recent_volatility = 0.02
+
+        # =================================================
+        # STOP LOSS
+        # =================================================
+
+        stop_loss = (
+
+            cmp
+
+            * (1 - recent_volatility * 2)
+        )
+
+        # =================================================
+        # TARGET
+        # =================================================
+
+        target_price = (
+
+            cmp
+
+            * (1 + recent_volatility * 4)
+        )
+
+        # =================================================
+        # RISK REWARD
+        # =================================================
+
+        risk_reward = (
+
+            (target_price - cmp)
+
+            / max(cmp - stop_loss, 0.0001)
+        )
+
+        # =================================================
         # REGIME ADAPTATION
         # =================================================
 
@@ -419,7 +442,7 @@ def analyze_stock(symbol, regime):
             trend_strength *= 0.80
 
         # =================================================
-        # METRICS
+        # FACTOR METRICS
         # =================================================
 
         metrics = {
@@ -477,26 +500,17 @@ def analyze_stock(symbol, regime):
         # CLASSIFICATION
         # =================================================
 
-        if final_score >= 1.0:
+        if final_score >= 1.20:
 
-            classification = (
+            classification = "STRONG_BUY"
 
-                "INSTITUTIONAL_LONG"
-            )
+        elif final_score >= 0.80:
 
-        elif final_score >= 0.7:
+            classification = "BUY"
 
-            classification = (
+        elif final_score >= 0.50:
 
-                "HIGH_CONVICTION"
-            )
-
-        elif final_score >= 0.4:
-
-            classification = (
-
-                "WATCHLIST"
-            )
+            classification = "WATCH"
 
         else:
 
@@ -521,6 +535,18 @@ def analyze_stock(symbol, regime):
 
             "Market Cap":
                 safe_round(market_cap, 0),
+
+            "Current Price":
+                safe_round(cmp, 2),
+
+            "Stop Loss":
+                safe_round(stop_loss, 2),
+
+            "Target":
+                safe_round(target_price, 2),
+
+            "Risk Reward":
+                safe_round(risk_reward, 2),
 
             "Momentum":
                 safe_round(momentum),
@@ -686,7 +712,7 @@ with col3:
     )
 
 # =========================================================
-# TABLE
+# COLORED TABLE
 # =========================================================
 
 st.subheader(
@@ -694,14 +720,94 @@ st.subheader(
     "Institutional Alpha Rankings"
 )
 
+def color_classification(val):
+
+    if val == "STRONG_BUY":
+
+        return (
+
+            "background-color: #00C853; "
+            "color: white; "
+            "font-weight: bold"
+        )
+
+    elif val == "BUY":
+
+        return (
+
+            "background-color: #64DD17; "
+            "color: black; "
+            "font-weight: bold"
+        )
+
+    elif val == "WATCH":
+
+        return (
+
+            "background-color: #FFD600; "
+            "color: black; "
+            "font-weight: bold"
+        )
+
+    elif val == "AVOID":
+
+        return (
+
+            "background-color: #D50000; "
+            "color: white; "
+            "font-weight: bold"
+        )
+
+    return ""
+
+styled_results = (
+
+    results.style
+
+    .applymap(
+
+        color_classification,
+
+        subset=["Classification"]
+    )
+
+    .format({
+
+        "Current Price": "{:.2f}",
+
+        "Stop Loss": "{:.2f}",
+
+        "Target": "{:.2f}",
+
+        "Risk Reward": "{:.2f}",
+
+        "Final Score": "{:.4f}"
+    })
+)
+
 st.dataframe(
 
-    results,
+    styled_results,
 
     use_container_width=True,
 
     height=700
 )
+
+# =========================================================
+# COLOR MAP
+# =========================================================
+
+color_map = {
+
+    "STRONG_BUY": "#00C853",
+
+    "BUY": "#64DD17",
+
+    "WATCH": "#FFD600",
+
+    "AVOID": "#D50000"
+}
 
 # =========================================================
 # BAR CHART
@@ -717,7 +823,16 @@ fig = px.bar(
 
     color="Classification",
 
+    color_discrete_map=color_map,
+
     title="Institutional Alpha Scores"
+)
+
+fig.update_layout(
+
+    template="plotly_dark",
+
+    height=600
 )
 
 st.plotly_chart(
@@ -756,12 +871,63 @@ factor_fig = px.scatter(
 
     hover_name="Symbol",
 
+    color_discrete_map=color_map,
+
     title="Institutional Factor Intelligence"
+)
+
+factor_fig.update_layout(
+
+    template="plotly_dark",
+
+    height=650
 )
 
 st.plotly_chart(
 
     factor_fig,
+
+    use_container_width=True
+)
+
+# =========================================================
+# RISK REWARD MATRIX
+# =========================================================
+
+st.subheader(
+
+    "Risk Reward Opportunities"
+)
+
+rr_fig = px.scatter(
+
+    results,
+
+    x="Risk Reward",
+
+    y="Final Score",
+
+    size="Momentum",
+
+    color="Classification",
+
+    hover_name="Symbol",
+
+    color_discrete_map=color_map,
+
+    title="Institutional Risk Reward Matrix"
+)
+
+rr_fig.update_layout(
+
+    template="plotly_dark",
+
+    height=650
+)
+
+st.plotly_chart(
+
+    rr_fig,
 
     use_container_width=True
 )
@@ -781,6 +947,13 @@ hist_fig = px.histogram(
     title="Alpha Percentile Distribution"
 )
 
+hist_fig.update_layout(
+
+    template="plotly_dark",
+
+    height=500
+)
+
 st.plotly_chart(
 
     hist_fig,
@@ -794,14 +967,19 @@ st.plotly_chart(
 
 st.subheader(
 
-    "Institutional Long Candidates"
+    "Institutional Buy Candidates"
 )
 
 top_picks = results[
 
     results["Classification"]
 
-    == "INSTITUTIONAL_LONG"
+    .isin([
+
+        "STRONG_BUY",
+
+        "BUY"
+    ])
 ]
 
 st.dataframe(
