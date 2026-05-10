@@ -1,6 +1,7 @@
 # =========================================================
 # INSTITUTIONAL QUANT RESEARCH PLATFORM
 # FUNDAMENTAL + TECHNICAL + SECTOR RANKING ENGINE
+# FINAL OPTIMIZED VERSION
 # =========================================================
 
 import sys
@@ -38,7 +39,7 @@ TOP_TOTAL_STOCKS = 500
 CACHE_FILE = "ranked_universe.xlsx"
 
 # =========================================================
-# SAFE VALUE
+# SAFE VALUE HANDLER
 # =========================================================
 
 def safe(value, default=0):
@@ -58,6 +59,49 @@ def safe(value, default=0):
         return default
 
 # =========================================================
+# SIDEBAR CONTROLS
+# =========================================================
+
+st.sidebar.header("Institutional Controls")
+
+use_cache = st.sidebar.checkbox(
+    "Use Cached Rankings",
+    value=False
+)
+
+refresh_rankings = st.sidebar.button(
+    "Regenerate Rankings"
+)
+
+top_n = st.sidebar.selectbox(
+    "Display Stocks",
+    [25, 50, 100, 250, 500],
+    index=2
+)
+
+watchlist_size = st.sidebar.selectbox(
+    "Live Signal Watchlist",
+    [10, 25, 50, 75, 100],
+    index=2
+)
+
+# =========================================================
+# CACHE MANAGEMENT
+# =========================================================
+
+ranked_file = Path(CACHE_FILE)
+
+if refresh_rankings:
+
+    if ranked_file.exists():
+
+        ranked_file.unlink()
+
+        st.sidebar.success(
+            "Old rankings deleted"
+        )
+
+# =========================================================
 # LOAD RANKED UNIVERSE
 # =========================================================
 
@@ -70,7 +114,7 @@ def load_ranked_universe():
     # LOAD CACHE
     # =====================================================
 
-    if ranked_file.exists():
+    if use_cache and ranked_file.exists():
 
         try:
 
@@ -83,11 +127,17 @@ def load_ranked_universe():
 
             ranking_df = ranking_df.reset_index(drop=True)
 
+            st.sidebar.success(
+                "Loaded Cached Rankings"
+            )
+
             return ranking_df
 
         except Exception as e:
 
-            st.warning(f"Cached ranking load failed: {e}")
+            st.warning(
+                f"Cached ranking load failed: {e}"
+            )
 
     # =====================================================
     # LOAD STOCK UNIVERSE
@@ -95,7 +145,9 @@ def load_ranked_universe():
 
     try:
 
-        universe = pd.read_excel("valid_stocks.xlsx")
+        universe = pd.read_excel(
+            "valid_stocks.xlsx"
+        )
 
         symbols = (
             universe.iloc[:, 0]
@@ -106,10 +158,19 @@ def load_ranked_universe():
         )
 
         # =====================================================
-        # LIMIT FOR CLOUD STABILITY
+        # REMOVE INVALID SYMBOLS
         # =====================================================
 
-        symbols = symbols[:2000]
+        symbols = [
+            s for s in symbols
+            if ".NS" in s
+        ]
+
+        # =====================================================
+        # LIMIT FOR STREAMLIT CLOUD
+        # =====================================================
+
+        symbols = symbols[:2500]
 
         ranking_data = []
 
@@ -128,12 +189,17 @@ def load_ranked_universe():
             try:
 
                 status.text(
-                    f"Analyzing {symbol} ({idx+1}/{total_symbols})"
+                    f"Analyzing {symbol} "
+                    f"({idx+1}/{total_symbols})"
                 )
 
                 ticker = yf.Ticker(symbol)
 
                 info = ticker.info
+
+                # =================================================
+                # FUNDAMENTALS
+                # =================================================
 
                 sector = safe(
                     info.get("sector"),
@@ -189,6 +255,13 @@ def load_ranked_universe():
                 )
 
                 # =================================================
+                # FILTER LOW QUALITY STOCKS
+                # =================================================
+
+                if market_cap < 1_000_000_000:
+                    continue
+
+                # =================================================
                 # PRICE DATA
                 # =================================================
 
@@ -206,11 +279,12 @@ def load_ranked_universe():
                 close = data["Close"]
 
                 if isinstance(close, pd.DataFrame):
+
                     close = close.iloc[:, 0]
 
                 close = close.dropna()
 
-                if len(close) < 40:
+                if len(close) < 50:
                     continue
 
                 returns = close.pct_change().dropna()
@@ -242,13 +316,50 @@ def load_ranked_universe():
                     / close.iloc[0]
                 ) - 1
 
-                sma_20 = close.rolling(20).mean().iloc[-1]
+                sma_20 = (
+                    close.rolling(20)
+                    .mean()
+                    .iloc[-1]
+                )
 
-                sma_50 = close.rolling(50).mean().iloc[-1]
+                sma_50 = (
+                    close.rolling(50)
+                    .mean()
+                    .iloc[-1]
+                )
 
                 trend_strength = (
                     sma_20 / sma_50
                 ) if sma_50 != 0 else 0
+
+                # =================================================
+                # RSI
+                # =================================================
+
+                delta = close.diff()
+
+                gain = (
+                    delta.where(delta > 0, 0)
+                    .rolling(14)
+                    .mean()
+                )
+
+                loss = (
+                    -delta.where(delta < 0, 0)
+                    .rolling(14)
+                    .mean()
+                )
+
+                rs = gain / loss
+
+                rsi = 100 - (
+                    100 / (1 + rs)
+                )
+
+                rsi = safe(
+                    rsi.iloc[-1],
+                    50
+                )
 
                 # =================================================
                 # INSTITUTIONAL SCORE
@@ -296,6 +407,11 @@ def load_ranked_universe():
 
                     +
 
+                    # RSI Strength
+                    (rsi / 100) * 0.05
+
+                    +
+
                     # Liquidity
                     np.log1p(avg_volume) * 0.05
 
@@ -326,15 +442,21 @@ def load_ranked_universe():
 
                 if score >= 1.0:
 
-                    classification = "INSTITUTIONAL_LONG"
+                    classification = (
+                        "INSTITUTIONAL_LONG"
+                    )
 
                 elif score >= 0.7:
 
-                    classification = "HIGH_CONVICTION"
+                    classification = (
+                        "HIGH_CONVICTION"
+                    )
 
                 elif score >= 0.4:
 
-                    classification = "WATCHLIST"
+                    classification = (
+                        "WATCHLIST"
+                    )
 
                 else:
 
@@ -390,6 +512,9 @@ def load_ranked_universe():
                     "Trend Strength":
                         round(trend_strength, 4),
 
+                    "RSI":
+                        round(rsi, 2),
+
                     "Total Return":
                         round(total_return, 4),
 
@@ -404,37 +529,42 @@ def load_ranked_universe():
                 continue
 
             progress.progress(
-                (idx + 1) / total_symbols
+                (idx + 1)
+                / total_symbols
             )
 
-        status.text("Institutional Ranking Completed")
+        status.text(
+            "Institutional Ranking Completed"
+        )
 
-        ranking_df = pd.DataFrame(ranking_data)
+        ranking_df = pd.DataFrame(
+            ranking_data
+        )
 
         if ranking_df.empty:
 
             return pd.DataFrame()
 
         # =====================================================
-        # FILTER LOW QUALITY STOCKS
+        # SORT OVERALL
         # =====================================================
 
-        ranking_df = ranking_df[
-            ranking_df["Market Cap"] > 1_000_000_000
-        ]
+        ranking_df = ranking_df.sort_values(
+            by="Institutional Score",
+            ascending=False
+        )
 
         # =====================================================
-        # SECTOR BALANCING
+        # SECTOR-WISE BALANCING
         # =====================================================
 
-        sectors = ranking_df["Sector"].unique()
+        sectors = (
+            ranking_df["Sector"]
+            .dropna()
+            .unique()
+        )
 
         sector_selected = []
-
-        stocks_per_sector = max(
-            5,
-            TOP_TOTAL_STOCKS // max(1, len(sectors))
-        )
 
         for sector in sectors:
 
@@ -447,15 +577,24 @@ def load_ranked_universe():
                 ascending=False
             )
 
-            top_sector = sector_df.head(
-                stocks_per_sector
-            )
+            # TAKE BEST STOCKS
+            top_sector = sector_df.head(50)
 
-            sector_selected.append(top_sector)
+            sector_selected.append(
+                top_sector
+            )
 
         final_df = pd.concat(
             sector_selected,
             ignore_index=True
+        )
+
+        # =====================================================
+        # REMOVE DUPLICATES
+        # =====================================================
+
+        final_df = final_df.drop_duplicates(
+            subset="Symbol"
         )
 
         # =====================================================
@@ -465,13 +604,11 @@ def load_ranked_universe():
         final_df = final_df.sort_values(
             by="Institutional Score",
             ascending=False
-        )
+        ).head(TOP_TOTAL_STOCKS)
 
-        final_df = final_df.head(
-            TOP_TOTAL_STOCKS
+        final_df = final_df.reset_index(
+            drop=True
         )
-
-        final_df = final_df.reset_index(drop=True)
 
         # =====================================================
         # SAVE CACHE
@@ -486,7 +623,9 @@ def load_ranked_universe():
 
     except Exception as e:
 
-        st.error(f"Universe ranking failed: {e}")
+        st.error(
+            f"Universe ranking failed: {e}"
+        )
 
         return pd.DataFrame()
 
@@ -497,22 +636,8 @@ def load_ranked_universe():
 ranking_df = load_ranked_universe()
 
 # =========================================================
-# SIDEBAR CONTROLS
+# SECTOR FILTER
 # =========================================================
-
-st.sidebar.header("Institutional Controls")
-
-top_n = st.sidebar.selectbox(
-    "Display Stocks",
-    [25, 50, 100, 250, 500],
-    index=2
-)
-
-watchlist_size = st.sidebar.selectbox(
-    "Live Signal Watchlist",
-    [10, 25, 50, 75, 100],
-    index=2
-)
 
 selected_sector = st.sidebar.selectbox(
     "Sector Filter",
@@ -533,7 +658,8 @@ display_df = ranking_df.copy()
 if selected_sector != "ALL":
 
     display_df = display_df[
-        display_df["Sector"] == selected_sector
+        display_df["Sector"]
+        == selected_sector
     ]
 
 display_df = display_df.head(top_n)
@@ -571,7 +697,9 @@ with col4:
     st.metric(
         "Top Score",
         round(
-            ranking_df["Institutional Score"].max(),
+            ranking_df[
+                "Institutional Score"
+            ].max(),
             4
         ) if not ranking_df.empty else 0
     )
@@ -580,7 +708,9 @@ with col4:
 # RANKING TABLE
 # =========================================================
 
-st.subheader("Institutional Alpha Rankings")
+st.subheader(
+    "Institutional Alpha Rankings"
+)
 
 if not display_df.empty:
 
@@ -592,19 +722,24 @@ if not display_df.empty:
 
 else:
 
-    st.warning("No rankings available")
+    st.warning(
+        "No rankings available"
+    )
 
 # =========================================================
 # SYMBOLS
 # =========================================================
 
 all_symbols = (
-    ranking_df["Symbol"].tolist()
+    ranking_df["Symbol"]
+    .tolist()
     if not ranking_df.empty
     else []
 )
 
-symbols = all_symbols[:watchlist_size]
+symbols = all_symbols[
+    :watchlist_size
+]
 
 # =========================================================
 # EMPTY CHECK
@@ -621,7 +756,8 @@ if len(symbols) == 0:
 # =========================================================
 
 weights = np.array(
-    [1 / len(symbols)] * len(symbols)
+    [1 / len(symbols)]
+    * len(symbols)
 )
 
 # =========================================================
@@ -634,7 +770,7 @@ def cached_signal(symbol):
     return generate_live_signal(symbol)
 
 # =========================================================
-# LIVE SIGNALS
+# LIVE AI SIGNALS
 # =========================================================
 
 st.subheader("Live AI Signals")
@@ -647,7 +783,9 @@ signal_status = st.empty()
 
 live_signal_symbols = symbols[:50]
 
-for idx, symbol in enumerate(live_signal_symbols):
+for idx, symbol in enumerate(
+    live_signal_symbols
+):
 
     try:
 
@@ -661,15 +799,22 @@ for idx, symbol in enumerate(live_signal_symbols):
 
     except Exception as e:
 
-        st.warning(f"Signal Error {symbol}: {e}")
+        st.warning(
+            f"Signal Error {symbol}: {e}"
+        )
 
     signal_progress.progress(
-        (idx + 1) / len(live_signal_symbols)
+        (idx + 1)
+        / len(live_signal_symbols)
     )
 
-signal_status.text("Signal Generation Completed")
+signal_status.text(
+    "Signal Generation Completed"
+)
 
-signal_df = pd.DataFrame(signal_reports)
+signal_df = pd.DataFrame(
+    signal_reports
+)
 
 # =========================================================
 # SIGNAL TABLE
@@ -687,13 +832,16 @@ if not signal_df.empty:
 # SIGNAL VISUALIZATION
 # =========================================================
 
-st.subheader("Signal Score Distribution")
+st.subheader(
+    "Signal Score Distribution"
+)
 
 if not signal_df.empty:
 
     fig = go.Figure()
 
     fig.add_trace(
+
         go.Bar(
             x=signal_df["Symbol"],
             y=signal_df["Signal Score"]
@@ -715,7 +863,9 @@ if not signal_df.empty:
 # TOP SIGNALS
 # =========================================================
 
-st.subheader("Top Institutional Signals")
+st.subheader(
+    "Top Institutional Signals"
+)
 
 if not signal_df.empty:
 
@@ -733,7 +883,9 @@ if not signal_df.empty:
 # PORTFOLIO ANALYTICS
 # =========================================================
 
-st.subheader("Live Portfolio Analytics")
+st.subheader(
+    "Live Portfolio Analytics"
+)
 
 try:
 
@@ -758,19 +910,27 @@ try:
 
 except Exception as e:
 
-    st.error(f"Portfolio Monitor Failed: {e}")
+    st.error(
+        f"Portfolio Monitor Failed: {e}"
+    )
 
 # =========================================================
 # ALERTS
 # =========================================================
 
-st.subheader("Institutional Alerts")
+st.subheader(
+    "Institutional Alerts"
+)
 
 alerts = AlertManager()
 
-alerts.risk_alert(drawdown=-0.12)
+alerts.risk_alert(
+    drawdown=-0.12
+)
 
-alerts.volatility_alert(volatility=0.35)
+alerts.volatility_alert(
+    volatility=0.35
+)
 
 alerts.signal_alert(
     symbol="RELIANCE.NS",
