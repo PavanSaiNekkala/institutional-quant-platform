@@ -1,4 +1,5 @@
 import sys
+
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -8,9 +9,30 @@ sys.path.append(str(ROOT_DIR))
 import streamlit as st
 import pandas as pd
 
-from paper_trading.paper_trading_engine import (
-    PaperTradingEngine
+from core.dashboard_data_loader import (
+    load_portfolio_analytics
 )
+
+# =========================================================
+# PAGE CONFIG
+# =========================================================
+
+st.set_page_config(
+
+    page_title="Portfolio Dashboard",
+
+    layout="wide"
+)
+
+# =========================================================
+# CACHED LOADER
+# =========================================================
+
+@st.cache_data(ttl=3600)
+
+def get_portfolio_data():
+
+    return load_portfolio_analytics()
 
 # =========================================================
 # TITLE
@@ -18,59 +40,58 @@ from paper_trading.paper_trading_engine import (
 
 st.title(
 
-    "Portfolio Monitor"
+    "Institutional Portfolio Dashboard"
 )
 
-engine = PaperTradingEngine()
+# =========================================================
+# LOAD DATA
+# =========================================================
 
-report = engine.report()
+portfolio_df = get_portfolio_data()
+
+# =========================================================
+# EMPTY CHECK
+# =========================================================
+
+if portfolio_df.empty:
+
+    st.warning(
+
+        "No portfolio analytics available."
+    )
+
+    st.stop()
+
+# =========================================================
+# DASHBOARD
+# =========================================================
+
+st.dataframe(
+
+    portfolio_df,
+
+    use_container_width=True
+)
 
 # =========================================================
 # METRICS
 # =========================================================
 
-col1, col2 = st.columns(2)
+if "Portfolio Value" in portfolio_df.columns:
 
-with col1:
+    latest_value = (
 
-    st.metric(
+        portfolio_df[
 
-        "Cash",
+            "Portfolio Value"
+        ]
 
-        f"${report['Cash']:,.2f}"
+        .iloc[-1]
     )
-
-with col2:
 
     st.metric(
 
         "Portfolio Value",
 
-        f"${report['Portfolio Value']:,.2f}"
-    )
-
-# =========================================================
-# POSITIONS
-# =========================================================
-
-positions = report["Positions"]
-
-if positions:
-
-    df = pd.DataFrame({
-
-        "Symbol":
-
-            list(positions.keys()),
-
-        "Quantity":
-
-            list(positions.values())
-    })
-
-    st.dataframe(
-
-        df,
-
-        use_container_width=True
+        f"{latest_value:,.2f}"
     )
