@@ -1,6 +1,4 @@
-import streamlit as st
-
-# ============import sys
+import sys
 
 from pathlib import Path
 
@@ -9,6 +7,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
+import pandas as pd
 
 from core.dashboard_data_loader import (
     load_ranked_universe
@@ -41,7 +40,7 @@ def get_rankings():
 
 st.title(
 
-    "Institutional Quant Operating Platform"
+    "Institutional Quant Research Platform"
 )
 
 # =========================================================
@@ -64,6 +63,31 @@ if ranking_df.empty:
     st.stop()
 
 # =========================================================
+# SIDEBAR
+# =========================================================
+
+st.sidebar.header(
+
+    "Institutional Controls"
+)
+
+top_n = st.sidebar.slider(
+
+    "Top Stocks",
+
+    min_value=10,
+
+    max_value=min(
+
+        500,
+
+        len(ranking_df)
+    ),
+
+    value=50
+)
+
+# =========================================================
 # METRICS
 # =========================================================
 
@@ -73,7 +97,7 @@ with col1:
 
     st.metric(
 
-        "Universe Size",
+        "Universe Loaded",
 
         len(ranking_df)
     )
@@ -82,12 +106,11 @@ with col2:
 
     st.metric(
 
-        "Top Score",
+        "Top Institutional Score",
 
         round(
 
             ranking_df[
-
                 "Institutional Score"
             ].max(),
 
@@ -104,7 +127,6 @@ with col3:
         round(
 
             ranking_df[
-
                 "Institutional Score"
             ].mean(),
 
@@ -118,75 +140,23 @@ with col3:
 
 st.subheader(
 
-    "Top Ranked Stocks"
+    "Top Ranked Institutional Stocks"
 )
+
+display_df = ranking_df.head(top_n)
 
 st.dataframe(
 
-    ranking_df.head(50),
+    display_df,
 
     use_container_width=True
-)=============================================
-# PAGE CONFIG
-# =========================================================
-
-st.set_page_config(
-
-    page_title="Institutional Quant Platform",
-
-    layout="wide"
 )
 
 # =========================================================
-# TITLE
+# SYSTEM STATUS
 # =========================================================
-
-st.title(
-
-    "Institutional Quant Operating Platform"
-)
 
 st.success(
 
-    "Platform Operational"
-)
-
-# =========================================================
-# OVERVIEW
-# =========================================================
-
-st.header(
-
-    "Platform Overview"
-)
-
-st.markdown(
-
-    """
-    This platform includes:
-
-    - Portfolio Analytics
-    - Paper Trading
-    - Adaptive Allocation
-    - Regime Detection
-    - Backtesting
-    - Risk Analytics
-    - Reporting Infrastructure
-    - Automated Refresh Systems
-    - Institutional Monitoring
-    """
-)
-
-# =========================================================
-# STATUS
-# =========================================================
-
-st.header(
-
-    "System Status"
-)
-
-st.info(
-
-    "All core institutional systems online."
+    "Lightweight Institutional Dashboard Active"
 )
