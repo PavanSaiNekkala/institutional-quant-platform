@@ -1,4 +1,5 @@
 import sys
+
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -6,15 +7,31 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
-import pandas as pd
 
-from paper_trading.paper_trading_engine import (
-    PaperTradingEngine
+from core.dashboard_data_loader import (
+    load_pnl_analytics
 )
 
-from portfolio.advanced_portfolio_analytics import (
-    AdvancedPortfolioAnalytics
+# =========================================================
+# PAGE CONFIG
+# =========================================================
+
+st.set_page_config(
+
+    page_title="PnL Analytics",
+
+    layout="wide"
 )
+
+# =========================================================
+# CACHE
+# =========================================================
+
+@st.cache_data(ttl=3600)
+
+def get_pnl_data():
+
+    return load_pnl_analytics()
 
 # =========================================================
 # TITLE
@@ -22,57 +39,31 @@ from portfolio.advanced_portfolio_analytics import (
 
 st.title(
 
-    "Portfolio Analytics"
-)
-
-engine = PaperTradingEngine()
-
-report = engine.report()
-
-analytics = AdvancedPortfolioAnalytics(
-
-    positions=report["Positions"],
-
-    trades=report["Trades"],
-
-    cash=report["Cash"]
-)
-
-summary, holdings_df = (
-
-    analytics.full_report()
+    "Institutional PnL Analytics"
 )
 
 # =========================================================
-# SUMMARY
+# LOAD
 # =========================================================
 
-summary_df = pd.DataFrame(
+pnl_df = get_pnl_data()
 
-    summary.items(),
+if pnl_df.empty:
 
-    columns=[
+    st.warning(
 
-        "Metric",
+        "No PnL analytics available."
+    )
 
-        "Value"
-    ]
-)
-
-st.dataframe(
-
-    summary_df,
-
-    use_container_width=True
-)
+    st.stop()
 
 # =========================================================
-# HOLDINGS
+# DISPLAY
 # =========================================================
 
 st.dataframe(
 
-    holdings_df,
+    pnl_df,
 
     use_container_width=True
 )
