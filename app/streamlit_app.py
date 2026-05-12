@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL STABLE INSTITUTIONAL QUANT PLATFORM
+# FINAL OPTIMIZED INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -38,6 +38,8 @@ from core.sector_models import (
 st.set_page_config(
 
     page_title="Institutional Quant Platform",
+
+    page_icon="🏦",
 
     layout="wide"
 )
@@ -100,30 +102,19 @@ st.sidebar.header(
 
 top_n = st.sidebar.slider(
 
-    "Top Stocks",
+    "Top Ranked Stocks",
 
-    25,
+    min_value=10,
 
-    500,
+    max_value=100,
 
-    100
-)
+    value=50,
 
-max_universe = st.sidebar.slider(
-
-    "Universe Size",
-
-    100,
-
-    3000,
-
-    1500,
-
-    step=100
+    step=10
 )
 
 # =========================================================
-# LOAD STOCK UNIVERSE
+# LOAD FULL UNIVERSE
 # =========================================================
 
 universe_path = (
@@ -157,16 +148,24 @@ try:
         .tolist()
     )
 
+    # =====================================================
+    # FILTER NSE STOCKS
+    # =====================================================
+
     stocks = [
 
         stock
 
         for stock in stocks
 
-        if ".NS" in stock
+        if stock.endswith(".NS")
     ]
 
-    stocks = stocks[:max_universe]
+    # =====================================================
+    # REMOVE DUPLICATES
+    # =====================================================
+
+    stocks = list(dict.fromkeys(stocks))
 
 except Exception as e:
 
@@ -178,14 +177,14 @@ except Exception as e:
     st.stop()
 
 # =========================================================
-# SIDEBAR METRICS
+# SIDEBAR METRIC
 # =========================================================
 
 st.sidebar.metric(
 
     "Universe Loaded",
 
-    len(stocks)
+    f"{len(stocks):,}"
 )
 
 # =========================================================
@@ -225,19 +224,19 @@ def safe_round(value, digits=4):
 
 def analyze_stock(symbol, regime):
 
-    # =============================================
-    # THROTTLE
-    # =============================================
+    # =====================================================
+    # SMALL THROTTLE
+    # =====================================================
 
-    time.sleep(0.15)
+    time.sleep(0.02)
 
     try:
 
         ticker = yf.Ticker(symbol)
 
-        # =========================================
-        # FAST INFO ONLY
-        # =========================================
+        # =================================================
+        # FAST INFO
+        # =================================================
 
         try:
 
@@ -258,21 +257,21 @@ def analyze_stock(symbol, regime):
 
             market_cap = 0
 
-        # =========================================
-        # SECTOR DETECTION
-        # =========================================
+        # =================================================
+        # SECTOR
+        # =================================================
 
         sector = detect_sector(symbol)
 
-        # =========================================
-        # PRICE DATA
-        # =========================================
+        # =================================================
+        # FAST DOWNLOAD
+        # =================================================
 
         data = yf.download(
 
             symbol,
 
-            period="6mo",
+            period="3mo",
 
             interval="1d",
 
@@ -280,7 +279,9 @@ def analyze_stock(symbol, regime):
 
             progress=False,
 
-            threads=False
+            threads=False,
+
+            timeout=8
         )
 
         if data.empty:
@@ -295,13 +296,13 @@ def analyze_stock(symbol, regime):
 
         close = close.dropna()
 
-        if len(close) < 50:
+        if len(close) < 40:
 
             return None
 
-        # =========================================
+        # =================================================
         # RETURNS
-        # =========================================
+        # =================================================
 
         returns = close.pct_change().dropna()
 
@@ -309,9 +310,9 @@ def analyze_stock(symbol, regime):
 
             return None
 
-        # =========================================
-        # TECHNICAL FACTORS
-        # =========================================
+        # =================================================
+        # FACTORS
+        # =================================================
 
         momentum = (
 
@@ -361,7 +362,7 @@ def analyze_stock(symbol, regime):
 
         sma50 = (
 
-            close.rolling(50)
+            close.rolling(40)
 
             .mean()
 
@@ -374,15 +375,15 @@ def analyze_stock(symbol, regime):
 
         ) if sma50 != 0 else 0
 
-        # =========================================
+        # =================================================
         # CURRENT PRICE
-        # =========================================
+        # =================================================
 
         cmp = close.iloc[-1]
 
-        # =========================================
-        # VOLATILITY MODEL
-        # =========================================
+        # =================================================
+        # RISK MODEL
+        # =================================================
 
         recent_volatility = (
 
@@ -431,9 +432,9 @@ def analyze_stock(symbol, regime):
             )
         )
 
-        # =========================================
+        # =================================================
         # FINAL SCORE
-        # =========================================
+        # =================================================
 
         final_score = sector_factor_score(
 
@@ -454,9 +455,9 @@ def analyze_stock(symbol, regime):
             regime=regime
         )
 
-        # =========================================
+        # =================================================
         # CLASSIFICATION
-        # =========================================
+        # =================================================
 
         if final_score >= 1.20:
 
@@ -558,7 +559,7 @@ with st.spinner(
     "Running Institutional Quant Engine..."
 ):
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=12) as executor:
 
         futures = {
 
@@ -602,9 +603,9 @@ with st.spinner(
 
                 failed_count += 1
 
-            # =====================================
+            # =================================================
             # PROGRESS
-            # =====================================
+            # =================================================
 
             progress = (
 
@@ -682,7 +683,7 @@ if results.empty:
     st.stop()
 
 # =========================================================
-# SECTOR RANKING
+# SECTOR RANK
 # =========================================================
 
 results["Sector Rank"] = (
@@ -713,7 +714,7 @@ results["Normalized Score"] = (
 )
 
 # =========================================================
-# FINAL SORT
+# SORT RESULTS
 # =========================================================
 
 results = results.sort_values(
@@ -727,10 +728,14 @@ results = results.sort_values(
     ascending=False
 )
 
-results = results.head(top_n)
+# =========================================================
+# DISPLAY ONLY TOP N
+# =========================================================
+
+display_results = results.head(top_n)
 
 # =========================================================
-# DASHBOARD METRICS
+# METRICS
 # =========================================================
 
 col1, col2, col3, col4 = st.columns(4)
@@ -761,7 +766,7 @@ with col3:
 
         safe_round(
 
-            results["Final Score"].mean()
+            display_results["Final Score"].mean()
         )
     )
 
@@ -773,7 +778,7 @@ with col4:
 
         safe_round(
 
-            results["Risk Reward"].mean()
+            display_results["Risk Reward"].mean()
         )
     )
 
@@ -803,7 +808,7 @@ st.subheader(
 
 st.dataframe(
 
-    results,
+    display_results,
 
     use_container_width=True,
 
@@ -821,7 +826,7 @@ st.subheader(
 
 sector_leaders = (
 
-    results
+    display_results
 
     .groupby("Sector")
 
@@ -843,7 +848,7 @@ st.dataframe(
 
 fig = px.bar(
 
-    results,
+    display_results,
 
     x="Symbol",
 
@@ -874,7 +879,7 @@ st.plotly_chart(
 # RISK REWARD MATRIX
 # =========================================================
 
-scatter_data = results.copy()
+scatter_data = display_results.copy()
 
 scatter_data["Bubble"] = (
 
@@ -931,9 +936,9 @@ st.subheader(
     "🚀 Institutional Buy Candidates"
 )
 
-top_picks = results[
+top_picks = display_results[
 
-    results["Classification"]
+    display_results["Classification"]
 
     .isin([
 
