@@ -12,6 +12,10 @@ def process_symbol(symbol):
 
     try:
 
+        # =================================================
+        # PRICE DATA
+        # =================================================
+
         data = yf.download(
 
             symbol,
@@ -21,13 +25,17 @@ def process_symbol(symbol):
             progress=False,
 
             auto_adjust=True,
-            
+
             threads=False
         )
 
         if data.empty:
 
             return None
+
+        # =================================================
+        # CLOSE PRICES
+        # =================================================
 
         close = data["Close"]
 
@@ -46,11 +54,19 @@ def process_symbol(symbol):
 
             return None
 
+        # =================================================
+        # RETURNS
+        # =================================================
+
         returns = close.pct_change().dropna()
 
         if returns.empty:
 
             return None
+
+        # =================================================
+        # METRICS
+        # =================================================
 
         momentum = (
 
@@ -83,6 +99,10 @@ def process_symbol(symbol):
 
         ) - 1
 
+        # =================================================
+        # VOLUME
+        # =================================================
+
         volume = data["Volume"]
 
         if isinstance(volume, pd.DataFrame):
@@ -98,19 +118,103 @@ def process_symbol(symbol):
 
         avg_volume = volume.tail(20).mean()
 
-        score = (
-            momentum * 0.30
-            + sharpe * 0.30
-            + total_return * 0.20
-            - volatility * 0.10
-            + np.log1p(avg_volume) * 0.10
+        # =================================================
+        # FUNDAMENTAL DATA
+        # =================================================
+
+        ticker = yf.Ticker(symbol)
+
+        try:
+
+            info = ticker.info
+
+        except:
+
+            info = {}
+
+        market_cap = info.get(
+
+            "marketCap",
+
+            0
         )
+
+        sector = info.get(
+
+            "sector",
+
+            "OTHER"
+        )
+
+        industry = info.get(
+
+            "industry",
+
+            "OTHER"
+        )
+
+        current_price = info.get(
+
+            "currentPrice",
+
+            float(close.iloc[-1])
+        )
+
+        company_name = info.get(
+
+            "shortName",
+
+            symbol
+        )
+
+        # =================================================
+        # INSTITUTIONAL SCORE
+        # =================================================
+
+        score = (
+
+            momentum * 0.30
+
+            + sharpe * 0.30
+
+            + total_return * 0.20
+
+            - volatility * 0.10
+
+            + np.log1p(avg_volume) * 0.10
+
+            + np.log1p(max(market_cap, 1)) * 0.05
+        )
+
+        # =================================================
+        # FINAL OUTPUT
+        # =================================================
 
         return {
 
             "Symbol":
 
                 symbol,
+
+            "Company":
+
+                company_name,
+
+            "Sector":
+
+                sector,
+
+            "Industry":
+
+                industry,
+
+            "Current Price":
+
+                round(float(current_price), 2),
+
+            "Market Cap":
+
+                round(float(market_cap), 0),
 
             "Momentum":
 
@@ -137,7 +241,12 @@ def process_symbol(symbol):
                 round(float(score), 4)
         }
 
-    except:
+    except Exception as e:
+
+        print(
+
+            f"FAILED: {symbol} -> {e}"
+        )
 
         return None
 
@@ -172,7 +281,7 @@ class ParallelUniverseRanker:
             f"\nPROCESSING "
 
             f"{len(symbols)} STOCKS "
-            
+
             f"USING {self.n_jobs} CORES\n"
         )
 
@@ -189,6 +298,10 @@ class ParallelUniverseRanker:
             for symbol in symbols
         )
 
+        # =================================================
+        # CLEAN RESULTS
+        # =================================================
+
         results = [
 
             r for r in results
@@ -202,21 +315,69 @@ class ParallelUniverseRanker:
 
             return df
 
-        df["Institutional Score"] = pd.to_numeric(
+        # =================================================
+        # NUMERIC CLEANING
+        # =================================================
 
-            df["Institutional Score"],
+        numeric_cols = [
 
-            errors="coerce"
-        )
+            "Market Cap",
+
+            "Momentum",
+
+            "Volatility",
+
+            "Sharpe",
+
+            "Total Return",
+
+            "Avg Volume",
+
+            "Institutional Score"
+        ]
+
+        for col in numeric_cols:
+
+            df[col] = pd.to_numeric(
+
+                df[col],
+
+                errors="coerce"
+            )
+
+        # =================================================
+        # DROP BAD ROWS
+        # =================================================
 
         df = df.dropna(
 
-            subset=["Institutional Score"]
+            subset=[
+
+                "Institutional Score"
+            ]
         )
 
-        return df.sort_values(
+        # =================================================
+        # SORT
+        # =================================================
+
+        df = df.sort_values(
 
             by="Institutional Score",
 
             ascending=False
         )
+
+        df = df.reset_index(
+
+            drop=True
+        )
+
+        print(
+
+            f"\nSUCCESSFULLY RANKED "
+
+            f"{len(df)} STOCKS\n"
+        )
+
+        return df
