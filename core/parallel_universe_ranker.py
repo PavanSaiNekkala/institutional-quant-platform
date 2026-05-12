@@ -291,7 +291,7 @@ class ParallelUniverseRanker:
 
         self,
 
-        n_jobs=16
+        n_jobs=32
     ):
 
         self.n_jobs = n_jobs
@@ -326,7 +326,7 @@ class ParallelUniverseRanker:
 
             backend="threading",
 
-            batch_size=25
+            batch_size=50
 
         )(
 
