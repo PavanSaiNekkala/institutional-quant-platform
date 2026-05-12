@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL OPTIMIZED INSTITUTIONAL QUANT PLATFORM
+# FINAL INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -26,7 +26,6 @@ from core.live_regime import (
 )
 
 from core.sector_models import (
-
     detect_sector,
     sector_factor_score
 )
@@ -224,12 +223,6 @@ def safe_round(value, digits=4):
 
 def analyze_stock(symbol, regime):
 
-    # =====================================================
-    # SMALL THROTTLE
-    # =====================================================
-
-    time.sleep(0.02)
-
     try:
 
         ticker = yf.Ticker(symbol)
@@ -279,9 +272,7 @@ def analyze_stock(symbol, regime):
 
             progress=False,
 
-            threads=False,
-
-            timeout=8
+            threads=False
         )
 
         if data.empty:
@@ -550,6 +541,8 @@ processed_count = 0
 success_count = 0
 failed_count = 0
 
+failed_stocks = []
+
 # =========================================================
 # PROCESSING ENGINE
 # =========================================================
@@ -559,7 +552,7 @@ with st.spinner(
     "Running Institutional Quant Engine..."
 ):
 
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    with ThreadPoolExecutor(max_workers=6) as executor:
 
         futures = {
 
@@ -599,9 +592,13 @@ with st.spinner(
 
                     failed_count += 1
 
+                    failed_stocks.append(symbol)
+
             except Exception:
 
                 failed_count += 1
+
+                failed_stocks.append(symbol)
 
             # =================================================
             # PROGRESS
@@ -973,6 +970,47 @@ st.download_button(
 
     mime="text/csv"
 )
+
+# =========================================================
+# FAILED STOCKS
+# =========================================================
+
+st.markdown("---")
+
+st.subheader(
+
+    "❌ Failed Stock Downloads"
+)
+
+if len(failed_stocks) == 0:
+
+    st.success(
+
+        "No failed stock downloads."
+    )
+
+else:
+
+    failed_df = pd.DataFrame({
+
+        "Failed Symbols":
+
+            failed_stocks
+    })
+
+    st.dataframe(
+
+        failed_df,
+
+        use_container_width=True,
+
+        height=400
+    )
+
+    st.warning(
+
+        f"{len(failed_stocks)} stocks failed during processing."
+    )
 
 # =========================================================
 # FOOTER
