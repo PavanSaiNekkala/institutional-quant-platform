@@ -44,6 +44,37 @@ st.set_page_config(
 )
 
 # =========================================================
+# COMPACT SIDEBAR CSS
+# =========================================================
+
+st.markdown(
+
+    """
+    <style>
+
+    section[data-testid="stSidebar"] {
+
+        width: 220px !important;
+    }
+
+    section[data-testid="stSidebar"] > div {
+
+        width: 220px !important;
+    }
+
+    div[data-baseweb="slider"] {
+
+        padding-top: 0rem;
+        padding-bottom: 0rem;
+    }
+
+    </style>
+    """,
+
+    unsafe_allow_html=True
+)
+
+# =========================================================
 # TITLE
 # =========================================================
 
@@ -89,28 +120,6 @@ else:
 
         f"📊 Live Market Regime: {regime}"
     )
-
-# =========================================================
-# SIDEBAR
-# =========================================================
-
-st.sidebar.header(
-
-    "Institutional Controls"
-)
-
-top_n = st.sidebar.slider(
-
-    "Top Ranked Stocks",
-
-    min_value=10,
-
-    max_value=100,
-
-    value=50,
-
-    step=10
-)
 
 # =========================================================
 # LOAD FULL UNIVERSE
@@ -176,15 +185,35 @@ except Exception as e:
     st.stop()
 
 # =========================================================
-# SIDEBAR METRIC
+# COMPACT SIDEBAR
 # =========================================================
 
-st.sidebar.metric(
+with st.sidebar:
 
-    "Universe Loaded",
+    st.markdown(
 
-    f"{len(stocks):,}"
-)
+        "## ⚙️ Controls"
+    )
+
+    top_n = st.slider(
+
+        "Top Stocks",
+
+        min_value=10,
+
+        max_value=100,
+
+        value=50,
+
+        step=10
+    )
+
+    st.metric(
+
+        "Universe",
+
+        f"{len(stocks):,}"
+    )
 
 # =========================================================
 # SAFE ROUND
