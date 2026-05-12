@@ -3,7 +3,7 @@ import numpy as np
 import yfinance as yf
 
 # =========================================================
-# FAST BATCH UNIVERSE RANKER
+# ULTRA FAST INSTITUTIONAL UNIVERSE RANKER
 # =========================================================
 
 class ParallelUniverseRanker:
@@ -12,7 +12,7 @@ class ParallelUniverseRanker:
 
         self,
 
-        batch_size=100
+        batch_size=25
     ):
 
         self.batch_size = batch_size
@@ -29,6 +29,10 @@ class ParallelUniverseRanker:
     ):
 
         try:
+
+            # =============================================
+            # FAST BATCH DOWNLOAD
+            # =============================================
 
             data = yf.download(
 
@@ -47,6 +51,10 @@ class ParallelUniverseRanker:
 
             results = []
 
+            # =============================================
+            # PROCESS EACH STOCK
+            # =============================================
+
             for symbol in batch_symbols:
 
                 try:
@@ -61,15 +69,27 @@ class ParallelUniverseRanker:
 
                     volume = stock["Volume"].dropna()
 
+                    # =====================================
+                    # MINIMUM HISTORY CHECK
+                    # =====================================
+
                     if len(close) < 40:
 
                         continue
+
+                    # =====================================
+                    # RETURNS
+                    # =====================================
 
                     returns = close.pct_change().dropna()
 
                     if returns.empty:
 
                         continue
+
+                    # =====================================
+                    # QUANT METRICS
+                    # =====================================
 
                     momentum = (
 
@@ -107,33 +127,9 @@ class ParallelUniverseRanker:
                         volume.tail(20).mean()
                     )
 
-                    # =====================================
-                    # FAST MARKET CAP
-                    # =====================================
+                    current_price = float(
 
-                    try:
-
-                        fast_info = yf.Ticker(
-
-                            symbol
-                        ).fast_info
-
-                    except:
-
-                        fast_info = {}
-
-                    market_cap = fast_info.get(
-
-                        "market_cap",
-
-                        0
-                    )
-
-                    current_price = fast_info.get(
-
-                        "last_price",
-
-                        float(close.iloc[-1])
+                        close.iloc[-1]
                     )
 
                     # =====================================
@@ -142,7 +138,7 @@ class ParallelUniverseRanker:
 
                     score = (
 
-                        momentum * 0.30
+                        momentum * 0.35
 
                         + sharpe * 0.30
 
@@ -150,12 +146,12 @@ class ParallelUniverseRanker:
 
                         - volatility * 0.10
 
-                        + np.log1p(avg_volume) * 0.10
-
-                        + np.log1p(
-                            max(market_cap, 1)
-                        ) * 0.05
+                        + np.log1p(avg_volume) * 0.05
                     )
+
+                    # =====================================
+                    # OUTPUT
+                    # =====================================
 
                     results.append({
 
@@ -170,16 +166,13 @@ class ParallelUniverseRanker:
                         "Current Price":
 
                             round(
-                                float(current_price),
+                                current_price,
                                 2
                             ),
 
                         "Market Cap":
 
-                            round(
-                                float(market_cap),
-                                0
-                            ),
+                            0,
 
                         "Momentum":
 
@@ -230,7 +223,12 @@ class ParallelUniverseRanker:
 
             return results
 
-        except:
+        except Exception as e:
+
+            print(
+
+                f"BATCH FAILED -> {e}"
+            )
 
             return []
 
@@ -254,6 +252,13 @@ class ParallelUniverseRanker:
 
         all_results = []
 
+        total_batches = (
+
+            len(symbols)
+
+            // self.batch_size
+        ) + 1
+
         # =================================================
         # BATCH LOOP
         # =================================================
@@ -267,6 +272,11 @@ class ParallelUniverseRanker:
             self.batch_size
         ):
 
+            batch_number = (
+
+                i // self.batch_size
+            ) + 1
+
             batch = symbols[
                 i:i + self.batch_size
             ]
@@ -275,7 +285,9 @@ class ParallelUniverseRanker:
 
                 f"PROCESSING BATCH "
 
-                f"{i // self.batch_size + 1}"
+                f"{batch_number}/"
+
+                f"{total_batches}"
             )
 
             batch_results = self.process_batch(
@@ -289,7 +301,7 @@ class ParallelUniverseRanker:
             )
 
         # =================================================
-        # DATAFRAME
+        # CREATE DATAFRAME
         # =================================================
 
         df = pd.DataFrame(
@@ -302,7 +314,7 @@ class ParallelUniverseRanker:
             return df
 
         # =================================================
-        # CLEAN NUMERICS
+        # CLEAN NUMERIC COLUMNS
         # =================================================
 
         numeric_cols = [
@@ -333,6 +345,10 @@ class ParallelUniverseRanker:
                 errors="coerce"
             )
 
+        # =================================================
+        # REMOVE BAD ROWS
+        # =================================================
+
         df = df.dropna(
 
             subset=[
@@ -342,7 +358,7 @@ class ParallelUniverseRanker:
         )
 
         # =================================================
-        # SORT
+        # SORT RANKINGS
         # =================================================
 
         df = df.sort_values(
