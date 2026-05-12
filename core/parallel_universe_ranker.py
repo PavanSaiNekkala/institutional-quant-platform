@@ -2,8 +2,287 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 
+from joblib import Parallel, delayed
+
 # =========================================================
-# ULTRA FAST INSTITUTIONAL UNIVERSE RANKER
+# FAILED STOCK TRACKER
+# =========================================================
+
+FAILED_STOCKS = []
+
+# =========================================================
+# SAFE ROUND
+# =========================================================
+
+def safe_round(value, digits=2):
+
+    try:
+
+        if value is None:
+
+            return 0
+
+        if pd.isna(value):
+
+            return 0
+
+        if np.isinf(value):
+
+            return 0
+
+        return round(float(value), digits)
+
+    except Exception:
+
+        return 0
+
+# =========================================================
+# PROCESS SINGLE STOCK
+# =========================================================
+
+def process_symbol(symbol):
+
+    try:
+
+        ticker = yf.Ticker(symbol)
+
+        # =================================================
+        # FETCH HISTORICAL DATA
+        # =================================================
+
+        data = ticker.history(
+
+            period="3mo",
+
+            auto_adjust=True
+        )
+
+        # =================================================
+        # EMPTY DATA
+        # =================================================
+
+        if data.empty:
+
+            FAILED_STOCKS.append({
+
+                "Symbol": symbol,
+
+                "Failure Reason":
+
+                    "No historical data returned"
+            })
+
+            return None
+
+        # =================================================
+        # CLOSE PRICE
+        # =================================================
+
+        close = data["Close"]
+
+        if isinstance(close, pd.DataFrame):
+
+            close = close.iloc[:, 0]
+
+        close = pd.to_numeric(
+
+            close,
+
+            errors="coerce"
+        ).dropna()
+
+        # =================================================
+        # INSUFFICIENT DATA
+        # =================================================
+
+        if len(close) < 40:
+
+            FAILED_STOCKS.append({
+
+                "Symbol": symbol,
+
+                "Failure Reason":
+
+                    "Insufficient price candles"
+            })
+
+            return None
+
+        # =================================================
+        # RETURNS
+        # =================================================
+
+        returns = close.pct_change().dropna()
+
+        if returns.empty:
+
+            FAILED_STOCKS.append({
+
+                "Symbol": symbol,
+
+                "Failure Reason":
+
+                    "Returns calculation failed"
+            })
+
+            return None
+
+        # =================================================
+        # FACTORS
+        # =================================================
+
+        momentum = (
+
+            close.iloc[-1]
+
+            / close.iloc[-20]
+
+        ) - 1
+
+        volatility = (
+
+            returns.std()
+
+            * np.sqrt(252)
+        )
+
+        sharpe = 0
+
+        if returns.std() != 0:
+
+            sharpe = (
+
+                returns.mean()
+
+                / returns.std()
+
+            ) * np.sqrt(252)
+
+        total_return = (
+
+            close.iloc[-1]
+
+            / close.iloc[0]
+
+        ) - 1
+
+        # =================================================
+        # VOLUME
+        # =================================================
+
+        volume = data["Volume"]
+
+        if isinstance(volume, pd.DataFrame):
+
+            volume = volume.iloc[:, 0]
+
+        volume = pd.to_numeric(
+
+            volume,
+
+            errors="coerce"
+        ).dropna()
+
+        avg_volume = volume.tail(20).mean()
+
+        # =================================================
+        # MARKET CAP
+        # =================================================
+
+        market_cap = 0
+
+        try:
+
+            info = ticker.info
+
+            market_cap = info.get(
+
+                "marketCap",
+
+                0
+            )
+
+            if market_cap is None:
+
+                market_cap = 0
+
+        except Exception:
+
+            market_cap = 0
+
+        # =================================================
+        # INSTITUTIONAL SCORE
+        # =================================================
+
+        score = (
+            momentum * 0.30
+            + sharpe * 0.30
+            + total_return * 0.20
+            - volatility * 0.10
+            + np.log1p(avg_volume) * 0.10
+        )
+
+        # =================================================
+        # OUTPUT
+        # =================================================
+
+        return {
+
+            "Symbol":
+
+                symbol,
+
+            "Momentum":
+
+                safe_round(momentum, 4),
+
+            "Volatility":
+
+                safe_round(volatility, 4),
+
+            "Sharpe":
+
+                safe_round(sharpe, 4),
+
+            "Total Return":
+
+                safe_round(total_return, 4),
+
+            "Avg Volume":
+
+                safe_round(avg_volume, 0),
+
+            "Market Cap (Cr)":
+
+                safe_round(
+                    market_cap / 10000000,
+                    2
+                ),
+
+            "Institutional Score":
+
+                safe_round(score, 4)
+        }
+
+    # =====================================================
+    # EXCEPTION HANDLER
+    # =====================================================
+
+    except Exception as e:
+
+        FAILED_STOCKS.append({
+
+            "Symbol": symbol,
+
+            "Failure Reason":
+
+                str(e)
+        })
+
+        return None
+
+# =========================================================
+# PARALLEL RANKER
 # =========================================================
 
 class ParallelUniverseRanker:
@@ -12,225 +291,10 @@ class ParallelUniverseRanker:
 
         self,
 
-        batch_size=25
+        n_jobs=16
     ):
 
-        self.batch_size = batch_size
-
-    # =====================================================
-    # PROCESS BATCH
-    # =====================================================
-
-    def process_batch(
-
-        self,
-
-        batch_symbols
-    ):
-
-        try:
-
-            # =============================================
-            # FAST BATCH DOWNLOAD
-            # =============================================
-
-            data = yf.download(
-
-                batch_symbols,
-
-                period="3mo",
-
-                auto_adjust=True,
-
-                progress=False,
-
-                group_by="ticker",
-
-                threads=True
-            )
-
-            results = []
-
-            # =============================================
-            # PROCESS EACH STOCK
-            # =============================================
-
-            for symbol in batch_symbols:
-
-                try:
-
-                    if symbol not in data:
-
-                        continue
-
-                    stock = data[symbol]
-
-                    close = stock["Close"].dropna()
-
-                    volume = stock["Volume"].dropna()
-
-                    # =====================================
-                    # MINIMUM HISTORY CHECK
-                    # =====================================
-
-                    if len(close) < 40:
-
-                        continue
-
-                    # =====================================
-                    # RETURNS
-                    # =====================================
-
-                    returns = close.pct_change().dropna()
-
-                    if returns.empty:
-
-                        continue
-
-                    # =====================================
-                    # QUANT METRICS
-                    # =====================================
-
-                    momentum = (
-
-                        close.iloc[-1]
-
-                        / close.iloc[-20]
-
-                    ) - 1
-
-                    volatility = (
-
-                        returns.std()
-
-                        * np.sqrt(252)
-                    )
-
-                    sharpe = (
-
-                        returns.mean()
-
-                        / returns.std()
-
-                    ) * np.sqrt(252)
-
-                    total_return = (
-
-                        close.iloc[-1]
-
-                        / close.iloc[0]
-
-                    ) - 1
-
-                    avg_volume = (
-
-                        volume.tail(20).mean()
-                    )
-
-                    current_price = float(
-
-                        close.iloc[-1]
-                    )
-
-                    # =====================================
-                    # INSTITUTIONAL SCORE
-                    # =====================================
-
-                    score = (
-
-                        momentum * 0.35
-
-                        + sharpe * 0.30
-
-                        + total_return * 0.20
-
-                        - volatility * 0.10
-
-                        + np.log1p(avg_volume) * 0.05
-                    )
-
-                    # =====================================
-                    # OUTPUT
-                    # =====================================
-
-                    results.append({
-
-                        "Symbol":
-
-                            symbol,
-
-                        "Sector":
-
-                            "OTHER",
-
-                        "Current Price":
-
-                            round(
-                                current_price,
-                                2
-                            ),
-
-                        "Market Cap":
-
-                            0,
-
-                        "Momentum":
-
-                            round(
-                                float(momentum),
-                                4
-                            ),
-
-                        "Volatility":
-
-                            round(
-                                float(volatility),
-                                4
-                            ),
-
-                        "Sharpe":
-
-                            round(
-                                float(sharpe),
-                                4
-                            ),
-
-                        "Total Return":
-
-                            round(
-                                float(total_return),
-                                4
-                            ),
-
-                        "Avg Volume":
-
-                            round(
-                                float(avg_volume),
-                                0
-                            ),
-
-                        "Institutional Score":
-
-                            round(
-                                float(score),
-                                4
-                            )
-                    })
-
-                except:
-
-                    continue
-
-            return results
-
-        except Exception as e:
-
-            print(
-
-                f"BATCH FAILED -> {e}"
-            )
-
-            return []
+        self.n_jobs = n_jobs
 
     # =====================================================
     # RANK UNIVERSE
@@ -243,122 +307,69 @@ class ParallelUniverseRanker:
         symbols
     ):
 
+        global FAILED_STOCKS
+
+        FAILED_STOCKS = []
+
         print(
 
             f"\nPROCESSING "
 
-            f"{len(symbols)} STOCKS\n"
+            f"{len(symbols)} STOCKS "
+
+            f"USING {self.n_jobs} WORKERS\n"
         )
 
-        all_results = []
+        results = Parallel(
 
-        total_batches = (
+            n_jobs=self.n_jobs,
 
-            len(symbols)
+            backend="threading",
 
-            // self.batch_size
-        ) + 1
+            batch_size=25
 
-        # =================================================
-        # BATCH LOOP
-        # =================================================
+        )(
 
-        for i in range(
+            delayed(process_symbol)(symbol)
 
-            0,
-
-            len(symbols),
-
-            self.batch_size
-        ):
-
-            batch_number = (
-
-                i // self.batch_size
-            ) + 1
-
-            batch = symbols[
-                i:i + self.batch_size
-            ]
-
-            print(
-
-                f"PROCESSING BATCH "
-
-                f"{batch_number}/"
-
-                f"{total_batches}"
-            )
-
-            batch_results = self.process_batch(
-
-                batch
-            )
-
-            all_results.extend(
-
-                batch_results
-            )
-
-        # =================================================
-        # CREATE DATAFRAME
-        # =================================================
-
-        df = pd.DataFrame(
-
-            all_results
+            for symbol in symbols
         )
+
+        # =================================================
+        # CLEAN RESULTS
+        # =================================================
+
+        results = [
+
+            r for r in results
+
+            if r is not None
+        ]
+
+        df = pd.DataFrame(results)
 
         if df.empty:
 
             return df
 
         # =================================================
-        # CLEAN NUMERIC COLUMNS
+        # CLEAN SCORE
         # =================================================
 
-        numeric_cols = [
+        df["Institutional Score"] = pd.to_numeric(
 
-            "Current Price",
+            df["Institutional Score"],
 
-            "Market Cap",
-
-            "Momentum",
-
-            "Volatility",
-
-            "Sharpe",
-
-            "Total Return",
-
-            "Avg Volume",
-
-            "Institutional Score"
-        ]
-
-        for col in numeric_cols:
-
-            df[col] = pd.to_numeric(
-
-                df[col],
-
-                errors="coerce"
-            )
-
-        # =================================================
-        # REMOVE BAD ROWS
-        # =================================================
+            errors="coerce"
+        )
 
         df = df.dropna(
 
-            subset=[
-
-                "Institutional Score"
-            ]
+            subset=["Institutional Score"]
         )
 
         # =================================================
-        # SORT RANKINGS
+        # SORT
         # =================================================
 
         df = df.sort_values(
@@ -368,16 +379,28 @@ class ParallelUniverseRanker:
             ascending=False
         )
 
-        df = df.reset_index(
+        # =================================================
+        # SAVE FAILED STOCKS
+        # =================================================
 
-            drop=True
+        failed_df = pd.DataFrame(
+
+            FAILED_STOCKS
         )
 
-        print(
+        if not failed_df.empty:
 
-            f"\nSUCCESSFULLY RANKED "
+            failed_df.to_excel(
 
-            f"{len(df)} STOCKS\n"
-        )
+                "failed_stocks.xlsx",
 
-        return df
+                index=False
+            )
+
+            print(
+
+                "\nFAILED STOCKS SAVED "
+                "TO failed_stocks.xlsx\n"
+            )
+
+        return df.reset_index(drop=True)
