@@ -13,7 +13,7 @@ def process_symbol(symbol):
     try:
 
         # =================================================
-        # PRICE DATA
+        # DOWNLOAD PRICE DATA
         # =================================================
 
         data = yf.download(
@@ -65,7 +65,7 @@ def process_symbol(symbol):
             return None
 
         # =================================================
-        # METRICS
+        # PERFORMANCE METRICS
         # =================================================
 
         momentum = (
@@ -119,53 +119,42 @@ def process_symbol(symbol):
         avg_volume = volume.tail(20).mean()
 
         # =================================================
-        # FUNDAMENTAL DATA
+        # FAST FUNDAMENTAL DATA
         # =================================================
 
         ticker = yf.Ticker(symbol)
 
         try:
 
-            info = ticker.info
+            fast_info = ticker.fast_info
 
         except:
 
-            info = {}
+            fast_info = {}
 
-        market_cap = info.get(
+        market_cap = fast_info.get(
 
-            "marketCap",
+            "market_cap",
 
             0
         )
 
-        sector = info.get(
+        current_price = fast_info.get(
 
-            "sector",
-
-            "OTHER"
-        )
-
-        industry = info.get(
-
-            "industry",
-
-            "OTHER"
-        )
-
-        current_price = info.get(
-
-            "currentPrice",
+            "last_price",
 
             float(close.iloc[-1])
         )
 
-        company_name = info.get(
+        # =================================================
+        # OPTIONAL PLACEHOLDERS
+        # =================================================
 
-            "shortName",
+        sector = "OTHER"
 
-            symbol
-        )
+        industry = "OTHER"
+
+        company_name = symbol
 
         # =================================================
         # INSTITUTIONAL SCORE
@@ -260,7 +249,7 @@ class ParallelUniverseRanker:
 
         self,
 
-        n_jobs=8
+        n_jobs=-1
     ):
 
         self.n_jobs = n_jobs
@@ -285,11 +274,15 @@ class ParallelUniverseRanker:
             f"USING {self.n_jobs} CORES\n"
         )
 
+        # =================================================
+        # PARALLEL EXECUTION
+        # =================================================
+
         results = Parallel(
 
             n_jobs=self.n_jobs,
 
-            backend="threading"
+            backend="loky"
 
         )(
 
@@ -322,6 +315,8 @@ class ParallelUniverseRanker:
         numeric_cols = [
 
             "Market Cap",
+
+            "Current Price",
 
             "Momentum",
 
