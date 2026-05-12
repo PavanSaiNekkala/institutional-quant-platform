@@ -13,7 +13,7 @@ def process_symbol(symbol):
     try:
 
         # =================================================
-        # DOWNLOAD PRICE DATA
+        # DOWNLOAD MARKET DATA
         # =================================================
 
         data = yf.download(
@@ -65,7 +65,7 @@ def process_symbol(symbol):
             return None
 
         # =================================================
-        # PERFORMANCE METRICS
+        # QUANT METRICS
         # =================================================
 
         momentum = (
@@ -119,7 +119,7 @@ def process_symbol(symbol):
         avg_volume = volume.tail(20).mean()
 
         # =================================================
-        # FAST FUNDAMENTAL DATA
+        # FAST FUNDAMENTALS
         # =================================================
 
         ticker = yf.Ticker(symbol)
@@ -147,7 +147,7 @@ def process_symbol(symbol):
         )
 
         # =================================================
-        # OPTIONAL PLACEHOLDERS
+        # PLACEHOLDER META
         # =================================================
 
         sector = "OTHER"
@@ -240,7 +240,7 @@ def process_symbol(symbol):
         return None
 
 # =========================================================
-# PARALLEL RANKER
+# PARALLEL UNIVERSE RANKER
 # =========================================================
 
 class ParallelUniverseRanker:
@@ -249,7 +249,7 @@ class ParallelUniverseRanker:
 
         self,
 
-        n_jobs=-1
+        n_jobs=32
     ):
 
         self.n_jobs = n_jobs
@@ -271,7 +271,7 @@ class ParallelUniverseRanker:
 
             f"{len(symbols)} STOCKS "
 
-            f"USING {self.n_jobs} CORES\n"
+            f"USING {self.n_jobs} WORKERS\n"
         )
 
         # =================================================
@@ -282,7 +282,7 @@ class ParallelUniverseRanker:
 
             n_jobs=self.n_jobs,
 
-            backend="loky"
+            backend="threading"
 
         )(
 
@@ -292,7 +292,7 @@ class ParallelUniverseRanker:
         )
 
         # =================================================
-        # CLEAN RESULTS
+        # FILTER VALID RESULTS
         # =================================================
 
         results = [
@@ -341,7 +341,7 @@ class ParallelUniverseRanker:
             )
 
         # =================================================
-        # DROP BAD ROWS
+        # REMOVE BAD ROWS
         # =================================================
 
         df = df.dropna(
@@ -353,7 +353,7 @@ class ParallelUniverseRanker:
         )
 
         # =================================================
-        # SORT
+        # SORT RANKINGS
         # =================================================
 
         df = df.sort_values(
