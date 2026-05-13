@@ -15,7 +15,6 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-import plotly.graph_objects as go
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -92,6 +91,7 @@ st.markdown(
     }
 
     .metric-card {
+
         background: linear-gradient(
             135deg,
             rgba(17,24,39,0.95),
@@ -130,6 +130,7 @@ st.markdown(
     }
 
     .market-card {
+
         background: linear-gradient(
             135deg,
             rgba(30,41,59,0.95),
@@ -142,6 +143,7 @@ st.markdown(
     }
 
     .processing-card {
+
         background: linear-gradient(
             135deg,
             rgba(10,25,47,0.95),
@@ -212,6 +214,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=1800)
 def cached_regime():
+
     return detect_market_regime()
 
 regime = cached_regime()
@@ -321,8 +324,6 @@ def analyze_stock(symbol, regime):
 
     try:
 
-        ticker = yf.Ticker(symbol)
-
         data = yf.download(
             symbol,
             period="3mo",
@@ -425,15 +426,19 @@ def analyze_stock(symbol, regime):
         )
 
         if final_score >= 1.20:
+
             classification = "STRONG_BUY"
 
         elif final_score >= 0.80:
+
             classification = "BUY"
 
         elif final_score >= 0.50:
+
             classification = "WATCH"
 
         else:
+
             classification = "AVOID"
 
         return {
@@ -450,6 +455,7 @@ def analyze_stock(symbol, regime):
         }
 
     except:
+
         return None
 
 # =========================================================
@@ -752,26 +758,115 @@ st.plotly_chart(
 # RISK REWARD MATRIX
 # =========================================================
 
+scatter_df = results.head(100).copy()
+
+scatter_df["Bubble Size"] = (
+    scatter_df["Momentum"]
+    .abs()
+    .fillna(0)
+)
+
+scatter_df["Bubble Size"] = (
+    scatter_df["Bubble Size"] * 2
+) + 10
+
 scatter = px.scatter(
-    results.head(100),
+
+    scatter_df,
+
     x="Risk Reward",
+
     y="Final Score",
+
     color="Classification",
-    size="Momentum",
+
+    size="Bubble Size",
+
     hover_name="Symbol",
+
+    hover_data=[
+        "Sector",
+        "Momentum",
+        "Sharpe",
+        "Volatility"
+    ],
+
     title="Institutional Risk Reward Matrix",
+
     template="plotly_dark"
 )
 
 scatter.update_layout(
-    height=700,
+
+    height=750,
+
     paper_bgcolor="#050816",
+
     plot_bgcolor="#050816",
-    font=dict(color="white")
+
+    font=dict(
+        color="white",
+        size=14
+    ),
+
+    title=dict(
+        x=0.02,
+        font=dict(
+            size=24
+        )
+    ),
+
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1
+    ),
+
+    margin=dict(
+        l=20,
+        r=20,
+        t=80,
+        b=20
+    )
+)
+
+scatter.update_traces(
+
+    marker=dict(
+
+        opacity=0.82,
+
+        line=dict(
+            width=1.5,
+            color="white"
+        )
+    )
+)
+
+scatter.update_xaxes(
+
+    showgrid=True,
+
+    gridcolor="rgba(255,255,255,0.08)",
+
+    zeroline=False
+)
+
+scatter.update_yaxes(
+
+    showgrid=True,
+
+    gridcolor="rgba(255,255,255,0.08)",
+
+    zeroline=False
 )
 
 st.plotly_chart(
+
     scatter,
+
     use_container_width=True
 )
 
