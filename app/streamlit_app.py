@@ -1,7 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
 # INSTITUTIONAL QUANT PLATFORM
-# EXECUTIVE POWERBI STYLE DASHBOARD
 # =========================================================
 
 import sys
@@ -48,11 +47,8 @@ GLOBAL
 ===================================================== */
 
 .stApp {
-
     background-color: #F3F4F6;
-
     color: #111827;
-
     font-family: "Segoe UI", sans-serif;
 }
 
@@ -61,11 +57,8 @@ CONTAINER
 ===================================================== */
 
 .block-container {
-
     padding-top: 1rem;
-
     padding-bottom: 2rem;
-
     max-width: 96%;
 }
 
@@ -74,23 +67,17 @@ SIDEBAR
 ===================================================== */
 
 section[data-testid="stSidebar"] {
-
     background: #111827;
-
     border-right: 1px solid #1F2937;
-
     width: 320px !important;
 }
 
 section[data-testid="stSidebar"] > div {
-
     width: 320px !important;
-
     padding-top: 1rem;
 }
 
 section[data-testid="stSidebar"] * {
-
     color: #F9FAFB !important;
 }
 
@@ -99,11 +86,8 @@ LABELS
 ===================================================== */
 
 label {
-
     color: #E5E7EB !important;
-
     font-size: 15px !important;
-
     font-weight: 600 !important;
 }
 
@@ -112,15 +96,10 @@ SELECT
 ===================================================== */
 
 div[data-baseweb="select"] > div {
-
     background-color: #1F2937 !important;
-
     border: 1px solid #374151 !important;
-
     border-radius: 10px !important;
-
     min-height: 48px !important;
-
     color: white !important;
 }
 
@@ -129,33 +108,22 @@ TEXT INPUT
 ===================================================== */
 
 div[data-baseweb="base-input"] > div {
-
     background-color: #FFFFFF !important;
-
     border: 2px solid #2563EB !important;
-
     border-radius: 12px !important;
-
     min-height: 50px !important;
 }
 
 input[type="text"] {
-
     color: #111827 !important;
-
     -webkit-text-fill-color: #111827 !important;
-
     font-weight: 700 !important;
-
     font-size: 16px !important;
-
     background-color: white !important;
 }
 
 input[type="text"]::placeholder {
-
     color: #6B7280 !important;
-
     opacity: 1 !important;
 }
 
@@ -164,20 +132,14 @@ TITLE
 ===================================================== */
 
 .main-title {
-
     font-size: 48px;
-
     font-weight: 800;
-
     color: #111827;
-
     margin-bottom: -10px;
 }
 
 .subtitle {
-
     font-size: 18px;
-
     color: #6B7280;
 }
 
@@ -186,17 +148,11 @@ STATUS CARD
 ===================================================== */
 
 .status-card {
-
     background: white;
-
     border-radius: 18px;
-
     padding: 1.5rem;
-
     border-left: 6px solid #10B981;
-
-    box-shadow:
-        0 2px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 /* =====================================================
@@ -204,16 +160,10 @@ CHARTS
 ===================================================== */
 
 .element-container:has(.js-plotly-plot) {
-
     background: white;
-
     border-radius: 18px;
-
     padding: 1rem;
-
-    box-shadow:
-        0 2px 12px rgba(0,0,0,0.08);
-
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     margin-bottom: 1rem;
 }
 
@@ -250,7 +200,6 @@ st.markdown("---")
 
 @st.cache_data(ttl=1800)
 def cached_regime():
-
     return detect_market_regime()
 
 regime = cached_regime()
@@ -260,7 +209,6 @@ regime = cached_regime()
 # =========================================================
 
 signal_colors = {
-
     "STRONG_BUY": "#006400",
     "BUY": "#32CD32",
     "WATCH": "#FF8C00",
@@ -333,9 +281,7 @@ with st.sidebar:
         if search_stock:
 
             matching_stocks = [
-
                 s for s in stocks
-
                 if search_stock.upper() in s.upper()
             ][:15]
 
@@ -396,7 +342,6 @@ def safe_round(value, digits=2):
         return round(float(value), digits)
 
     except:
-
         return 0
 
 # =========================================================
@@ -461,7 +406,6 @@ def analyze_stock(symbol, close_data, regime):
         )
 
         if pd.isna(recent_volatility):
-
             recent_volatility = 0.02
 
         stop_loss = cmp * (
@@ -494,23 +438,18 @@ def analyze_stock(symbol, close_data, regime):
         )
 
         if final_score >= 1.20:
-
             classification = "STRONG_BUY"
 
         elif final_score >= 0.80:
-
             classification = "BUY"
 
         elif final_score >= 0.50:
-
             classification = "WATCH"
 
         else:
-
             classification = "AVOID"
 
         return {
-
             "Symbol": symbol,
             "Sector": sector,
             "CMP": safe_round(cmp),
@@ -523,7 +462,6 @@ def analyze_stock(symbol, close_data, regime):
         }
 
     except:
-
         return None
 
 # =========================================================
@@ -545,17 +483,9 @@ def run_analysis(stock_list, regime):
 
     start_time = datetime.now(india_tz)
 
-    # =====================================================
-    # BATCH CONFIG
-    # =====================================================
-
     batch_size = 75
 
     completed = 0
-
-    # =====================================================
-    # PROCESS BATCHES
-    # =====================================================
 
     for batch_start in range(0, total, batch_size):
 
@@ -563,124 +493,15 @@ def run_analysis(stock_list, regime):
             batch_start: batch_start + batch_size
         ]
 
-        # =================================================
-        # STATUS
-        # =================================================
-
-        status_box.markdown(
-    f"""
-    <div style="
-        background:white;
-        border-radius:18px;
-        padding:18px;
-        border-left:6px solid #10B981;
-        box-shadow:0 2px 12px rgba(0,0,0,0.08);
-        height:260px;
-        overflow:hidden;
-    ">
-
-    <h3 style="
-        margin-top:0;
-        margin-bottom:12px;
-        color:#111827;
-    ">
-    📊 Institutional Processing Engine
-    </h3>
-
-    <hr style="margin:8px 0 14px 0;">
-
-    <div style="
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:14px;
-        font-size:17px;
-        font-weight:600;
-        color:#374151;
-    ">
-
-        <div>
-        ✅ Completed<br>
-        <span style="
-            font-size:26px;
-            color:#10B981;
-            font-weight:800;
-        ">
-        {completed}/{total}
-        </span>
-        </div>
-
-        <div>
-        ❌ Failed<br>
-        <span style="
-            font-size:26px;
-            color:#DC2626;
-            font-weight:800;
-        ">
-        {len(set(failed_stocks))}
-        </span>
-        </div>
-
-        <div>
-        🌐 Universe<br>
-        <span style="
-            font-size:24px;
-            color:#2563EB;
-            font-weight:800;
-        ">
-        {total}
-        </span>
-        </div>
-
-        <div>
-        ⏳ Remaining<br>
-        <span style="
-            font-size:24px;
-            color:#F59E0B;
-            font-weight:800;
-        ">
-        {remaining_minutes}m
-        </span>
-        </div>
-
-    </div>
-
-    <div style="
-        margin-top:16px;
-        padding:12px;
-        border-radius:12px;
-        background:#F3F4F6;
-        font-size:15px;
-        font-weight:600;
-        color:#111827;
-    ">
-    🔍 Current Stock:
-    {symbol}
-    </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-        # =================================================
-        # DOWNLOAD BATCH
-        # =================================================
-
         try:
 
             data = yf.download(
-
                 tickers=batch,
-
                 period="3mo",
-
                 interval="1d",
-
                 auto_adjust=True,
-
                 progress=False,
-
                 threads=False,
-
                 group_by="ticker"
             )
 
@@ -689,10 +510,6 @@ def run_analysis(stock_list, regime):
             failed_stocks.extend(batch)
 
             continue
-
-        # =================================================
-        # BUILD CLOSE MATRIX
-        # =================================================
 
         close_data = pd.DataFrame()
 
@@ -711,10 +528,6 @@ def run_analysis(stock_list, regime):
             except:
 
                 failed_stocks.append(symbol)
-
-        # =================================================
-        # ANALYZE
-        # =================================================
 
         for symbol in batch:
 
@@ -773,38 +586,98 @@ def run_analysis(stock_list, regime):
 
                 status_box.markdown(
                     f"""
-                    <div class="status-card">
+                    <div style="
+                        background:white;
+                        border-radius:18px;
+                        padding:18px;
+                        border-left:6px solid #10B981;
+                        box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                        height:260px;
+                        overflow:hidden;
+                    ">
 
-                    <h4>📊 Institutional Processing Engine</h4>
+                    <h3 style="
+                        margin-top:0;
+                        margin-bottom:12px;
+                        color:#111827;
+                    ">
+                    📊 Institutional Processing Engine
+                    </h3>
 
-                    <hr>
+                    <hr style="margin:8px 0 14px 0;">
 
-                    ✅ Completed Stocks:
-                    {completed}/{total}<br><br>
+                    <div style="
+                        display:grid;
+                        grid-template-columns:1fr 1fr;
+                        gap:14px;
+                        font-size:17px;
+                        font-weight:600;
+                        color:#374151;
+                    ">
 
-                    ❌ Failed Stocks:
-                    {len(set(failed_stocks))}<br><br>
+                        <div>
+                        ✅ Completed<br>
+                        <span style="
+                            font-size:26px;
+                            color:#10B981;
+                            font-weight:800;
+                        ">
+                        {completed}/{total}
+                        </span>
+                        </div>
 
-                    🌐 Stock Universe:
-                    {total}<br><br>
+                        <div>
+                        ❌ Failed<br>
+                        <span style="
+                            font-size:26px;
+                            color:#DC2626;
+                            font-weight:800;
+                        ">
+                        {len(set(failed_stocks))}
+                        </span>
+                        </div>
 
-                    📦 Batch Size:
-                    {batch_size}<br><br>
+                        <div>
+                        🌐 Universe<br>
+                        <span style="
+                            font-size:24px;
+                            color:#2563EB;
+                            font-weight:800;
+                        ">
+                        {total}
+                        </span>
+                        </div>
 
-                    ⏳ Remaining Time:
-                    {remaining_minutes} min<br><br>
+                        <div>
+                        ⏳ Remaining<br>
+                        <span style="
+                            font-size:24px;
+                            color:#F59E0B;
+                            font-weight:800;
+                        ">
+                        {remaining_minutes}m
+                        </span>
+                        </div>
 
+                    </div>
+
+                    <div style="
+                        margin-top:16px;
+                        padding:12px;
+                        border-radius:12px;
+                        background:#F3F4F6;
+                        font-size:15px;
+                        font-weight:600;
+                        color:#111827;
+                    ">
                     🔍 Current Stock:
                     {symbol}
+                    </div>
 
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
-
-        # =================================================
-        # COOL DOWN
-        # =================================================
 
         time.sleep(1)
 
@@ -873,7 +746,6 @@ if failed_stocks:
     ):
 
         failed_df = pd.DataFrame({
-
             "Failed Stocks": failed_stocks
         })
 
@@ -890,14 +762,9 @@ if failed_stocks:
 k1, k2, k3, k4 = st.columns(4)
 
 with k1:
-
-    st.metric(
-        "Universe Size",
-        len(results)
-    )
+    st.metric("Universe Size", len(results))
 
 with k2:
-
     st.metric(
         "Avg Institutional Score",
         safe_round(
@@ -906,7 +773,6 @@ with k2:
     )
 
 with k3:
-
     st.metric(
         "Strong Buy Opportunities",
         len(
@@ -918,7 +784,6 @@ with k3:
     )
 
 with k4:
-
     st.metric(
         "Market Regime",
         regime
@@ -931,10 +796,6 @@ st.markdown("<br>", unsafe_allow_html=True)
 # =========================================================
 
 chart1, chart2 = st.columns(2)
-
-# =========================================================
-# SIGNAL DISTRIBUTION
-# =========================================================
 
 with chart1:
 
@@ -950,36 +811,22 @@ with chart1:
     ]
 
     pie_fig = px.pie(
-
         signal_counts,
-
         names="Signal",
-
         values="Count",
-
         hole=0.55,
-
         title="Signal Distribution",
-
         template="plotly_white",
-
         color="Signal",
-
         color_discrete_map=signal_colors
     )
 
-    pie_fig.update_layout(
-        height=450
-    )
+    pie_fig.update_layout(height=450)
 
     st.plotly_chart(
         pie_fig,
         use_container_width=True
     )
-
-# =========================================================
-# SECTOR PERFORMANCE
-# =========================================================
 
 with chart2:
 
@@ -992,19 +839,12 @@ with chart2:
     )
 
     sector_fig = px.bar(
-
         sector_perf.head(10),
-
         x="Sector",
-
         y="Final Score",
-
         color="Final Score",
-
         title="Top Sector Performance",
-
         template="plotly_white",
-
         color_continuous_scale=[
             "#FF8C00",
             "#32CD32",
@@ -1012,9 +852,7 @@ with chart2:
         ]
     )
 
-    sector_fig.update_layout(
-        height=450
-    )
+    sector_fig.update_layout(height=450)
 
     st.plotly_chart(
         sector_fig,
@@ -1052,33 +890,22 @@ scatter_df["Bubble Size"] = (
 ) + 10
 
 scatter = px.scatter(
-
     scatter_df,
-
     x="Risk Reward",
-
     y="Final Score",
-
     color="Classification",
-
     size="Bubble Size",
-
     hover_name="Symbol",
-
     hover_data=[
         "Sector",
         "Momentum",
         "Sharpe"
     ],
-
     template="plotly_white",
-
     color_discrete_map=signal_colors
 )
 
-scatter.update_layout(
-    height=700
-)
+scatter.update_layout(height=700)
 
 st.plotly_chart(
     scatter,
@@ -1094,23 +921,15 @@ st.markdown("## 🚀 Top Stocks By Institutional Score")
 top_stocks = results.head(15)
 
 top_fig = px.bar(
-
     top_stocks,
-
     x="Symbol",
-
     y="Final Score",
-
     color="Classification",
-
     template="plotly_white",
-
     color_discrete_map=signal_colors
 )
 
-top_fig.update_layout(
-    height=550
-)
+top_fig.update_layout(height=550)
 
 st.plotly_chart(
     top_fig,
