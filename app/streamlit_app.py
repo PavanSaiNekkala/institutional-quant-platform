@@ -234,8 +234,20 @@ Enterprise Institutional Analytics Dashboard
 
 india = pytz.timezone("Asia/Kolkata")
 
-st.caption(
-    f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}"
+st.markdown(
+    f"""
+    <div style="
+        color:#000000;
+        font-size:14px;
+        font-weight:800;
+        margin-top:6px;
+        margin-bottom:12px;
+    ">
+        Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 )
 
 st.markdown("---")
