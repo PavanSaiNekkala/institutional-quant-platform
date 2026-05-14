@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL UPDATED INSTITUTIONAL QUANT PLATFORM
+# FINAL FULL UPDATED CODE
 # =========================================================
 
 import sys
@@ -36,6 +36,12 @@ st.set_page_config(
 )
 
 # =========================================================
+# CLEAR CACHE (RUN ONCE THEN REMOVE)
+# =========================================================
+
+st.cache_data.clear()
+
+# =========================================================
 # CSS
 # =========================================================
 
@@ -53,6 +59,8 @@ st.markdown("""
     padding-bottom: 2rem;
     max-width: 96%;
 }
+
+/* ================= SIDEBAR ================= */
 
 section[data-testid="stSidebar"] {
     background: #111827;
@@ -75,6 +83,8 @@ label {
     font-weight: 600 !important;
 }
 
+/* ================= SELECTBOX ================= */
+
 div[data-baseweb="select"] > div {
     background-color: #1F2937 !important;
     border: 1px solid #374151 !important;
@@ -82,6 +92,8 @@ div[data-baseweb="select"] > div {
     min-height: 48px !important;
     color: white !important;
 }
+
+/* ================= SEARCH BOX ================= */
 
 div[data-baseweb="base-input"] > div {
     background-color: #FFFFFF !important;
@@ -102,6 +114,8 @@ input[type="text"]::placeholder {
     color: #6B7280 !important;
 }
 
+/* ================= TITLE ================= */
+
 .main-title {
     font-size: 48px;
     font-weight: 800;
@@ -113,6 +127,8 @@ input[type="text"]::placeholder {
     font-size: 18px;
     color: #6B7280;
 }
+
+/* ================= PLOTLY ================= */
 
 .element-container:has(.js-plotly-plot) {
     background: white;
@@ -565,47 +581,51 @@ def run_analysis(stock_list, regime):
                     ">
 
                         <div>
-                        ✅ Completed<br>
-                        <span style="
-                            font-size:26px;
-                            color:#10B981;
-                            font-weight:800;
-                        ">
-                        {completed}/{total}
-                        </span>
+                            ✅ Completed<br>
+
+                            <span style="
+                                font-size:26px;
+                                color:#10B981;
+                                font-weight:800;
+                            ">
+                                {completed}/{total}
+                            </span>
                         </div>
 
                         <div>
-                        ❌ Failed<br>
-                        <span style="
-                            font-size:26px;
-                            color:#DC2626;
-                            font-weight:800;
-                        ">
-                        {len(set(failed_stocks))}
-                        </span>
+                            ❌ Failed<br>
+
+                            <span style="
+                                font-size:26px;
+                                color:#DC2626;
+                                font-weight:800;
+                            ">
+                                {len(set(failed_stocks))}
+                            </span>
                         </div>
 
                         <div>
-                        🌐 Universe<br>
-                        <span style="
-                            font-size:24px;
-                            color:#2563EB;
-                            font-weight:800;
-                        ">
-                        {total}
-                        </span>
+                            🌐 Universe<br>
+
+                            <span style="
+                                font-size:24px;
+                                color:#2563EB;
+                                font-weight:800;
+                            ">
+                                {total}
+                            </span>
                         </div>
 
                         <div>
-                        ⏳ Remaining<br>
-                        <span style="
-                            font-size:24px;
-                            color:#F59E0B;
-                            font-weight:800;
-                        ">
-                        {remaining_minutes}m
-                        </span>
+                            ⏳ Remaining<br>
+
+                            <span style="
+                                font-size:24px;
+                                color:#F59E0B;
+                                font-weight:800;
+                            ">
+                                {remaining_minutes}m
+                            </span>
                         </div>
 
                     </div>
@@ -619,8 +639,8 @@ def run_analysis(stock_list, regime):
                         font-weight:600;
                         color:#111827;
                     ">
-                    🔍 Current Stock:
-                    {symbol}
+                        🔍 Current Stock:
+                        {symbol}
                     </div>
 
                     </div>
