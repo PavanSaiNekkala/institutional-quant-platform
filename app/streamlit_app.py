@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 import pytz
+import time
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
@@ -295,14 +296,6 @@ stocks = [
 stocks = list(dict.fromkeys(stocks))
 
 # =========================================================
-# LIMIT LIVE UNIVERSE
-# =========================================================
-
-MAX_STOCKS = 500
-
-stocks = stocks[:MAX_STOCKS]
-
-# =========================================================
 # SIDEBAR
 # =========================================================
 
@@ -553,156 +546,195 @@ def run_analysis(stock_list, regime):
     start_time = datetime.now(india_tz)
 
     # =====================================================
-    # DOWNLOAD
+    # BATCH CONFIG
     # =====================================================
 
-    status_box.markdown(
-        f"""
-        <div class="status-card">
-
-        <h4>📥 Institutional Market Data Engine</h4>
-
-        <hr>
-
-        🌐 Stock Universe: {total}<br><br>
-
-        ⏳ Downloading NSE market data...
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    try:
-
-        data = yf.download(
-
-            tickers=stock_list,
-
-            period="3mo",
-
-            interval="1d",
-
-            auto_adjust=True,
-
-            progress=False,
-
-            threads=False,
-
-            group_by="ticker"
-        )
-
-    except Exception as e:
-
-        st.error(f"Yahoo download failed: {e}")
-
-        return pd.DataFrame(), []
-
-    # =====================================================
-    # BUILD CLOSE DATA
-    # =====================================================
-
-    close_data = pd.DataFrame()
-
-    for symbol in stock_list:
-
-        try:
-
-            if symbol in data.columns.levels[0]:
-
-                close_data[symbol] = data[symbol]["Close"]
-
-            else:
-
-                failed_stocks.append(symbol)
-
-        except:
-
-            failed_stocks.append(symbol)
-
-    # =====================================================
-    # ANALYZE
-    # =====================================================
+    batch_size = 75
 
     completed = 0
 
-    for symbol in stock_list:
+    # =====================================================
+    # PROCESS BATCHES
+    # =====================================================
 
-        completed += 1
+    for batch_start in range(0, total, batch_size):
+
+        batch = stock_list[
+            batch_start: batch_start + batch_size
+        ]
+
+        # =================================================
+        # STATUS
+        # =================================================
+
+        status_box.markdown(
+            f"""
+            <div class="status-card">
+
+            <h4>📥 Institutional Market Data Engine</h4>
+
+            <hr>
+
+            🌐 Stock Universe: {total}<br><br>
+
+            📦 Current Batch:
+            {batch_start + 1}
+            -
+            {min(batch_start + batch_size, total)}<br><br>
+
+            ⏳ Downloading NSE market data...
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # =================================================
+        # DOWNLOAD BATCH
+        # =================================================
 
         try:
 
-            result = analyze_stock(
-                symbol,
-                close_data,
-                regime
+            data = yf.download(
+
+                tickers=batch,
+
+                period="3mo",
+
+                interval="1d",
+
+                auto_adjust=True,
+
+                progress=False,
+
+                threads=False,
+
+                group_by="ticker"
             )
-
-            if result:
-
-                ranking_data.append(result)
-
-            else:
-
-                failed_stocks.append(symbol)
 
         except:
 
-            failed_stocks.append(symbol)
+            failed_stocks.extend(batch)
 
-        progress_bar.progress(
-            completed / total
-        )
+            continue
 
-        elapsed_minutes = round(
-            (
-                datetime.now(india_tz)
-                - start_time
-            ).total_seconds() / 60,
-            1
-        )
+        # =================================================
+        # BUILD CLOSE MATRIX
+        # =================================================
 
-        estimated_total = round(
-            (
-                elapsed_minutes
-                / max(completed, 1)
-            ) * total,
-            1
-        )
+        close_data = pd.DataFrame()
 
-        remaining_minutes = round(
-            max(
-                estimated_total
-                - elapsed_minutes,
-                0
-            ),
-            1
-        )
+        for symbol in batch:
 
-        if completed % 10 == 0:
+            try:
 
-            status_box.markdown(
-                f"""
-                <div class="status-card">
+                if symbol in data.columns.levels[0]:
 
-                <h4>📊 Institutional Processing Engine</h4>
+                    close_data[symbol] = data[symbol]["Close"]
 
-                <hr>
+                else:
 
-                ✅ Completed Stocks: {completed}/{total}<br><br>
+                    failed_stocks.append(symbol)
 
-                ❌ Failed Stocks: {len(set(failed_stocks))}<br><br>
+            except:
 
-                🌐 Stock Universe: {total}<br><br>
+                failed_stocks.append(symbol)
 
-                ⏳ Remaining Time: {remaining_minutes} min<br><br>
+        # =================================================
+        # ANALYZE
+        # =================================================
 
-                🔍 Current Stock: {symbol}
+        for symbol in batch:
 
-                </div>
-                """,
-                unsafe_allow_html=True
+            completed += 1
+
+            try:
+
+                result = analyze_stock(
+                    symbol,
+                    close_data,
+                    regime
+                )
+
+                if result:
+
+                    ranking_data.append(result)
+
+                else:
+
+                    failed_stocks.append(symbol)
+
+            except:
+
+                failed_stocks.append(symbol)
+
+            progress_bar.progress(
+                completed / total
             )
+
+            elapsed_minutes = round(
+                (
+                    datetime.now(india_tz)
+                    - start_time
+                ).total_seconds() / 60,
+                1
+            )
+
+            estimated_total = round(
+                (
+                    elapsed_minutes
+                    / max(completed, 1)
+                ) * total,
+                1
+            )
+
+            remaining_minutes = round(
+                max(
+                    estimated_total
+                    - elapsed_minutes,
+                    0
+                ),
+                1
+            )
+
+            if completed % 10 == 0:
+
+                status_box.markdown(
+                    f"""
+                    <div class="status-card">
+
+                    <h4>📊 Institutional Processing Engine</h4>
+
+                    <hr>
+
+                    ✅ Completed Stocks:
+                    {completed}/{total}<br><br>
+
+                    ❌ Failed Stocks:
+                    {len(set(failed_stocks))}<br><br>
+
+                    🌐 Stock Universe:
+                    {total}<br><br>
+
+                    📦 Batch Size:
+                    {batch_size}<br><br>
+
+                    ⏳ Remaining Time:
+                    {remaining_minutes} min<br><br>
+
+                    🔍 Current Stock:
+                    {symbol}
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        # =================================================
+        # COOL DOWN
+        # =================================================
+
+        time.sleep(1)
 
     progress_bar.empty()
 
