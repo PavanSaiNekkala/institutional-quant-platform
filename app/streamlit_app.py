@@ -225,7 +225,7 @@ st.markdown("""
 st.markdown("""
 <div style="
     font-size:16px;
-    color:#6B7280;
+    color:#111827;
     margin-top:-6px;
 ">
 Enterprise Institutional Analytics Dashboard
