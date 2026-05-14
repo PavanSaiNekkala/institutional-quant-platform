@@ -691,12 +691,322 @@ def run_analysis(stock_list):
 # RUN ANALYSIS
 # =========================================================
 
-results, failed_stocks = run_analysis(stocks)
+@st.cache_data(ttl=3600, show_spinner=False)
+def run_analysis(stock_list):
 
-if results.empty:
+    progress_bar = st.progress(0)
 
-    st.error("No valid results generated.")
-    st.stop()
+    status_placeholder = st.empty()
+
+    results = []
+    failed_stocks = []
+
+    total = len(stock_list)
+
+    completed = 0
+
+    start_time = time.time()
+
+    batch_size = 25
+
+    for i in range(0, total, batch_size):
+
+        batch = stock_list[i:i + batch_size]
+
+        try:
+
+            data = yf.download(
+                tickers=batch,
+                period="6mo",
+                interval="1d",
+                auto_adjust=True,
+                progress=False,
+                threads=False,
+                group_by="ticker"
+            )
+
+        except:
+
+            failed_stocks.extend(batch)
+            continue
+
+        for symbol in batch:
+
+            completed += 1
+
+            try:
+
+                if symbol not in data.columns.levels[0]:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                close = data[symbol]["Close"].dropna()
+
+                if len(close) < 40:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                momentum = (
+                    close.iloc[-1]
+                    / close.iloc[-20]
+                ) - 1
+
+                returns = close.pct_change().dropna()
+
+                sharpe = (
+                    returns.mean()
+                    / max(returns.std(), 0.0001)
+                ) * np.sqrt(252)
+
+                score = (
+                    momentum * 0.6
+                    + sharpe * 0.4
+                )
+
+                if score >= 1.5:
+                    signal = "STRONG_BUY"
+
+                elif score >= 1.0:
+                    signal = "BUY"
+
+                elif score >= 0.6:
+                    signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
+
+                else:
+                    signal = "AVOID"
+
+                results.append({
+                    "Symbol": symbol,
+                    "CMP": safe_round(close.iloc[-1]),
+                    "Momentum": safe_round(momentum * 100),
+                    "Sharpe": safe_round(sharpe),
+                    "Final Score": safe_round(score),
+                    "Classification": signal
+                })
+
+            except:
+
+                failed_stocks.append(symbol)
+
+            # =====================================================
+            # LIVE STATUS UPDATE
+            # =====================================================
+
+            completion_pct = round(
+                (completed / total) * 100,
+                1
+            )
+
+            elapsed = (time.time() - start_time) / 60
+
+            estimated_total = (
+                elapsed / max(completed, 1)
+            ) * total
+
+            remaining_minutes = round(
+                max(estimated_total - elapsed, 0),
+                1
+            )
+
+            progress_bar.progress(
+                completed / total
+            )
+
+            status_html = f"""
+            <div style="
+                background:white;
+                border-radius:22px;
+                padding:20px;
+                margin-top:14px;
+                box-shadow:0 10px 28px rgba(0,0,0,0.08);
+            ">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:18px;
+                    flex-wrap:wrap;
+                    gap:12px;
+                ">
+
+                    <div>
+
+                        <div style="
+                            font-size:30px;
+                            font-weight:900;
+                            color:#111827;
+                        ">
+                            📊 Institutional Processing Engine
+                        </div>
+
+                        <div style="
+                            color:#6B7280;
+                            font-size:14px;
+                            margin-top:4px;
+                        ">
+                            Real-Time Quant Processing
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        background:#DBEAFE;
+                        color:#1D4ED8;
+                        padding:8px 16px;
+                        border-radius:12px;
+                        font-size:12px;
+                        font-weight:900;
+                    ">
+                        LIVE
+                    </div>
+
+                </div>
+
+                <div style="
+                    display:grid;
+                    grid-template-columns:
+                    repeat(auto-fit,minmax(180px,1fr));
+                    gap:14px;
+                    margin-bottom:18px;
+                ">
+
+                    <div style="
+                        background:#ECFDF5;
+                        border-left:6px solid #10B981;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+                        <div style="
+                            color:#047857;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            COMPLETED
+                        </div>
+
+                        <div style="
+                            font-size:28px;
+                            font-weight:900;
+                            color:#065F46;
+                            margin-top:6px;
+                        ">
+                            {completed}
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#FEF2F2;
+                        border-left:6px solid #DC2626;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+                        <div style="
+                            color:#B91C1C;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            FAILED
+                        </div>
+
+                        <div style="
+                            font-size:28px;
+                            font-weight:900;
+                            color:#991B1B;
+                            margin-top:6px;
+                        ">
+                            {len(set(failed_stocks))}
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#EFF6FF;
+                        border-left:6px solid #2563EB;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+                        <div style="
+                            color:#1D4ED8;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            UNIVERSE
+                        </div>
+
+                        <div style="
+                            font-size:28px;
+                            font-weight:900;
+                            color:#1E3A8A;
+                            margin-top:6px;
+                        ">
+                            {total}
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#FFF7ED;
+                        border-left:6px solid #F59E0B;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+                        <div style="
+                            color:#D97706;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            ETA
+                        </div>
+
+                        <div style="
+                            font-size:28px;
+                            font-weight:900;
+                            color:#92400E;
+                            margin-top:6px;
+                        ">
+                            {remaining_minutes}m
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="
+                    width:100%;
+                    height:12px;
+                    background:#E5E7EB;
+                    border-radius:999px;
+                    overflow:hidden;
+                ">
+
+                    <div style="
+                        width:{completion_pct}%;
+                        height:100%;
+                        background:
+                        linear-gradient(
+                            90deg,
+                            #2563EB,
+                            #10B981
+                        );
+                    ">
+                    </div>
+
+                </div>
+
+            </div>
+            """
+
+            status_placeholder.markdown(
+                status_html,
+                unsafe_allow_html=True
+            )
+
+    progress_bar.empty()
+
+    return pd.DataFrame(results), failed_stocks
 
 # =========================================================
 # FILTERS
