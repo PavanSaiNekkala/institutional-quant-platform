@@ -61,7 +61,7 @@ GLOBAL APP
 }
 
 /* =====================================================
-REMOVE STREAMLIT HEADER SPACE
+MAIN CONTAINER
 ===================================================== */
 
 .block-container {
@@ -138,15 +138,33 @@ INPUT BOX
 
 div[data-baseweb="base-input"] > div {
 
-    background-color: #1F2937 !important;
+    background-color: #FFFFFF !important;
 
-    border: 1px solid #374151 !important;
+    border: 2px solid #2563EB !important;
 
-    border-radius: 10px !important;
+    border-radius: 12px !important;
 
-    min-height: 48px !important;
+    min-height: 50px !important;
 
-    color: white !important;
+    color: #111827 !important;
+
+    font-size: 16px !important;
+}
+
+input {
+
+    color: #111827 !important;
+
+    font-weight: 600 !important;
+
+    font-size: 16px !important;
+}
+
+input::placeholder {
+
+    color: #6B7280 !important;
+
+    opacity: 1 !important;
 }
 
 /* =====================================================
@@ -203,24 +221,6 @@ KPI CARDS
 .kpi-card:hover {
 
     transform: translateY(-3px);
-}
-
-.kpi-title {
-
-    font-size: 15px;
-
-    color: #6B7280;
-
-    margin-bottom: 10px;
-}
-
-.kpi-value {
-
-    font-size: 40px;
-
-    font-weight: 800;
-
-    color: #111827;
 }
 
 /* =====================================================
@@ -356,10 +356,6 @@ stocks = list(dict.fromkeys(stocks))
 # SIDEBAR
 # =========================================================
 
-# =========================================================
-# SIDEBAR
-# =========================================================
-
 with st.sidebar:
 
     st.markdown("## ⚙️ Dashboard Controls")
@@ -386,9 +382,59 @@ with st.sidebar:
             value=60
         )
 
+        # =====================================================
+        # SEARCH STOCK
+        # =====================================================
+
         search_stock = st.text_input(
-            "Search Stock"
+            "Search Stock",
+            placeholder="Type stock name...",
+            help="Search NSE stocks"
         )
+
+        # =====================================================
+        # LIVE MATCHING RESULTS
+        # =====================================================
+
+        if search_stock:
+
+            matching_stocks = [
+
+                s for s in stocks
+
+                if search_stock.upper() in s.upper()
+            ][:15]
+
+            if matching_stocks:
+
+                st.markdown(
+                    "### 🔍 Matching Stocks"
+                )
+
+                for stock in matching_stocks:
+
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background:#1F2937;
+                            padding:10px;
+                            border-radius:10px;
+                            margin-bottom:8px;
+                            color:white;
+                            font-weight:600;
+                            border-left:4px solid #32CD32;
+                        ">
+                        {stock}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+            else:
+
+                st.warning(
+                    "No matching stocks found"
+                )
 
         submitted = st.form_submit_button(
             "🚀 Apply Filters"
@@ -397,9 +443,11 @@ with st.sidebar:
     st.markdown("---")
 
     st.success("✅ Full NSE Universe Enabled")
+
     st.info("📈 Live Regime Detection Enabled")
+
     st.info("🧠 Sector Rotation Enabled")
-    
+
 # =========================================================
 # SAFE ROUND
 # =========================================================
@@ -571,17 +619,11 @@ def run_analysis(stock_list, regime):
 
     ranking_data = []
 
-    processed = 0
-
-    success = 0
-
-    failed = 0
-
-    start_time = time.time()
-
     progress_bar = st.progress(0)
 
     status_box = st.empty()
+
+    total = len(stock_list)
 
     with ThreadPoolExecutor(max_workers=12) as executor:
 
@@ -596,9 +638,9 @@ def run_analysis(stock_list, regime):
             for symbol in stock_list
         }
 
-        for future in as_completed(futures):
-
-            processed += 1
+        for idx, future in enumerate(
+            as_completed(futures)
+        ):
 
             symbol = futures[future]
 
@@ -610,27 +652,12 @@ def run_analysis(stock_list, regime):
 
                     ranking_data.append(result)
 
-                    success += 1
-
-                else:
-
-                    failed += 1
-
             except:
 
-                failed += 1
+                pass
 
             progress_bar.progress(
-                processed / len(stock_list)
-            )
-
-            remaining = (
-                (
-                    time.time()
-                    - start_time
-                ) / max(processed, 1)
-            ) * (
-                len(stock_list) - processed
+                (idx + 1) / total
             )
 
             status_box.markdown(
@@ -639,11 +666,7 @@ def run_analysis(stock_list, regime):
 
                 <b>Processing:</b> {symbol}<br><br>
 
-                ✅ Success: {success}<br>
-
-                ❌ Failed: {failed}<br>
-
-                ⏳ Remaining: {int(remaining)} sec
+                📈 Completed: {idx + 1}/{total}
 
                 </div>
                 """,
