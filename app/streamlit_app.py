@@ -137,6 +137,15 @@ div[data-baseweb="select"] > div{
 }
 
 /* =====================================================
+MULTISELECT
+===================================================== */
+
+[data-baseweb="tag"]{
+    background:#2563EB !important;
+    color:white !important;
+}
+
+/* =====================================================
 METRICS
 ===================================================== */
 
@@ -268,14 +277,18 @@ with st.sidebar:
 
     st.markdown("---")
 
-    signal_filter = st.selectbox(
-        "Trade Signal",
-        [
-            "All",
+    signal_filter = st.multiselect(
+        "📈 Trade Signal Filter",
+        options=[
             "STRONG_BUY",
             "BUY",
             "WATCH",
+            "HOLD",
             "AVOID"
+        ],
+        default=[
+            "STRONG_BUY",
+            "BUY"
         ]
     )
 
@@ -326,13 +339,6 @@ with st.sidebar:
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
 
-    st.markdown("### 📈 Trade Signal Summary")
-
-    st.success("🟢 STRONG BUY")
-    st.info("🟩 BUY")
-    st.warning("🟠 WATCH")
-    st.error("🔴 AVOID")
-
 # =========================================================
 # COLORS
 # =========================================================
@@ -340,7 +346,8 @@ with st.sidebar:
 signal_colors = {
     "STRONG_BUY": "#006400",
     "BUY": "#32CD32",
-    "WATCH": "#FF8C00",
+    "WATCH": "#F59E0B",
+    "HOLD": "#3B82F6",
     "AVOID": "#DC2626"
 }
 
@@ -354,6 +361,12 @@ def safe_round(x, n=2):
         return round(float(x), n)
     except:
         return 0
+
+# =========================================================
+# LOADING MESSAGE
+# =========================================================
+
+st.info("⚡ Running institutional analysis across full NSE universe...")
 
 # =========================================================
 # ANALYSIS ENGINE
@@ -374,7 +387,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 50
+    batch_size = 25
 
     status_placeholder = st.empty()
 
@@ -396,7 +409,9 @@ def run_analysis(stock_list):
 
         except:
 
-            failed_stocks.extend(batch)
+            for symbol in batch:
+                if symbol not in failed_stocks:
+                    failed_stocks.append(symbol)
 
             continue
 
@@ -408,7 +423,8 @@ def run_analysis(stock_list):
 
                 if symbol not in data.columns.levels[0]:
 
-                    failed_stocks.append(symbol)
+                    if symbol not in failed_stocks:
+                        failed_stocks.append(symbol)
 
                     continue
 
@@ -419,7 +435,8 @@ def run_analysis(stock_list):
 
                 if len(close) < 40:
 
-                    failed_stocks.append(symbol)
+                    if symbol not in failed_stocks:
+                        failed_stocks.append(symbol)
 
                     continue
 
@@ -440,14 +457,21 @@ def run_analysis(stock_list):
                     + sharpe * 0.4
                 )
 
-                if score >= 1.2:
+                # =====================================================
+                # SIGNAL CLASSIFICATION
+                # =====================================================
+
+                if score >= 1.5:
                     signal = "STRONG_BUY"
 
-                elif score >= 0.8:
+                elif score >= 1.0:
                     signal = "BUY"
 
-                elif score >= 0.4:
+                elif score >= 0.6:
                     signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
 
                 else:
                     signal = "AVOID"
@@ -462,7 +486,9 @@ def run_analysis(stock_list):
                 })
 
             except:
-                failed_stocks.append(symbol)
+
+                if symbol not in failed_stocks:
+                    failed_stocks.append(symbol)
 
             progress_bar.progress(completed / total)
 
@@ -699,47 +725,6 @@ def run_analysis(stock_list):
 
                 </div>
 
-                <div style="
-                    margin-top:28px;
-                    background:#111827;
-                    color:white;
-                    border-radius:18px;
-                    padding:20px;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                ">
-
-                    <div>
-
-                        <div style="
-                            color:#9CA3AF;
-                            font-size:13px;
-                            margin-bottom:6px;
-                        ">
-                        CURRENTLY ANALYZING
-                        </div>
-
-                        <div style="
-                            font-size:26px;
-                            font-weight:900;
-                        ">
-                        {symbol}
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#10B981;
-                        padding:10px 18px;
-                        border-radius:12px;
-                        font-weight:800;
-                    ">
-                    ACTIVE
-                    </div>
-
-                </div>
-
                 </div>
                 """
 
@@ -776,10 +761,11 @@ results = results[
     results["Percentile"] >= min_score
 ]
 
-if signal_filter != "All":
+if signal_filter:
 
     results = results[
-        results["Classification"] == signal_filter
+        results["Classification"]
+        .isin(signal_filter)
     ]
 
 if search_stock:
@@ -803,7 +789,7 @@ with k1:
 with k2:
     st.metric(
         "Processed Stocks",
-        len(results) + len(set(failed_stocks))
+        len(results)
     )
 
 with k3:
@@ -847,7 +833,10 @@ with left:
         title="Signal Distribution"
     )
 
-    fig1.update_layout(height=450)
+    fig1.update_layout(
+        height=450,
+        margin=dict(l=10,r=10,t=50,b=10)
+    )
 
     st.plotly_chart(
         fig1,
@@ -867,7 +856,10 @@ with right:
         title="Risk Reward Opportunity Matrix"
     )
 
-    fig2.update_layout(height=450)
+    fig2.update_layout(
+        height=450,
+        margin=dict(l=10,r=10,t=50,b=10)
+    )
 
     st.plotly_chart(
         fig2,
