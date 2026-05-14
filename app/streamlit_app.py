@@ -80,8 +80,11 @@ div[data-baseweb="base-input"] > div{
 }
 
 input{
-    color:#111111 !important;
-    font-weight:700 !important;
+    color:#111827 !important;
+    font-weight:800 !important;
+    font-size:18px !important;
+    background:white !important;
+    caret-color:#2563EB !important;
 }
 
 /* =====================================================
@@ -255,6 +258,67 @@ with st.sidebar:
     st.success(
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
+    st.markdown("### 📈 Trade Signal Summary")
+
+    signal_summary_html = f"""
+    <div style="
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        margin-top:10px;
+    ">
+
+        <div style="
+            background:#064E3B;
+            padding:14px;
+            border-radius:12px;
+            color:white;
+            font-weight:800;
+            border-left:6px solid #22C55E;
+        ">
+        🟢 STRONG BUY
+        </div>
+
+        <div style="
+            background:#14532D;
+            padding:14px;
+            border-radius:12px;
+            color:white;
+            font-weight:800;
+            border-left:6px solid #4ADE80;
+        ">
+        🟩 BUY
+        </div>
+
+        <div style="
+            background:#7C2D12;
+            padding:14px;
+            border-radius:12px;
+            color:white;
+            font-weight:800;
+            border-left:6px solid #FB923C;
+        ">
+        🟠 WATCH
+        </div>
+
+        <div style="
+            background:#7F1D1D;
+            padding:14px;
+            border-radius:12px;
+            color:white;
+            font-weight:800;
+            border-left:6px solid #EF4444;
+        ">
+        🔴 AVOID
+        </div>
+
+    </div>
+    """
+
+    st.markdown(
+        signal_summary_html,
+        unsafe_allow_html=True
+    )        
 
 # =========================================================
 # COLORS
