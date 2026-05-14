@@ -6,6 +6,8 @@
 import sys
 import time
 from pathlib import Path
+from datetime import datetime
+import pytz
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
@@ -327,9 +329,6 @@ Executive Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
 
-from datetime import datetime
-import pytz
-
 india_tz = pytz.timezone("Asia/Kolkata")
 
 current_time = datetime.now(india_tz)
@@ -350,6 +349,18 @@ def cached_regime():
     return detect_market_regime()
 
 regime = cached_regime()
+
+# =========================================================
+# INSTITUTIONAL COLOR MAP
+# =========================================================
+
+signal_colors = {
+
+    "STRONG_BUY": "#006400",
+    "BUY": "#32CD32",
+    "WATCH": "#FF8C00",
+    "AVOID": "#DC2626"
+}
 
 # =========================================================
 # LOAD STOCKS
@@ -603,7 +614,7 @@ failed = 0
 
 start_time = time.time()
 
-with ThreadPoolExecutor(max_workers=6) as executor:
+with ThreadPoolExecutor(max_workers=12) as executor:
 
     futures = {
 
@@ -686,15 +697,13 @@ results["Percentile"] = (
 )
 
 results = results[
-    results["Percentile"]
-    >= min_score
+    results["Percentile"] >= min_score
 ]
 
 if signal_filter != "All":
 
     results = results[
-        results["Classification"]
-        == signal_filter
+        results["Classification"] == signal_filter
     ]
 
 if search_stock:
@@ -760,8 +769,7 @@ with k3:
 
     strong_buys = len(
         results[
-            results["Classification"]
-            == "STRONG_BUY"
+            results["Classification"] == "STRONG_BUY"
         ]
     )
 
@@ -834,7 +842,11 @@ with chart1:
 
         title="Signal Distribution",
 
-        template="plotly_white"
+        template="plotly_white",
+
+        color="Signal",
+
+        color_discrete_map=signal_colors
     )
 
     pie_fig.update_layout(
@@ -850,7 +862,7 @@ with chart1:
 
     st.plotly_chart(
         pie_fig,
-        use_container_width=True
+        width="stretch"
     )
 
 # =========================================================
@@ -881,7 +893,11 @@ with chart2:
 
         template="plotly_white",
 
-        color_continuous_scale="Viridis"
+        color_continuous_scale=[
+            "#FF8C00",
+            "#32CD32",
+            "#006400"
+        ]
     )
 
     sector_fig.update_layout(
@@ -897,7 +913,7 @@ with chart2:
 
     st.plotly_chart(
         sector_fig,
-        use_container_width=True
+        width="stretch"
     )
 
 # =========================================================
@@ -908,7 +924,7 @@ st.markdown("## 🏦 Top Institutional Rankings")
 
 st.dataframe(
     results.head(100),
-    use_container_width=True,
+    width="stretch",
     height=650
 )
 
@@ -950,7 +966,9 @@ scatter = px.scatter(
         "Sharpe"
     ],
 
-    template="plotly_white"
+    template="plotly_white",
+
+    color_discrete_map=signal_colors
 )
 
 scatter.update_layout(
@@ -964,9 +982,20 @@ scatter.update_layout(
     height=700
 )
 
+scatter.update_traces(
+
+    marker=dict(
+        opacity=0.85,
+        line=dict(
+            width=1,
+            color="white"
+        )
+    )
+)
+
 st.plotly_chart(
     scatter,
-    use_container_width=True
+    width="stretch"
 )
 
 # =========================================================
@@ -985,11 +1014,11 @@ top_fig = px.bar(
 
     y="Final Score",
 
-    color="Final Score",
+    color="Classification",
 
     template="plotly_white",
 
-    color_continuous_scale="Turbo"
+    color_discrete_map=signal_colors
 )
 
 top_fig.update_layout(
@@ -1005,7 +1034,7 @@ top_fig.update_layout(
 
 st.plotly_chart(
     top_fig,
-    use_container_width=True
+    width="stretch"
 )
 
 # =========================================================
