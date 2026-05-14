@@ -1,9 +1,11 @@
 # =========================================================
-# FILE: app/streamlit_app.py
-# FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
+# INSTITUTIONAL QUANT PLATFORM
+# FINAL ENTERPRISE VERSION
 # =========================================================
 
 import streamlit as st
+import streamlit.components.v1 as components
+
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -26,7 +28,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# GLOBAL CSS
+# CSS
 # =========================================================
 
 st.markdown("""
@@ -42,15 +44,15 @@ GLOBAL
 }
 
 /* =====================================================
-MAIN CONTAINER
+HEADER COMPACT
 ===================================================== */
 
 .block-container{
-    padding-top:0.2rem;
-    padding-bottom:1rem;
+    padding-top:0.2rem !important;
+    padding-bottom:1rem !important;
     padding-left:1rem !important;
     padding-right:1rem !important;
-    max-width:100%;
+    max-width:100% !important;
 }
 
 /* =====================================================
@@ -109,39 +111,6 @@ FULL WIDTH COMPONENTS
 }
 
 /* =====================================================
-PROCESSING ENGINE
-===================================================== */
-
-.processing-container{
-    width:100% !important;
-    max-width:100% !important;
-    overflow:hidden !important;
-    max-height:none !important;
-}
-
-/* =====================================================
-REMOVE SCROLLBARS
-===================================================== */
-
-iframe{
-    overflow:hidden !important;
-}
-
-.element-container{
-    overflow:hidden !important;
-}
-
-.stHtml{
-    overflow:hidden !important;
-    padding-bottom:0px !important;
-    margin-bottom:0px !important;
-}
-
-html, body, [class*="css"]{
-    overflow-x:hidden !important;
-}
-
-/* =====================================================
 SEARCH INPUT
 ===================================================== */
 
@@ -193,7 +162,7 @@ MULTISELECT TAGS
 }
 
 /* =====================================================
-METRICS
+METRIC CARDS
 ===================================================== */
 
 [data-testid="metric-container"]{
@@ -227,10 +196,36 @@ TABLE
 }
 
 /* =====================================================
+PROCESSING ENGINE
+===================================================== */
+
+.processing-container{
+    width:100% !important;
+    max-width:100% !important;
+    overflow:hidden !important;
+}
+
+/* =====================================================
+REMOVE SCROLLBARS
+===================================================== */
+
+iframe{
+    overflow:hidden !important;
+}
+
+.element-container{
+    overflow:hidden !important;
+}
+
+html, body, [class*="css"]{
+    overflow-x:hidden !important;
+}
+
+/* =====================================================
 MOBILE
 ===================================================== */
 
-@media (max-width: 768px){
+@media (max-width:768px){
 
     section[data-testid="stSidebar"]{
         width:100% !important;
@@ -280,7 +275,8 @@ st.markdown(
         margin-bottom:8px;
         font-weight:600;
     ">
-    Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
+    Updated:
+    {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
     </div>
     """,
     unsafe_allow_html=True
@@ -289,16 +285,12 @@ st.markdown(
 st.markdown("---")
 
 # =========================================================
-# LOAD NSE UNIVERSE
+# LOAD NSE STOCKS
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-excel_path = (
-    ROOT_DIR /
-    "data" /
-    "valid_stocks.xlsx"
-)
+excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
 
 universe_df = pd.read_excel(excel_path)
 
@@ -392,11 +384,11 @@ with st.sidebar:
 # =========================================================
 
 signal_colors = {
-    "STRONG_BUY": "#006400",
-    "BUY": "#32CD32",
-    "WATCH": "#F59E0B",
-    "HOLD": "#3B82F6",
-    "AVOID": "#DC2626"
+    "STRONG_BUY":"#006400",
+    "BUY":"#32CD32",
+    "WATCH":"#F59E0B",
+    "HOLD":"#3B82F6",
+    "AVOID":"#DC2626"
 }
 
 # =========================================================
@@ -411,10 +403,12 @@ def safe_round(x, n=2):
         return 0
 
 # =========================================================
-# LOADING MESSAGE
+# INFO
 # =========================================================
 
-st.info("⚡ Running institutional analysis across full NSE universe...")
+st.info(
+    "⚡ Running institutional analysis across full NSE universe..."
+)
 
 # =========================================================
 # ANALYSIS ENGINE
@@ -488,7 +482,7 @@ def run_analysis(stock_list):
 
                 sharpe = (
                     returns.mean()
-                    / max(returns.std(), 0.0001)
+                    / max(returns.std(),0.0001)
                 ) * np.sqrt(252)
 
                 score = (
@@ -512,12 +506,14 @@ def run_analysis(stock_list):
                     signal = "AVOID"
 
                 results.append({
-                    "Symbol": symbol,
-                    "CMP": safe_round(close.iloc[-1]),
-                    "Momentum": safe_round(momentum * 100),
-                    "Sharpe": safe_round(sharpe),
-                    "Final Score": safe_round(score),
-                    "Classification": signal
+
+                    "Symbol":symbol,
+                    "CMP":safe_round(close.iloc[-1]),
+                    "Momentum":safe_round(momentum*100),
+                    "Sharpe":safe_round(sharpe),
+                    "Final Score":safe_round(score),
+                    "Classification":signal
+
                 })
 
             except:
@@ -533,7 +529,7 @@ def run_analysis(stock_list):
             ) * total
 
             remaining_minutes = round(
-                max(estimated_total - elapsed, 0),
+                max(estimated_total - elapsed,0),
                 1
             )
 
@@ -549,8 +545,6 @@ def run_analysis(stock_list):
                     background:white;
                     border-radius:18px;
                     padding:20px;
-                    width:100%;
-                    box-sizing:border-box;
                     box-shadow:0 6px 20px rgba(0,0,0,0.08);
                     margin-top:2px;
                     font-family:Segoe UI;
@@ -788,14 +782,16 @@ def run_analysis(stock_list):
                 """
 
                 with status_placeholder:
-                    st.html(status_html, height=330)
+
+                    components.html(
+                        status_html,
+                        height=330,
+                        scrolling=False
+                    )
 
     progress_bar.empty()
 
-    return (
-        pd.DataFrame(results),
-        failed_stocks
-    )
+    return pd.DataFrame(results), failed_stocks
 
 # =========================================================
 # RUN ANALYSIS
@@ -805,7 +801,7 @@ results, failed_stocks = run_analysis(stocks)
 
 if results.empty:
 
-    st.error("No valid results.")
+    st.error("No valid results generated.")
     st.stop()
 
 # =========================================================
@@ -849,22 +845,13 @@ with k1:
     st.metric("NSE Universe", len(stocks))
 
 with k2:
-    st.metric(
-        "Processed Stocks",
-        len(results)
-    )
+    st.metric("Processed Stocks", len(results))
 
 with k3:
-    st.metric(
-        "Filtered Opportunities",
-        len(results)
-    )
+    st.metric("Filtered Opportunities", len(results))
 
 with k4:
-    st.metric(
-        "Failed Stocks",
-        len(set(failed_stocks))
-    )
+    st.metric("Failed Stocks", len(set(failed_stocks)))
 
 # =========================================================
 # CHARTS
