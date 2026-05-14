@@ -385,9 +385,9 @@ with st.sidebar:
     top_n = st.slider(
         "Stocks To Analyze",
         min_value=100,
-        max_value=min(len(stocks), 1000),
+        max_value=min(len(stocks), 3000),
         value=300,
-        step=50
+        step=25
     )
 
     signal_filter = st.selectbox(
