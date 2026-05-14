@@ -80,7 +80,7 @@ div[data-baseweb="base-input"] > div{
 }
 
 input{
-    color:#111827 !important;
+    color:#111111 !important;
     font-weight:700 !important;
 }
 
