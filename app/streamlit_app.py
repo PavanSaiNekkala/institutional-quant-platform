@@ -1,6 +1,6 @@
 # =========================================================
 # INSTITUTIONAL QUANT PLATFORM
-# FINAL ENTERPRISE VERSION
+# FINAL ENTERPRISE STREAMLIT DASHBOARD
 # =========================================================
 
 import streamlit as st
@@ -44,11 +44,24 @@ GLOBAL
 }
 
 /* =====================================================
-HEADER COMPACT
+REMOVE STREAMLIT HEADER SPACE
+===================================================== */
+
+header[data-testid="stHeader"]{
+    background:transparent !important;
+    height:0px !important;
+}
+
+div[data-testid="stToolbar"]{
+    right:1rem !important;
+}
+
+/* =====================================================
+MAIN CONTAINER
 ===================================================== */
 
 .block-container{
-    padding-top:0.2rem !important;
+    padding-top:1rem !important;
     padding-bottom:1rem !important;
     padding-left:1rem !important;
     padding-right:1rem !important;
@@ -78,12 +91,8 @@ section[data-testid="stSidebar"] *{
 }
 
 /* =====================================================
-AUTO EXPAND MAIN SCREEN
+AUTO EXPAND
 ===================================================== */
-
-[data-testid="collapsedControl"]{
-    z-index:9999 !important;
-}
 
 .main .block-container{
     max-width:100% !important;
@@ -96,22 +105,7 @@ section.main > div{
 }
 
 /* =====================================================
-FULL WIDTH COMPONENTS
-===================================================== */
-
-.element-container,
-.stPlotlyChart,
-[data-testid="stDataFrame"],
-[data-testid="metric-container"]{
-    width:100% !important;
-}
-
-[data-testid="column"]{
-    width:100% !important;
-}
-
-/* =====================================================
-SEARCH INPUT
+SEARCH BOX
 ===================================================== */
 
 div[data-baseweb="base-input"]{
@@ -126,6 +120,10 @@ div[data-baseweb="base-input"] > div{
     min-height:48px !important;
 }
 
+div[data-baseweb="base-input"] > div:focus-within{
+    border:2px solid #10B981 !important;
+}
+
 input[type="text"]{
     color:#111827 !important;
     background:white !important;
@@ -134,6 +132,7 @@ input[type="text"]{
     opacity:1 !important;
     -webkit-text-fill-color:#111827 !important;
     caret-color:#2563EB !important;
+    box-shadow:none !important;
 }
 
 input[type="text"]::placeholder{
@@ -162,7 +161,7 @@ MULTISELECT TAGS
 }
 
 /* =====================================================
-METRIC CARDS
+METRICS
 ===================================================== */
 
 [data-testid="metric-container"]{
@@ -196,7 +195,7 @@ TABLE
 }
 
 /* =====================================================
-PROCESSING ENGINE
+PROCESSING PANEL
 ===================================================== */
 
 .processing-container{
@@ -211,6 +210,7 @@ REMOVE SCROLLBARS
 
 iframe{
     overflow:hidden !important;
+    margin-bottom:-10px !important;
 }
 
 .element-container{
@@ -222,8 +222,16 @@ html, body, [class*="css"]{
 }
 
 /* =====================================================
-MOBILE
+RESPONSIVE
 ===================================================== */
+
+@media (max-width:1200px){
+
+    .processing-container{
+        zoom:0.92;
+    }
+
+}
 
 @media (max-width:768px){
 
@@ -241,28 +249,75 @@ MOBILE
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HEADER
+# MAIN HEADER
 # =========================================================
 
-st.markdown("""
-<div style="
-    font-size:30px;
-    font-weight:900;
-    color:#111827;
-">
-📊 Institutional Quant Platform
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style="
+        background:linear-gradient(
+            135deg,
+            #0F172A,
+            #111827
+        );
+        padding:22px 28px;
+        border-radius:22px;
+        margin-bottom:14px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.15);
+    ">
 
-st.markdown("""
-<div style="
-    font-size:13px;
-    color:#6B7280;
-    margin-top:-6px;
-">
-Enterprise Institutional Analytics Dashboard
-</div>
-""", unsafe_allow_html=True)
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+        ">
+
+            <div>
+
+                <div style="
+                    font-size:42px;
+                    font-weight:900;
+                    color:white;
+                    line-height:1.1;
+                    letter-spacing:-1px;
+                ">
+                    📊 Institutional Quant Platform
+                </div>
+
+                <div style="
+                    margin-top:8px;
+                    color:#CBD5E1;
+                    font-size:15px;
+                    font-weight:500;
+                ">
+                    Enterprise Institutional Analytics Dashboard
+                </div>
+
+            </div>
+
+            <div style="
+                background:#10B981;
+                color:white;
+                padding:10px 18px;
+                border-radius:14px;
+                font-size:14px;
+                font-weight:800;
+                margin-top:8px;
+            ">
+                LIVE NSE ENGINE
+            </div>
+
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# =========================================================
+# TIMESTAMP
+# =========================================================
 
 india = pytz.timezone("Asia/Kolkata")
 
@@ -270,10 +325,10 @@ st.markdown(
     f"""
     <div style="
         color:#6B7280;
-        font-size:12px;
+        font-size:11px;
         margin-top:-4px;
-        margin-bottom:8px;
-        font-weight:600;
+        margin-bottom:10px;
+        font-weight:700;
     ">
     Updated:
     {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
@@ -282,10 +337,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("---")
-
 # =========================================================
-# LOAD NSE STOCKS
+# LOAD NSE UNIVERSE
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -312,7 +365,15 @@ stocks = list(dict.fromkeys(stocks))
 
 with st.sidebar:
 
-    st.markdown("## ⚙️ Dashboard Controls")
+    st.markdown("""
+    <div style="
+        font-size:28px;
+        font-weight:900;
+        margin-bottom:6px;
+    ">
+    ⚙️ Dashboard Controls
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -392,7 +453,7 @@ signal_colors = {
 }
 
 # =========================================================
-# SAFE ROUND
+# HELPERS
 # =========================================================
 
 def safe_round(x, n=2):
@@ -506,18 +567,15 @@ def run_analysis(stock_list):
                     signal = "AVOID"
 
                 results.append({
-
                     "Symbol":symbol,
                     "CMP":safe_round(close.iloc[-1]),
                     "Momentum":safe_round(momentum*100),
                     "Sharpe":safe_round(sharpe),
                     "Final Score":safe_round(score),
                     "Classification":signal
-
                 })
 
             except:
-
                 failed_stocks.append(symbol)
 
             progress_bar.progress(completed / total)
@@ -544,9 +602,8 @@ def run_analysis(stock_list):
                 <div class="processing-container" style="
                     background:white;
                     border-radius:18px;
-                    padding:20px;
+                    padding:14px;
                     box-shadow:0 6px 20px rgba(0,0,0,0.08);
-                    margin-top:2px;
                     font-family:Segoe UI;
                 ">
 
@@ -599,7 +656,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#ECFDF5;
-                        padding:12px;
+                        padding:10px;
                         border-radius:14px;
                         border-left:5px solid #10B981;
                     ">
@@ -613,7 +670,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:6px;
-                            font-size:22px;
+                            font-size:18px;
                             font-weight:900;
                             color:#065F46;
                         ">
@@ -631,7 +688,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#FEF2F2;
-                        padding:12px;
+                        padding:10px;
                         border-radius:14px;
                         border-left:5px solid #DC2626;
                     ">
@@ -645,7 +702,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:6px;
-                            font-size:22px;
+                            font-size:18px;
                             font-weight:900;
                             color:#991B1B;
                         ">
@@ -663,7 +720,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#EFF6FF;
-                        padding:12px;
+                        padding:10px;
                         border-radius:14px;
                         border-left:5px solid #2563EB;
                     ">
@@ -677,7 +734,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:6px;
-                            font-size:22px;
+                            font-size:18px;
                             font-weight:900;
                             color:#1E3A8A;
                         ">
@@ -695,7 +752,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#FFF7ED;
-                        padding:12px;
+                        padding:10px;
                         border-radius:14px;
                         border-left:5px solid #F59E0B;
                     ">
@@ -709,7 +766,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:6px;
-                            font-size:22px;
+                            font-size:18px;
                             font-weight:900;
                             color:#92400E;
                         ">
@@ -755,7 +812,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         width:100%;
-                        height:10px;
+                        height:7px;
                         background:#E5E7EB;
                         border-radius:999px;
                         overflow:hidden;
@@ -783,9 +840,9 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
 
-                    components.html(
+                    st.components.v1.html(
                         status_html,
-                        height=330,
+                        height=280,
                         scrolling=False
                     )
 
@@ -856,6 +913,14 @@ with k4:
 # =========================================================
 # CHARTS
 # =========================================================
+
+signal_colors = {
+    "STRONG_BUY":"#006400",
+    "BUY":"#32CD32",
+    "WATCH":"#F59E0B",
+    "HOLD":"#3B82F6",
+    "AVOID":"#DC2626"
+}
 
 left,right = st.columns(2)
 
