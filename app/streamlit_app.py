@@ -277,7 +277,7 @@ excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
 universe_df = pd.read_excel(excel_path)
 
 stocks = (
-    universe_df.iloc[:,0]
+    universe_df.iloc[:, 0]
     .dropna()
     .astype(str)
     .str.upper()
@@ -315,6 +315,10 @@ with st.sidebar:
             "HOLD",
             "AVOID"
         ],
+        default=[
+            "STRONG_BUY",
+            "BUY"
+        ]
     )
 
     min_score = st.slider(
@@ -340,11 +344,11 @@ with st.sidebar:
 # =========================================================
 
 signal_colors = {
-    "STRONG_BUY":"#006400",
-    "BUY":"#32CD32",
-    "WATCH":"#F59E0B",
-    "HOLD":"#3B82F6",
-    "AVOID":"#DC2626"
+    "STRONG_BUY": "#006400",
+    "BUY": "#32CD32",
+    "WATCH": "#F59E0B",
+    "HOLD": "#3B82F6",
+    "AVOID": "#DC2626"
 }
 
 # =========================================================
@@ -366,16 +370,124 @@ st.info(
     "⚡ Running institutional analysis across full NSE universe..."
 )
 
+# =========================================================
+# ANALYSIS ENGINE
+# =========================================================
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def run_analysis(stock_list):
+
+    progress_bar = st.progress(0)
+
+    results = []
+
+    failed_stocks = []
+
+    total = len(stock_list)
+
+    completed = 0
+
+    start_time = time.time()
+
+    batch_size = 25
+
+    status_placeholder = st.empty()
+
+    for i in range(0, total, batch_size):
+
+        batch = stock_list[i:i + batch_size]
+
+        try:
+
+            data = yf.download(
+                tickers=batch,
+                period="6mo",
+                interval="1d",
+                auto_adjust=True,
+                progress=False,
+                threads=False,
+                group_by="ticker"
+            )
+
+        except:
+
+            failed_stocks.extend(batch)
+
+            continue
+
+        for symbol in batch:
+
+            completed += 1
+
+            try:
+
+                if symbol not in data.columns.levels[0]:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                close = data[symbol]["Close"].dropna()
+
+                if len(close) < 40:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                momentum = (
+                    close.iloc[-1]
+                    / close.iloc[-20]
+                ) - 1
+
+                returns = close.pct_change().dropna()
+
+                sharpe = (
+                    returns.mean()
+                    / max(returns.std(), 0.0001)
+                ) * np.sqrt(252)
+
+                score = (
+                    momentum * 0.6
+                    + sharpe * 0.4
+                )
+
+                if score >= 1.5:
+                    signal = "STRONG_BUY"
+
+                elif score >= 1.0:
+                    signal = "BUY"
+
+                elif score >= 0.6:
+                    signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
+
+                else:
+                    signal = "AVOID"
+
+                results.append({
+                    "Symbol": symbol,
+                    "CMP": safe_round(close.iloc[-1]),
+                    "Momentum": safe_round(momentum * 100),
+                    "Sharpe": safe_round(sharpe),
+                    "Final Score": safe_round(score),
+                    "Classification": signal
+                })
+
+            except:
+
+                failed_stocks.append(symbol)
+
             progress_bar.progress(completed / total)
 
             elapsed = (time.time() - start_time) / 60
 
             estimated_total = (
-                elapsed / max(completed,1)
+                elapsed / max(completed, 1)
             ) * total
 
             remaining_minutes = round(
-                max(estimated_total - elapsed,0),
+                max(estimated_total - elapsed, 0),
                 1
             )
 
@@ -460,13 +572,6 @@ st.info(
                                 {completed}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#10B981;
-                                    font-size:11px;
-                                ">
-                                out of {total}
-                                </div>
                             </div>
 
                             <div style="
@@ -492,13 +597,6 @@ st.info(
                                 {len(set(failed_stocks))}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#DC2626;
-                                    font-size:11px;
-                                ">
-                                failed stocks
-                                </div>
                             </div>
 
                             <div style="
@@ -524,13 +622,6 @@ st.info(
                                 {total}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#2563EB;
-                                    font-size:11px;
-                                ">
-                                NSE Stocks
-                                </div>
                             </div>
 
                             <div style="
@@ -556,13 +647,6 @@ st.info(
                                 {remaining_minutes}m
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#F59E0B;
-                                    font-size:11px;
-                                ">
-                                remaining
-                                </div>
                             </div>
 
                         </div>
@@ -625,116 +709,6 @@ st.info(
 
     progress_bar.empty()
 
-# =========================================================
-# ANALYSIS ENGINE
-# =========================================================
-
-@st.cache_data(ttl=3600, show_spinner=False)
-def run_analysis(stock_list):
-
-    progress_bar = st.progress(0)
-
-    results = []
-
-    failed_stocks = []
-
-    total = len(stock_list)
-
-    completed = 0
-
-    start_time = time.time()
-
-    batch_size = 25
-
-    status_placeholder = st.empty()
-
-    
-
-    for i in range(0, total, batch_size):
-
-        batch = stock_list[i:i+batch_size]
-
-        try:
-
-            data = yf.download(
-                tickers=batch,
-                period="6mo",
-                interval="1d",
-                auto_adjust=True,
-                progress=False,
-                threads=False,
-                group_by="ticker"
-            )
-
-        except:
-
-            failed_stocks.extend(batch)
-
-            continue
-
-        for symbol in batch:
-
-            completed += 1
-
-            try:
-
-                if symbol not in data.columns.levels[0]:
-
-                    failed_stocks.append(symbol)
-                    continue
-
-                close = data[symbol]["Close"].dropna()
-
-                if len(close) < 40:
-
-                    failed_stocks.append(symbol)
-                    continue
-
-                momentum = (
-                    close.iloc[-1]
-                    / close.iloc[-20]
-                ) - 1
-
-                returns = close.pct_change().dropna()
-
-                sharpe = (
-                    returns.mean()
-                    / max(returns.std(),0.0001)
-                ) * np.sqrt(252)
-
-                score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
-                )
-
-                if score >= 1.5:
-                    signal = "STRONG_BUY"
-
-                elif score >= 1.0:
-                    signal = "BUY"
-
-                elif score >= 0.6:
-                    signal = "WATCH"
-
-                elif score >= 0.2:
-                    signal = "HOLD"
-
-                else:
-                    signal = "AVOID"
-
-                results.append({
-                    "Symbol":symbol,
-                    "CMP":safe_round(close.iloc[-1]),
-                    "Momentum":safe_round(momentum*100),
-                    "Sharpe":safe_round(sharpe),
-                    "Final Score":safe_round(score),
-                    "Classification":signal
-                })
-
-            except:
-                failed_stocks.append(symbol)
-
-
     return pd.DataFrame(results), failed_stocks
 
 # =========================================================
@@ -783,7 +757,7 @@ if search_stock:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-k1,k2,k3,k4 = st.columns(4)
+k1, k2, k3, k4 = st.columns(4)
 
 with k1:
     st.metric("NSE Universe", len(stocks))
@@ -801,7 +775,7 @@ with k4:
 # CHARTS
 # =========================================================
 
-left,right = st.columns(2)
+left, right = st.columns(2)
 
 with left:
 
@@ -828,7 +802,7 @@ with left:
 
     fig1.update_layout(
         height=320,
-        margin=dict(l=10,r=10,t=40,b=10)
+        margin=dict(l=10, r=10, t=40, b=10)
     )
 
     st.plotly_chart(
@@ -851,7 +825,7 @@ with right:
 
     fig2.update_layout(
         height=320,
-        margin=dict(l=10,r=10,t=40,b=10)
+        margin=dict(l=10, r=10, t=40, b=10)
     )
 
     st.plotly_chart(
