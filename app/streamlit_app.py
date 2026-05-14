@@ -284,10 +284,6 @@ with st.sidebar:
             "WATCH",
             "HOLD",
             "AVOID"
-        ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
         ]
     )
 
