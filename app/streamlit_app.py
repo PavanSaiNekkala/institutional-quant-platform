@@ -81,7 +81,38 @@ RESPONSIVE MAIN AREA
     max-width:100% !important;
     width:100% !important;
 }
+/* =====================================================
+AUTO EXPAND MAIN SCREEN WHEN SIDEBAR COLLAPSES
+===================================================== */
 
+[data-testid="collapsedControl"]{
+    z-index:9999 !important;
+}
+
+/* Main app expands automatically */
+section.main > div{
+    max-width:100% !important;
+    width:100% !important;
+}
+
+/* Full width charts/tables/cards */
+.element-container,
+.stPlotlyChart,
+[data-testid="stDataFrame"],
+[data-testid="metric-container"]{
+    width:100% !important;
+}
+
+/* Better responsive columns */
+[data-testid="column"]{
+    width:100% !important;
+}
+
+/* Remove extra side margins */
+.block-container{
+    padding-left:1rem !important;
+    padding-right:1rem !important;
+}
 /* =====================================================
 PROCESSING ENGINE
 ===================================================== */
@@ -91,7 +122,37 @@ PROCESSING ENGINE
     max-width:100% !important;
     overflow:hidden !important;
 }
+/* =====================================================
+REMOVE PROCESSING SCROLLBARS
+===================================================== */
 
+/* Remove vertical scrolling from processing area */
+.processing-container{
+    overflow:hidden !important;
+    max-height:none !important;
+}
+
+/* Prevent html component scroll */
+iframe{
+    overflow:hidden !important;
+}
+
+/* Remove Streamlit element scrollbars */
+.element-container{
+    overflow:hidden !important;
+}
+
+/* Remove extra processing whitespace */
+.stHtml{
+    overflow:hidden !important;
+    padding-bottom:0px !important;
+    margin-bottom:0px !important;
+}
+
+/* Prevent horizontal scrollbar */
+html, body, [class*="css"]{
+    overflow-x:hidden !important;
+}
 /* =====================================================
 SEARCH INPUT FIX
 ===================================================== */
