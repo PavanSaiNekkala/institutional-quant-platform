@@ -377,26 +377,26 @@ def run_analysis(stock_list):
     elapsed = (time.time() - start_time) / 60
 
     estimated_total = (
-                elapsed / max(completed, 1)
-            ) * total
+        elapsed / max(completed, 1)
+    ) * total
 
-            remaining_minutes = round(
-                max(estimated_total - elapsed, 0),
-                1
-            )
+    remaining_minutes = round(
+        max(estimated_total - elapsed, 0),
+        1
+    )
 
-            progress_bar.progress(
-                completed / total
-            )
+    progress_bar.progress(
+        completed / total
+    )
 
-            status_html = f"""
-            <div style="
-                background:white;
-                border-radius:22px;
-                padding:20px;
-                margin-top:14px;
-                box-shadow:0 10px 28px rgba(0,0,0,0.08);
-            ">
+    status_html = f"""
+    <div style="
+        background:white;
+        border-radius:22px;
+        padding:20px;
+        margin-top:14px;
+        box-shadow:0 10px 28px rgba(0,0,0,0.08);
+    ">
 
                 <div style="
                     display:flex;
