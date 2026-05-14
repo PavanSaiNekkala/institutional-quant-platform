@@ -207,26 +207,26 @@ st.markdown(
             gap:12px;
         ">
 
-            <div>
+        <div>
 
-                <div style="
-                    font-size:42px;
-                    font-weight:900;
-                    color:white;
-                    line-height:1.1;
-                    letter-spacing:-1px;
-                ">
-                    📊 Institutional Quant Platform
-                </div>
+            <div style="
+                font-size:42px;
+                font-weight:900;
+                color:white;
+                line-height:1.1;
+                letter-spacing:-1px;
+            ">
+                📊 Institutional Quant Platform
+            </div>
 
-                <div style="
-                    color:#CBD5E1;
-                    margin-top:6px;
-                    font-size:15px;
-                    font-weight:500;
-                ">
-                    Enterprise Institutional Analytics Dashboard
-                </div>
+            <div style="
+                 color:#CBD5E1;
+                 margin-top:6px;
+                font-size:15px;
+                font-weight:500;
+            ">
+                Enterprise Institutional Analytics Dashboard
+            </div>
 
                 <div style="
                     color:#94A3B8;
