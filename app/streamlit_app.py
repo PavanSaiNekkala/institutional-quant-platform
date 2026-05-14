@@ -48,25 +48,50 @@ MAIN CONTAINER
 .block-container{
     padding-top:1rem;
     padding-bottom:2rem;
-    max-width:96%;
+    max-width:100%;
 }
 
 /* =====================================================
-SIDEBAR
+RESPONSIVE SIDEBAR
 ===================================================== */
 
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
-    width:320px !important;
+    min-width:280px !important;
+    max-width:340px !important;
+    width:22vw !important;
 }
 
 section[data-testid="stSidebar"] > div{
-    width:320px !important;
+    min-width:280px !important;
+    max-width:340px !important;
+    width:22vw !important;
 }
 
 section[data-testid="stSidebar"] *{
     color:white !important;
+}
+
+/* =====================================================
+RESPONSIVE MAIN AREA
+===================================================== */
+
+.main .block-container{
+    padding-top:1rem;
+    padding-bottom:2rem;
+    max-width:100% !important;
+    width:100% !important;
+}
+
+/* =====================================================
+AUTO FIT PROCESSING ENGINE
+===================================================== */
+
+.processing-container{
+    width:100% !important;
+    max-width:100% !important;
+    overflow:hidden !important;
 }
 
 /* =====================================================
@@ -142,6 +167,34 @@ TABLE
     background:white;
     border-radius:20px;
     padding:12px;
+}
+
+/* =====================================================
+MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 1200px){
+
+    section[data-testid="stSidebar"]{
+        width:280px !important;
+    }
+
+    section[data-testid="stSidebar"] > div{
+        width:280px !important;
+    }
+
+}
+
+@media (max-width: 768px){
+
+    section[data-testid="stSidebar"]{
+        width:100% !important;
+    }
+
+    section[data-testid="stSidebar"] > div{
+        width:100% !important;
+    }
+
 }
 
 </style>
@@ -432,10 +485,12 @@ def run_analysis(stock_list):
             if completed % 10 == 0:
 
                 status_html = f"""
-                <div style="
+                <div class="processing-container" style="
                     background:white;
                     border-radius:24px;
                     padding:30px;
+                    width:100%;
+                    box-sizing:border-box;
                     box-shadow:0 8px 28px rgba(0,0,0,0.08);
                     margin-top:10px;
                     font-family:Segoe UI;
@@ -743,10 +798,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 k1,k2,k3,k4 = st.columns(4)
 
 with k1:
-    st.metric(
-        "NSE Universe",
-        len(stocks)
-    )
+    st.metric("NSE Universe", len(stocks))
 
 with k2:
     st.metric(
