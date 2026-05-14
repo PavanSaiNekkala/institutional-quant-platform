@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# INSTITUTIONAL QUANT PLATFORM
+# UPDATED INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -36,7 +36,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# CSS
+# CUSTOM CSS
 # =========================================================
 
 st.markdown("""
@@ -92,7 +92,7 @@ label {
 }
 
 /* =====================================================
-SELECT
+SELECT BOX
 ===================================================== */
 
 div[data-baseweb="select"] > div {
@@ -144,19 +144,7 @@ TITLE
 }
 
 /* =====================================================
-STATUS CARD
-===================================================== */
-
-.status-card {
-    background: white;
-    border-radius: 18px;
-    padding: 1.5rem;
-    border-left: 6px solid #10B981;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-}
-
-/* =====================================================
-CHARTS
+PLOTLY CONTAINERS
 ===================================================== */
 
 .element-container:has(.js-plotly-plot) {
@@ -869,84 +857,6 @@ st.dataframe(
     results.head(100),
     use_container_width=True,
     height=650
-)
-
-# =========================================================
-# RISK REWARD MATRIX
-# =========================================================
-
-st.markdown("## 📈 Risk Reward Opportunity Matrix")
-
-scatter_df = results.head(100).copy()
-
-scatter_df["Bubble Size"] = (
-    scatter_df["Momentum"]
-    .abs()
-    .fillna(0)
-)
-
-scatter_df["Bubble Size"] = (
-    scatter_df["Bubble Size"] * 2
-) + 10
-
-scatter = px.scatter(
-    scatter_df,
-    x="Risk Reward",
-    y="Final Score",
-    color="Classification",
-    size="Bubble Size",
-    hover_name="Symbol",
-    hover_data=[
-        "Sector",
-        "Momentum",
-        "Sharpe"
-    ],
-    template="plotly_white",
-    color_discrete_map=signal_colors
-)
-
-scatter.update_layout(height=700)
-
-st.plotly_chart(
-    scatter,
-    use_container_width=True
-)
-
-# =========================================================
-# TOP STOCKS
-# =========================================================
-
-st.markdown("## 🚀 Top Stocks By Institutional Score")
-
-top_stocks = results.head(15)
-
-top_fig = px.bar(
-    top_stocks,
-    x="Symbol",
-    y="Final Score",
-    color="Classification",
-    template="plotly_white",
-    color_discrete_map=signal_colors
-)
-
-top_fig.update_layout(height=550)
-
-st.plotly_chart(
-    top_fig,
-    use_container_width=True
-)
-
-# =========================================================
-# DOWNLOAD
-# =========================================================
-
-csv = results.to_csv(index=False)
-
-st.download_button(
-    label="📥 Download Rankings CSV",
-    data=csv,
-    file_name="institutional_rankings.csv",
-    mime="text/csv"
 )
 
 # =========================================================
