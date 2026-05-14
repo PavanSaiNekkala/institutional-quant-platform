@@ -274,44 +274,6 @@ CHART CONTAINER
     margin-bottom: 1rem;
 }
 
-/* =====================================================
-BUTTONS
-===================================================== */
-
-.stButton button {
-
-    border-radius: 10px;
-
-    background: #2563EB;
-
-    color: white;
-
-    border: none;
-
-    height: 45px;
-
-    font-weight: 600;
-}
-
-/* =====================================================
-DOWNLOAD BUTTON
-===================================================== */
-
-.stDownloadButton button {
-
-    border-radius: 10px;
-
-    background: #10B981;
-
-    color: white;
-
-    border: none;
-
-    height: 45px;
-
-    font-weight: 600;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -394,48 +356,50 @@ stocks = list(dict.fromkeys(stocks))
 # SIDEBAR
 # =========================================================
 
+# =========================================================
+# SIDEBAR
+# =========================================================
+
 with st.sidebar:
 
     st.markdown("## ⚙️ Dashboard Controls")
 
     st.markdown("---")
 
-    top_n = st.slider(
-        "Stocks To Analyze",
-        min_value=100,
-        max_value=min(len(stocks), 3000),
-        value=300,
-        step=25
-    )
+    with st.form("control_form"):
 
-    signal_filter = st.selectbox(
-        "Trade Signal",
-        [
-            "All",
-            "STRONG_BUY",
-            "BUY",
-            "WATCH",
-            "AVOID"
-        ]
-    )
+        signal_filter = st.selectbox(
+            "Trade Signal",
+            [
+                "All",
+                "STRONG_BUY",
+                "BUY",
+                "WATCH",
+                "AVOID"
+            ]
+        )
 
-    min_score = st.slider(
-        "Minimum Institutional Score",
-        min_value=0,
-        max_value=100,
-        value=60
-    )
+        min_score = st.slider(
+            "Minimum Institutional Score",
+            min_value=0,
+            max_value=100,
+            value=60
+        )
 
-    search_stock = st.text_input(
-        "Search Stock"
-    )
+        search_stock = st.text_input(
+            "Search Stock"
+        )
+
+        submitted = st.form_submit_button(
+            "🚀 Apply Filters"
+        )
 
     st.markdown("---")
 
-    st.success("AI Quant Engine Enabled")
-    st.info("Live Regime Detection Enabled")
-    st.info("Sector Rotation Enabled")
-
+    st.success("✅ Full NSE Universe Enabled")
+    st.info("📈 Live Regime Detection Enabled")
+    st.info("🧠 Sector Rotation Enabled")
+    
 # =========================================================
 # SAFE ROUND
 # =========================================================
@@ -693,24 +657,20 @@ def run_analysis(stock_list, regime):
     return pd.DataFrame(ranking_data)
 
 # =========================================================
-# RUN ANALYSIS ONLY ONCE
-# =========================================================
-
-results = run_analysis(
-    stocks[:top_n],
-    regime
-)
-
-# =========================================================
 # RESULTS
 # =========================================================
 
-results = pd.DataFrame(ranking_data)
+raw_results = run_analysis(
+    stocks,
+    regime
+)
 
-if results.empty:
+if raw_results.empty:
 
     st.error("No valid stocks analyzed.")
     st.stop()
+
+results = raw_results.copy()
 
 results["Percentile"] = (
     results["Final Score"] * 100
@@ -749,80 +709,37 @@ k1, k2, k3, k4 = st.columns(4)
 
 with k1:
 
-    st.markdown(
-        f"""
-        <div class="kpi-card">
-        <div class="kpi-title">
-        Universe Size
-        </div>
-
-        <div class="kpi-value">
-        {len(results)}
-        </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "Universe Size",
+        len(results)
     )
 
 with k2:
 
-    avg_score = safe_round(
-        results["Final Score"].mean() * 100
-    )
-
-    st.markdown(
-        f"""
-        <div class="kpi-card">
-        <div class="kpi-title">
-        Avg Institutional Score
-        </div>
-
-        <div class="kpi-value">
-        {avg_score}
-        </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "Avg Institutional Score",
+        safe_round(
+            results["Final Score"].mean() * 100
+        )
     )
 
 with k3:
 
-    strong_buys = len(
-        results[
-            results["Classification"] == "STRONG_BUY"
-        ]
-    )
-
-    st.markdown(
-        f"""
-        <div class="kpi-card">
-        <div class="kpi-title">
-        Strong Buy Opportunities
-        </div>
-
-        <div class="kpi-value">
-        {strong_buys}
-        </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "Strong Buy Opportunities",
+        len(
+            results[
+                results["Classification"]
+                == "STRONG_BUY"
+            ]
+        )
     )
 
 with k4:
 
-    st.markdown(
-        f"""
-        <div class="kpi-card">
-        <div class="kpi-title">
-        Market Regime
-        </div>
-
-        <div class="kpi-value" style="font-size:24px;">
-        {regime}
-        </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "Market Regime",
+        regime
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -870,19 +787,12 @@ with chart1:
     )
 
     pie_fig.update_layout(
-
-        paper_bgcolor="white",
-
-        plot_bgcolor="white",
-
-        font=dict(color="#111827"),
-
         height=450
     )
 
     st.plotly_chart(
         pie_fig,
-        width="stretch"
+        use_container_width=True
     )
 
 # =========================================================
@@ -921,19 +831,12 @@ with chart2:
     )
 
     sector_fig.update_layout(
-
-        paper_bgcolor="white",
-
-        plot_bgcolor="white",
-
-        font=dict(color="#111827"),
-
         height=450
     )
 
     st.plotly_chart(
         sector_fig,
-        width="stretch"
+        use_container_width=True
     )
 
 # =========================================================
@@ -944,7 +847,7 @@ st.markdown("## 🏦 Top Institutional Rankings")
 
 st.dataframe(
     results.head(100),
-    width="stretch",
+    use_container_width=True,
     height=650
 )
 
@@ -992,30 +895,12 @@ scatter = px.scatter(
 )
 
 scatter.update_layout(
-
-    paper_bgcolor="white",
-
-    plot_bgcolor="white",
-
-    font=dict(color="#111827"),
-
     height=700
-)
-
-scatter.update_traces(
-
-    marker=dict(
-        opacity=0.85,
-        line=dict(
-            width=1,
-            color="white"
-        )
-    )
 )
 
 st.plotly_chart(
     scatter,
-    width="stretch"
+    use_container_width=True
 )
 
 # =========================================================
@@ -1042,19 +927,12 @@ top_fig = px.bar(
 )
 
 top_fig.update_layout(
-
-    paper_bgcolor="white",
-
-    plot_bgcolor="white",
-
-    font=dict(color="#111827"),
-
     height=550
 )
 
 st.plotly_chart(
     top_fig,
-    width="stretch"
+    use_container_width=True
 )
 
 # =========================================================
