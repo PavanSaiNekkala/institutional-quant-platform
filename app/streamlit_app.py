@@ -4,7 +4,6 @@
 # =========================================================
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -699,11 +698,7 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
 
-                    components.html(
-                        status_html,
-                        height=720,
-                        scrolling=False
-                    )
+                    st.html(status_html)
 
     progress_bar.empty()
 
