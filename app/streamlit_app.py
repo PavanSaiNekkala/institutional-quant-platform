@@ -226,7 +226,9 @@ st.markdown("""
 <div style="
     font-size:16px;
     color:#111827;
-    margin-top:-6px;
+    font-weight:800;
+    margin-top:6px;
+    margin-bottom:12px;
 ">
 Enterprise Institutional Analytics Dashboard
 </div>
@@ -237,9 +239,9 @@ india = pytz.timezone("Asia/Kolkata")
 st.markdown(
     f"""
     <div style="
-        color:#000000;
+        color:#111827;
         font-size:14px;
-        font-weight:800;
+        font-weight:500;
         margin-top:6px;
         margin-bottom:12px;
     ">
