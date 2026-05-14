@@ -758,27 +758,20 @@ k1,k2,k3,k4 = st.columns(4)
 
 with k1:
     st.metric(
-        "Universe Size",
-        len(results)
+        "NSE Universe",
+        len(stocks)
     )
 
 with k2:
     st.metric(
-        "Average Score",
-        safe_round(
-            results["Final Score"].mean() * 100
-        )
+        "Processed Stocks",
+        len(results) + len(set(failed_stocks))
     )
 
 with k3:
     st.metric(
-        "Strong Buy",
-        len(
-            results[
-                results["Classification"]
-                == "STRONG_BUY"
-            ]
-        )
+        "Filtered Opportunities",
+        len(results)
     )
 
 with k4:
@@ -786,7 +779,6 @@ with k4:
         "Failed Stocks",
         len(set(failed_stocks))
     )
-
 # =========================================================
 # CHARTS
 # =========================================================
