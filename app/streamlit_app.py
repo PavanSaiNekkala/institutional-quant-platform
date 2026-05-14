@@ -87,6 +87,11 @@ input{
     caret-color:#2563EB !important;
 }
 
+input::placeholder{
+    color:#6B7280 !important;
+    opacity:1 !important;
+}
+
 /* =====================================================
 SELECT BOX
 ===================================================== */
@@ -258,9 +263,10 @@ with st.sidebar:
     st.success(
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
+
     st.markdown("### 📈 Trade Signal Summary")
 
-    signal_summary_html = f"""
+    signal_summary_html = """
     <div style="
         display:flex;
         flex-direction:column;
@@ -318,7 +324,7 @@ with st.sidebar:
     st.markdown(
         signal_summary_html,
         unsafe_allow_html=True
-    )        
+    )
 
 # =========================================================
 # COLORS
@@ -761,7 +767,6 @@ def run_analysis(stock_list):
                 """
 
                 with status_placeholder:
-
                     st.html(status_html)
 
     progress_bar.empty()
@@ -843,6 +848,7 @@ with k4:
         "Failed Stocks",
         len(set(failed_stocks))
     )
+
 # =========================================================
 # CHARTS
 # =========================================================
