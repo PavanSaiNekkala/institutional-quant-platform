@@ -6,9 +6,8 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 
-
 # =========================================================
-# DETECT LIVE MARKET REGIME
+# MARKET REGIME DETECTOR
 # =========================================================
 
 def detect_market_regime():
@@ -16,7 +15,7 @@ def detect_market_regime():
     try:
 
         # =================================================
-        # NIFTY DATA
+        # NIFTY 50 INDEX
         # =================================================
 
         nifty = yf.download(
@@ -25,126 +24,79 @@ def detect_market_regime():
 
             period="6mo",
 
+            interval="1d",
+
+            auto_adjust=True,
+
             progress=False,
 
-            auto_adjust=True
+            threads=False
         )
 
         if nifty.empty:
 
-            return "UNKNOWN"
+            return "SIDEWAYS"
 
-        close = nifty["Close"].dropna()
-
-        if isinstance(close, pd.DataFrame):
-
-            close = close.iloc[:, 0]
+        close = nifty["Close"]
 
         # =================================================
         # MOVING AVERAGES
         # =================================================
 
-        sma20 = close.rolling(20).mean().iloc[-1]
+        sma20 = (
+            close
+            .rolling(20)
+            .mean()
+            .iloc[-1]
+        )
 
-        sma50 = close.rolling(50).mean().iloc[-1]
+        sma50 = (
+            close
+            .rolling(50)
+            .mean()
+            .iloc[-1]
+        )
 
-        sma200 = close.rolling(200).mean().iloc[-1]
-
-        current = close.iloc[-1]
-
-        # =================================================
-        # RETURNS
-        # =================================================
-
-        returns = close.pct_change().dropna()
+        current_price = close.iloc[-1]
 
         volatility = (
-
-            returns.std()
-            * np.sqrt(252)
+            close
+            .pct_change()
+            .rolling(20)
+            .std()
+            .iloc[-1]
         )
 
         # =================================================
-        # RSI
+        # REGIME LOGIC
         # =================================================
 
-        delta = close.diff()
+        if current_price > sma20 > sma50:
 
-        gain = (
+            if volatility < 0.015:
 
-            delta.where(delta > 0, 0)
-            .rolling(14)
-            .mean()
-        )
-
-        loss = (
-
-            -delta.where(delta < 0, 0)
-            .rolling(14)
-            .mean()
-        )
-
-        rs = gain / loss
-
-        rsi = 100 - (
-
-            100 / (1 + rs)
-        )
-
-        rsi = rsi.iloc[-1]
-
-        # =================================================
-        # TREND LOGIC
-        # =================================================
-
-        bullish_trend = (
-
-            current > sma20 >
-
-            sma50 > sma200
-        )
-
-        bearish_trend = (
-
-            current < sma20 <
-
-            sma50 < sma200
-        )
-
-        # =================================================
-        # REGIME DETECTION
-        # =================================================
-
-        if bullish_trend:
-
-            if volatility > 0.30:
-
-                return "BULLISH_HIGH_VOL"
-
-            return "BULLISH"
-
-        elif bearish_trend:
-
-            if volatility > 0.30:
-
-                return "BEARISH_HIGH_VOL"
-
-            return "BEARISH"
-
-        else:
-
-            if rsi > 60:
-
-                return "SIDEWAYS_BULLISH"
-
-            elif rsi < 40:
-
-                return "SIDEWAYS_BEARISH"
+                return "BULLISH"
 
             else:
 
-                return "SIDEWAYS"
+                return "VOLATILE_BULLISH"
 
-    except Exception:
+        elif current_price < sma20 < sma50:
 
-        return "UNKNOWN"
+            if volatility < 0.015:
+
+                return "BEARISH"
+
+            else:
+
+                return "VOLATILE_BEARISH"
+
+        else:
+
+            return "SIDEWAYS"
+
+    except Exception as e:
+
+        print(f"Market Regime Error: {e}")
+
+        return "SIDEWAYS"
