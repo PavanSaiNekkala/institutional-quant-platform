@@ -1,496 +1,181 @@
 # =========================================================
 # FILE: core/sector_models.py
-# FINAL LIGHTWEIGHT INSTITUTIONAL SECTOR ENGINE
+# FINAL FIXED VERSION
 # =========================================================
 
 import numpy as np
 
 # =========================================================
-# SECTOR IMPACT WEIGHTS
+# DEFAULT SECTOR WEIGHTS
 # =========================================================
 
-SECTOR_IMPACT = {
+SECTOR_WEIGHTS = {
 
-    "PRIVATE_BANKS": 1.40,
-    "PSU_BANKS": 1.20,
+    "Technology": {
 
-    "PRIVATE_IT": 1.30,
+        "revenue_growth": 0.25,
+        "profit_margin": 0.15,
+        "roe": 0.15,
+        "momentum": 0.20,
+        "sharpe": 0.15,
+        "trend_strength": 0.10
+    },
 
-    "PRIVATE_FMCG": 1.10,
+    "Financial Services": {
 
-    "PRIVATE_AUTO": 1.05,
+        "roe": 0.30,
+        "profit_margin": 0.20,
+        "operating_margin": 0.15,
+        "momentum": 0.15,
+        "sharpe": 0.10,
+        "dividend_yield": 0.10
+    },
 
-    "PRIVATE_PHARMA": 1.00,
+    "Healthcare": {
 
-    "PRIVATE_ENERGY": 1.25,
-    "PSU_ENERGY": 1.20,
+        "revenue_growth": 0.20,
+        "profit_margin": 0.20,
+        "roe": 0.20,
+        "momentum": 0.15,
+        "sharpe": 0.15,
+        "trend_strength": 0.10
+    },
 
-    "PSU_DEFENCE": 1.10,
+    "Industrials": {
 
-    "PRIVATE_METALS": 0.95,
+        "revenue_growth": 0.20,
+        "operating_margin": 0.20,
+        "roe": 0.20,
+        "momentum": 0.15,
+        "trend_strength": 0.15,
+        "sharpe": 0.10
+    },
 
-    "PRIVATE_REALTY": 0.90,
+    "Energy": {
 
-    "PRIVATE_CONSUMER": 1.00,
+        "profit_margin": 0.25,
+        "dividend_yield": 0.20,
+        "momentum": 0.15,
+        "roe": 0.15,
+        "operating_margin": 0.15,
+        "sharpe": 0.10
+    },
 
-    "PRIVATE_CHEMICALS": 0.95,
+    "Consumer Defensive": {
 
-    "PRIVATE_TELECOM": 1.00,
-
-    "PRIVATE_CEMENT": 0.90,
-
-    "PRIVATE_INFRA": 1.05,
-
-    "OTHER": 0.70
+        "profit_margin": 0.20,
+        "dividend_yield": 0.20,
+        "roe": 0.20,
+        "momentum": 0.15,
+        "sharpe": 0.15,
+        "trend_strength": 0.10
+    }
 }
 
 # =========================================================
-# LIGHTWEIGHT SECTOR DETECTION
+# DEFAULT MODEL
 # =========================================================
 
-def detect_sector(symbol):
+DEFAULT_WEIGHTS = {
 
-    symbol = symbol.upper()
-
-    # =====================================================
-    # PRIVATE / PSU BANKS
-    # =====================================================
-
-    if any(
-
-        x in symbol
-
-        for x in [
-
-            "BANK",
-            "FIN",
-            "HDFC",
-            "ICICI",
-            "SBI",
-            "KOTAK",
-            "AXIS",
-            "IDFC"
-        ]
-    ):
-
-        if any(
-
-            x in symbol
-
-            for x in [
-
-                "SBI",
-                "PNB",
-                "BANKBARODA",
-                "CANBK",
-                "UNIONBANK",
-                "IOB",
-                "PSB"
-            ]
-        ):
-
-            return "PSU_BANKS"
-
-        return "PRIVATE_BANKS"
-
-    # =====================================================
-    # IT
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "TCS",
-            "INFY",
-            "WIPRO",
-            "TECH",
-            "SOFT",
-            "LTIM",
-            "HCL",
-            "KPIT",
-            "PERSISTENT"
-        ]
-    ):
-
-        return "PRIVATE_IT"
-
-    # =====================================================
-    # PHARMA
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "PHARMA",
-            "LAB",
-            "MED",
-            "DRREDDY",
-            "SUN",
-            "LUPIN",
-            "CIPLA"
-        ]
-    ):
-
-        return "PRIVATE_PHARMA"
-
-    # =====================================================
-    # AUTO
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "AUTO",
-            "MOTOR",
-            "MARUTI",
-            "M&M",
-            "TATA",
-            "EICHER",
-            "BAJAJ"
-        ]
-    ):
-
-        return "PRIVATE_AUTO"
-
-    # =====================================================
-    # ENERGY
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "POWER",
-            "OIL",
-            "GAS",
-            "ENERGY",
-            "ONGC",
-            "IOC",
-            "BPCL",
-            "NTPC",
-            "GAIL"
-        ]
-    ):
-
-        return "PSU_ENERGY"
-
-    # =====================================================
-    # FMCG
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "CONSUM",
-            "NESTLE",
-            "DABUR",
-            "MARICO",
-            "HINDUNILVR",
-            "BRITANNIA"
-        ]
-    ):
-
-        return "PRIVATE_FMCG"
-
-    # =====================================================
-    # METALS
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "STEEL",
-            "METAL",
-            "HINDALCO",
-            "JSW",
-            "TATASTEEL",
-            "SAIL",
-            "NMDC"
-        ]
-    ):
-
-        return "PRIVATE_METALS"
-
-    # =====================================================
-    # REALTY
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "REAL",
-            "PROP",
-            "DLF",
-            "LODHA",
-            "OBEROI"
-        ]
-    ):
-
-        return "PRIVATE_REALTY"
-
-    # =====================================================
-    # DEFENCE
-    # =====================================================
-
-    elif any(
-
-        x in symbol
-
-        for x in [
-
-            "HAL",
-            "BEL",
-            "BDL",
-            "MAZDOCK",
-            "SHIP"
-        ]
-    ):
-
-        return "PSU_DEFENCE"
-
-    return "OTHER"
+    "revenue_growth": 0.15,
+    "profit_margin": 0.15,
+    "roe": 0.15,
+    "operating_margin": 0.10,
+    "momentum": 0.15,
+    "sharpe": 0.10,
+    "trend_strength": 0.10,
+    "dividend_yield": 0.05,
+    "debt_to_equity": -0.05
+}
 
 # =========================================================
-# INSTITUTIONAL FACTOR ENGINE
+# SAFE VALUE
 # =========================================================
 
-def sector_factor_score(
+def safe_value(x):
 
+    try:
+
+        if x is None:
+            return 0
+
+        if np.isnan(x):
+            return 0
+
+        if np.isinf(x):
+            return 0
+
+        return float(x)
+
+    except Exception:
+
+        return 0
+
+# =========================================================
+# MAIN SCORING ENGINE
+# =========================================================
+
+def calculate_sector_score(
     sector,
-    momentum,
-    sharpe,
-    trend_strength,
-    total_return,
-    volatility,
-    risk_reward,
-    regime
+    metrics
 ):
 
-    # =====================================================
-    # PRIVATE BANKS
-    # =====================================================
+    try:
 
-    if sector == "PRIVATE_BANKS":
-
-        raw_score = (
-
-            sharpe * 0.30 +
-            momentum * 0.25 +
-            trend_strength * 0.20 +
-            total_return * 0.25
+        weights = SECTOR_WEIGHTS.get(
+            sector,
+            DEFAULT_WEIGHTS
         )
 
-    # =====================================================
-    # PSU BANKS
-    # =====================================================
+        score = 0
 
-    elif sector == "PSU_BANKS":
+        for factor, weight in weights.items():
 
-        raw_score = (
+            value = safe_value(
+                metrics.get(factor, 0)
+            )
 
-            momentum * 0.35 +
-            total_return * 0.30 +
-            sharpe * 0.20 -
-            volatility * 0.15
+            score += value * weight
+
+        # =============================================
+        # PENALIZE HIGH DEBT
+        # =============================================
+
+        debt = safe_value(
+            metrics.get(
+                "debt_to_equity",
+                0
+            )
         )
 
-    # =====================================================
-    # PRIVATE IT
-    # =====================================================
+        if debt > 2:
 
-    elif sector == "PRIVATE_IT":
+            score *= 0.85
 
-        raw_score = (
+        # =============================================
+        # BONUS FOR STRONG MOMENTUM
+        # =============================================
 
-            momentum * 0.30 +
-            sharpe * 0.25 +
-            total_return * 0.25 +
-            trend_strength * 0.20
+        momentum = safe_value(
+            metrics.get(
+                "momentum",
+                0
+            )
         )
 
-    # =====================================================
-    # FMCG
-    # =====================================================
+        if momentum > 0.20:
 
-    elif sector == "PRIVATE_FMCG":
+            score *= 1.10
 
-        raw_score = (
+        return round(score, 4)
 
-            sharpe * 0.35 -
-            volatility * 0.25 +
-            trend_strength * 0.20 +
-            total_return * 0.20
-        )
+    except Exception:
 
-    # =====================================================
-    # AUTO
-    # =====================================================
+        return 0
 
-    elif sector == "PRIVATE_AUTO":
+# =========================================================
+# BACKWARD COMPATIBILITY
+# =========================================================
 
-        raw_score = (
-
-            momentum * 0.35 +
-            total_return * 0.30 +
-            trend_strength * 0.20 +
-            sharpe * 0.15
-        )
-
-    # =====================================================
-    # PHARMA
-    # =====================================================
-
-    elif sector == "PRIVATE_PHARMA":
-
-        raw_score = (
-
-            sharpe * 0.30 +
-            momentum * 0.25 +
-            total_return * 0.25 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # ENERGY
-    # =====================================================
-
-    elif sector == "PSU_ENERGY":
-
-        raw_score = (
-
-            total_return * 0.25 +
-            momentum * 0.25 +
-            sharpe * 0.25 -
-            volatility * 0.15
-        )
-
-    # =====================================================
-    # DEFENCE
-    # =====================================================
-
-    elif sector == "PSU_DEFENCE":
-
-        raw_score = (
-
-            momentum * 0.40 +
-            total_return * 0.30 +
-            trend_strength * 0.20 -
-            volatility * 0.10
-        )
-
-    # =====================================================
-    # METALS
-    # =====================================================
-
-    elif sector == "PRIVATE_METALS":
-
-        raw_score = (
-
-            momentum * 0.35 +
-            total_return * 0.30 +
-            trend_strength * 0.20 -
-            volatility * 0.15
-        )
-
-    # =====================================================
-    # REALTY
-    # =====================================================
-
-    elif sector == "PRIVATE_REALTY":
-
-        raw_score = (
-
-            momentum * 0.30 +
-            total_return * 0.30 +
-            trend_strength * 0.20 -
-            volatility * 0.20
-        )
-
-    # =====================================================
-    # DEFAULT
-    # =====================================================
-
-    else:
-
-        raw_score = (
-
-            momentum * 0.25 +
-            sharpe * 0.25 +
-            total_return * 0.25 +
-            trend_strength * 0.15 -
-            volatility * 0.10
-        )
-
-    # =====================================================
-    # SECTOR IMPACT
-    # =====================================================
-
-    sector_weight = SECTOR_IMPACT.get(
-
-        sector,
-        0.70
-    )
-
-    impact_adjusted_score = (
-
-        raw_score
-        * sector_weight
-    )
-
-    # =====================================================
-    # REGIME BOOST
-    # =====================================================
-
-    if "BULLISH" in regime:
-
-        if sector in [
-
-            "PRIVATE_BANKS",
-            "PRIVATE_IT",
-            "PRIVATE_AUTO",
-            "PRIVATE_REALTY"
-        ]:
-
-            impact_adjusted_score *= 1.10
-
-    elif "BEARISH" in regime:
-
-        if sector in [
-
-            "PRIVATE_FMCG",
-            "PRIVATE_PHARMA"
-        ]:
-
-            impact_adjusted_score *= 1.10
-
-    # =====================================================
-    # FINAL SCORE
-    # =====================================================
-
-    final_score = (
-
-        impact_adjusted_score
-        * risk_reward
-    )
-
-    return final_score
+sector_score = calculate_sector_score
