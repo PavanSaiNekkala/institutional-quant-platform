@@ -137,6 +137,15 @@ div[data-baseweb="select"] > div{
 }
 
 /* =====================================================
+MULTISELECT
+===================================================== */
+
+[data-baseweb="tag"]{
+    background:#2563EB !important;
+    color:white !important;
+}
+
+/* =====================================================
 METRICS
 ===================================================== */
 
@@ -268,14 +277,22 @@ with st.sidebar:
 
     st.markdown("---")
 
-    signal_filter = st.selectbox(
-        "Trade Signal",
-        [
-            "All",
+    # =====================================================
+    # TRADE SIGNAL FILTER
+    # =====================================================
+
+    signal_filter = st.multiselect(
+        "📈 Trade Signal Filter",
+        options=[
             "STRONG_BUY",
             "BUY",
             "WATCH",
+            "HOLD",
             "AVOID"
+        ],
+        default=[
+            "STRONG_BUY",
+            "BUY"
         ]
     )
 
@@ -331,6 +348,7 @@ with st.sidebar:
     st.success("🟢 STRONG BUY")
     st.info("🟩 BUY")
     st.warning("🟠 WATCH")
+    st.info("🔵 HOLD")
     st.error("🔴 AVOID")
 
 # =========================================================
@@ -340,7 +358,8 @@ with st.sidebar:
 signal_colors = {
     "STRONG_BUY": "#006400",
     "BUY": "#32CD32",
-    "WATCH": "#FF8C00",
+    "WATCH": "#F59E0B",
+    "HOLD": "#3B82F6",
     "AVOID": "#DC2626"
 }
 
@@ -440,14 +459,21 @@ def run_analysis(stock_list):
                     + sharpe * 0.4
                 )
 
-                if score >= 1.2:
+                # =====================================================
+                # SIGNAL CLASSIFICATION
+                # =====================================================
+
+                if score >= 1.5:
                     signal = "STRONG_BUY"
 
-                elif score >= 0.8:
+                elif score >= 1.0:
                     signal = "BUY"
 
-                elif score >= 0.4:
+                elif score >= 0.6:
                     signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
 
                 else:
                     signal = "AVOID"
@@ -776,10 +802,15 @@ results = results[
     results["Percentile"] >= min_score
 ]
 
-if signal_filter != "All":
+# =========================================================
+# APPLY SIGNAL FILTER
+# =========================================================
+
+if signal_filter:
 
     results = results[
-        results["Classification"] == signal_filter
+        results["Classification"]
+        .isin(signal_filter)
     ]
 
 if search_stock:
