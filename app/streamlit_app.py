@@ -1,6 +1,6 @@
 # =========================================================
 # INSTITUTIONAL QUANT PLATFORM
-# FINAL ENTERPRISE STREAMLIT DASHBOARD
+# FINAL CLEAN ENTERPRISE STREAMLIT APP
 # =========================================================
 
 import streamlit as st
@@ -44,7 +44,7 @@ GLOBAL
 }
 
 /* =====================================================
-REMOVE STREAMLIT HEADER SPACE
+REMOVE HEADER SPACE
 ===================================================== */
 
 header[data-testid="stHeader"]{
@@ -75,15 +75,6 @@ SIDEBAR
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
-    min-width:250px !important;
-    max-width:300px !important;
-    width:20vw !important;
-}
-
-section[data-testid="stSidebar"] > div{
-    min-width:250px !important;
-    max-width:300px !important;
-    width:20vw !important;
 }
 
 section[data-testid="stSidebar"] *{
@@ -91,33 +82,13 @@ section[data-testid="stSidebar"] *{
 }
 
 /* =====================================================
-AUTO EXPAND
+SEARCH INPUT
 ===================================================== */
-
-.main .block-container{
-    max-width:100% !important;
-    width:100% !important;
-}
-
-section.main > div{
-    width:100% !important;
-    max-width:100% !important;
-}
-
-/* =====================================================
-SEARCH BOX
-===================================================== */
-
-div[data-baseweb="base-input"]{
-    background:white !important;
-    border-radius:12px !important;
-}
 
 div[data-baseweb="base-input"] > div{
     background:white !important;
     border:2px solid #2563EB !important;
     border-radius:12px !important;
-    min-height:48px !important;
 }
 
 div[data-baseweb="base-input"] > div:focus-within{
@@ -129,47 +100,32 @@ input[type="text"]{
     background:white !important;
     font-size:18px !important;
     font-weight:800 !important;
-    opacity:1 !important;
     -webkit-text-fill-color:#111827 !important;
-    caret-color:#2563EB !important;
-    box-shadow:none !important;
 }
 
 input[type="text"]::placeholder{
     color:#6B7280 !important;
     opacity:1 !important;
-    font-weight:700 !important;
 }
 
 /* =====================================================
-SELECT BOX
+SELECT
 ===================================================== */
 
 div[data-baseweb="select"] > div{
     background:#1F2937 !important;
-    border:1px solid #374151 !important;
     border-radius:12px !important;
 }
 
 /* =====================================================
-MULTISELECT TAGS
-===================================================== */
-
-[data-baseweb="tag"]{
-    background:#2563EB !important;
-    color:white !important;
-}
-
-/* =====================================================
-METRICS
+METRIC CARDS
 ===================================================== */
 
 [data-testid="metric-container"]{
     background:white;
     border-radius:18px;
-    padding:12px;
-    min-height:100px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    padding:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 
 /* =====================================================
@@ -181,7 +137,7 @@ PLOTLY
     border-radius:18px;
     padding:10px;
     box-shadow:0 4px 14px rgba(0,0,0,0.08);
-    margin-bottom:16px;
+    margin-bottom:18px;
 }
 
 /* =====================================================
@@ -195,25 +151,10 @@ TABLE
 }
 
 /* =====================================================
-PROCESSING PANEL
-===================================================== */
-
-.processing-container{
-    width:100% !important;
-    max-width:100% !important;
-    overflow:hidden !important;
-}
-
-/* =====================================================
 REMOVE SCROLLBARS
 ===================================================== */
 
 iframe{
-    overflow:hidden !important;
-    margin-bottom:-10px !important;
-}
-
-.element-container{
     overflow:hidden !important;
 }
 
@@ -233,23 +174,11 @@ RESPONSIVE
 
 }
 
-@media (max-width:768px){
-
-    section[data-testid="stSidebar"]{
-        width:100% !important;
-    }
-
-    section[data-testid="stSidebar"] > div{
-        width:100% !important;
-    }
-
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# MAIN HEADER
+# HEADER
 # =========================================================
 
 st.markdown(
@@ -260,9 +189,9 @@ st.markdown(
             #0F172A,
             #111827
         );
-        padding:22px 28px;
+        padding:18px 24px;
         border-radius:22px;
-        margin-bottom:14px;
+        margin-bottom:12px;
         box-shadow:0 8px 24px rgba(0,0,0,0.15);
     ">
 
@@ -276,7 +205,7 @@ st.markdown(
             <div>
 
                 <div style="
-                    font-size:42px;
+                    font-size:38px;
                     font-weight:900;
                     color:white;
                     line-height:1.1;
@@ -286,9 +215,9 @@ st.markdown(
                 </div>
 
                 <div style="
-                    margin-top:8px;
+                    margin-top:6px;
                     color:#CBD5E1;
-                    font-size:15px;
+                    font-size:14px;
                     font-weight:500;
                 ">
                     Enterprise Institutional Analytics Dashboard
@@ -299,9 +228,9 @@ st.markdown(
             <div style="
                 background:#10B981;
                 color:white;
-                padding:10px 18px;
-                border-radius:14px;
-                font-size:14px;
+                padding:8px 16px;
+                border-radius:12px;
+                font-size:13px;
                 font-weight:800;
                 margin-top:8px;
             ">
@@ -326,8 +255,8 @@ st.markdown(
     <div style="
         color:#6B7280;
         font-size:11px;
-        margin-top:-4px;
-        margin-bottom:10px;
+        margin-top:-2px;
+        margin-bottom:12px;
         font-weight:700;
     ">
     Updated:
@@ -338,7 +267,7 @@ st.markdown(
 )
 
 # =========================================================
-# LOAD NSE UNIVERSE
+# LOAD NSE STOCKS
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -369,7 +298,7 @@ with st.sidebar:
     <div style="
         font-size:28px;
         font-weight:900;
-        margin-bottom:6px;
+        margin-bottom:10px;
     ">
     ⚙️ Dashboard Controls
     </div>
@@ -379,7 +308,7 @@ with st.sidebar:
 
     signal_filter = st.multiselect(
         "📈 Trade Signal Filter",
-        options=[
+        [
             "STRONG_BUY",
             "BUY",
             "WATCH",
@@ -404,36 +333,6 @@ with st.sidebar:
         placeholder="Type stock name..."
     )
 
-    if search_stock:
-
-        matches = [
-            s for s in stocks
-            if search_stock.upper() in s.upper()
-        ][:15]
-
-        if matches:
-
-            st.markdown("### 🔍 Matching Stocks")
-
-            for m in matches:
-
-                st.markdown(
-                    f"""
-                    <div style="
-                        background:#1F2937;
-                        padding:8px;
-                        border-radius:8px;
-                        margin-bottom:6px;
-                        border-left:4px solid #10B981;
-                        font-weight:700;
-                        font-size:13px;
-                    ">
-                    {m}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
     st.markdown("---")
 
     st.success(
@@ -453,7 +352,7 @@ signal_colors = {
 }
 
 # =========================================================
-# HELPERS
+# SAFE ROUND
 # =========================================================
 
 def safe_round(x, n=2):
@@ -464,7 +363,7 @@ def safe_round(x, n=2):
         return 0
 
 # =========================================================
-# INFO
+# RUNNING MESSAGE
 # =========================================================
 
 st.info(
@@ -472,7 +371,7 @@ st.info(
 )
 
 # =========================================================
-# ANALYSIS ENGINE
+# ANALYSIS
 # =========================================================
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -576,6 +475,7 @@ def run_analysis(stock_list):
                 })
 
             except:
+
                 failed_stocks.append(symbol)
 
             progress_bar.progress(completed / total)
@@ -627,7 +527,6 @@ def run_analysis(stock_list):
                         <div style="
                             color:#6B7280;
                             font-size:13px;
-                            margin-top:2px;
                         ">
                         Real-Time Quant Processing
                         </div>
@@ -840,7 +739,7 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
 
-                    st.components.v1.html(
+                    components.html(
                         status_html,
                         height=280,
                         scrolling=False
@@ -851,7 +750,7 @@ def run_analysis(stock_list):
     return pd.DataFrame(results), failed_stocks
 
 # =========================================================
-# RUN ANALYSIS
+# RUN
 # =========================================================
 
 results, failed_stocks = run_analysis(stocks)
@@ -891,7 +790,7 @@ if search_stock:
     ]
 
 # =========================================================
-# KPI CARDS
+# KPIs
 # =========================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -913,14 +812,6 @@ with k4:
 # =========================================================
 # CHARTS
 # =========================================================
-
-signal_colors = {
-    "STRONG_BUY":"#006400",
-    "BUY":"#32CD32",
-    "WATCH":"#F59E0B",
-    "HOLD":"#3B82F6",
-    "AVOID":"#DC2626"
-}
 
 left,right = st.columns(2)
 
@@ -992,5 +883,5 @@ st.dataframe(
         ascending=False
     ),
     use_container_width=True,
-    height=480
+    height=500
 )
