@@ -45,7 +45,15 @@ html, body, [class*="css"]{
 }
 
 /* =====================================================
-STREAMLIT HEADER
+REMOVE SCROLL GLITCHES
+===================================================== */
+
+html{
+    scroll-behavior:smooth;
+}
+
+/* =====================================================
+HEADER
 ===================================================== */
 
 header[data-testid="stHeader"]{
@@ -58,7 +66,7 @@ div[data-testid="stToolbar"]{
 }
 
 /* =====================================================
-MAIN CONTAINER
+MAIN LAYOUT
 ===================================================== */
 
 .block-container{
@@ -188,7 +196,7 @@ st.markdown(
         border-radius:24px;
         padding:22px 28px;
         box-shadow:0 10px 28px rgba(0,0,0,0.18);
-        margin-bottom:12px;
+        margin-bottom:18px;
     ">
 
         <div style="
@@ -299,8 +307,7 @@ with st.sidebar:
             "WATCH",
             "HOLD",
             "AVOID"
-        ],
-
+        ]
     )
 
     min_score = st.slider(
@@ -359,7 +366,8 @@ st.info(
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
 
-    progress_placeholder = st.empty()
+    progress_bar = st.progress(0)
+
     status_placeholder = st.empty()
 
     results = []
@@ -392,7 +400,6 @@ def run_analysis(stock_list):
         except:
 
             failed_stocks.extend(batch)
-
             continue
 
         for symbol in batch:
@@ -474,7 +481,7 @@ def run_analysis(stock_list):
                 1
             )
 
-            progress_placeholder.progress(
+            progress_bar.progress(
                 completed / total
             )
 
@@ -491,18 +498,17 @@ def run_analysis(stock_list):
                     display:flex;
                     justify-content:space-between;
                     align-items:center;
+                    margin-bottom:18px;
                     flex-wrap:wrap;
                     gap:12px;
-                    margin-bottom:18px;
                 ">
 
                     <div>
 
                         <div style="
-                            font-size:32px;
+                            font-size:30px;
                             font-weight:900;
                             color:#111827;
-                            line-height:1.1;
                         ">
                             📊 Institutional Processing Engine
                         </div>
@@ -510,7 +516,7 @@ def run_analysis(stock_list):
                         <div style="
                             color:#6B7280;
                             font-size:14px;
-                            margin-top:5px;
+                            margin-top:4px;
                         ">
                             Real-Time Quant Processing
                         </div>
@@ -554,20 +560,12 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            font-size:24px;
+                            font-size:28px;
                             font-weight:900;
                             color:#065F46;
                             margin-top:6px;
                         ">
                             {completed}
-                        </div>
-
-                        <div style="
-                            color:#10B981;
-                            font-size:13px;
-                            margin-top:4px;
-                        ">
-                            out of {total}
                         </div>
 
                     </div>
@@ -588,20 +586,12 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            font-size:24px;
+                            font-size:28px;
                             font-weight:900;
                             color:#991B1B;
                             margin-top:6px;
                         ">
                             {len(set(failed_stocks))}
-                        </div>
-
-                        <div style="
-                            color:#DC2626;
-                            font-size:13px;
-                            margin-top:4px;
-                        ">
-                            failed stocks
                         </div>
 
                     </div>
@@ -622,20 +612,12 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            font-size:24px;
+                            font-size:28px;
                             font-weight:900;
                             color:#1E3A8A;
                             margin-top:6px;
                         ">
                             {total}
-                        </div>
-
-                        <div style="
-                            color:#2563EB;
-                            font-size:13px;
-                            margin-top:4px;
-                        ">
-                            NSE Stocks
                         </div>
 
                     </div>
@@ -656,7 +638,7 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            font-size:24px;
+                            font-size:28px;
                             font-weight:900;
                             color:#92400E;
                             margin-top:6px;
@@ -664,65 +646,28 @@ def run_analysis(stock_list):
                             {remaining_minutes}m
                         </div>
 
-                        <div style="
-                            color:#F59E0B;
-                            font-size:13px;
-                            margin-top:4px;
-                        ">
-                            remaining
-                        </div>
-
                     </div>
 
                 </div>
 
-                <div>
+                <div style="
+                    width:100%;
+                    height:12px;
+                    background:#E5E7EB;
+                    border-radius:999px;
+                    overflow:hidden;
+                ">
 
                     <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        margin-bottom:8px;
+                        width:{completion_pct}%;
+                        height:100%;
+                        background:
+                        linear-gradient(
+                            90deg,
+                            #2563EB,
+                            #10B981
+                        );
                     ">
-
-                        <div style="
-                            color:#374151;
-                            font-size:14px;
-                            font-weight:700;
-                        ">
-                            Processing Progress
-                        </div>
-
-                        <div style="
-                            color:#2563EB;
-                            font-size:14px;
-                            font-weight:900;
-                        ">
-                            {completion_pct}%
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        width:100%;
-                        height:12px;
-                        background:#E5E7EB;
-                        border-radius:999px;
-                        overflow:hidden;
-                    ">
-
-                        <div style="
-                            width:{completion_pct}%;
-                            height:100%;
-                            background:
-                            linear-gradient(
-                                90deg,
-                                #2563EB,
-                                #10B981
-                            );
-                            border-radius:999px;
-                        ">
-                        </div>
-
                     </div>
 
                 </div>
@@ -730,12 +675,16 @@ def run_analysis(stock_list):
             </div>
             """
 
-            status_placeholder.markdown(
-                status_html,
-                unsafe_allow_html=True
-            )
+            with status_placeholder.container():
 
-    progress_placeholder.empty()
+                st.markdown(
+                    status_html,
+                    unsafe_allow_html=True
+                )
+
+    progress_bar.empty()
+
+    status_placeholder.empty()
 
     return pd.DataFrame(results), failed_stocks
 
@@ -829,8 +778,7 @@ with left:
     )
 
     fig1.update_layout(
-        height=380,
-        margin=dict(l=10, r=10, t=50, b=10)
+        height=380
     )
 
     st.plotly_chart(
@@ -852,8 +800,7 @@ with right:
     )
 
     fig2.update_layout(
-        height=380,
-        margin=dict(l=10, r=10, t=50, b=10)
+        height=380
     )
 
     st.plotly_chart(
