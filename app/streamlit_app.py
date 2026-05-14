@@ -579,12 +579,12 @@ def run_analysis(stock_list):
             </div>
             """
 
-            with status_placeholder.container():
+    with status_placeholder.container():
 
-                st.markdown(
-                    status_html,
-                    unsafe_allow_html=True
-                )
+        st.markdown(
+            status_html,
+            unsafe_allow_html=True
+        )
 
     progress_bar.empty()
 
