@@ -1,28 +1,17 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# INSTITUTIONAL QUANT PLATFORM - FINAL ENTERPRISE UI
 # =========================================================
-
-import sys
-from pathlib import Path
-from datetime import datetime
-import pytz
-import time
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
+import time
+import pytz
 
-from core.live_regime import detect_market_regime
-from core.sector_models import (
-    detect_sector,
-    sector_factor_score
-)
+from pathlib import Path
+from datetime import datetime
 
 # =========================================================
 # PAGE CONFIG
@@ -42,169 +31,114 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.stApp {
-    background-color: #F3F4F6;
-    color: #111827;
-    font-family: "Segoe UI", sans-serif;
-}
-
-.block-container {
-    padding-top: 1rem;
-    padding-bottom: 2rem;
-    max-width: 96%;
+.stApp{
+    background:#F3F4F6;
 }
 
 /* ================= SIDEBAR ================= */
 
-section[data-testid="stSidebar"] {
-    background: #111827;
-    border-right: 1px solid #1F2937;
-    width: 320px !important;
+section[data-testid="stSidebar"]{
+    background:#111827;
+    border-right:1px solid #1F2937;
+    width:320px !important;
 }
 
-section[data-testid="stSidebar"] > div {
-    width: 320px !important;
-    padding-top: 1rem;
+section[data-testid="stSidebar"] > div{
+    width:320px !important;
 }
 
-section[data-testid="stSidebar"] * {
-    color: #F9FAFB !important;
-}
-
-label {
-    color: #E5E7EB !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-}
-
-/* ================= SELECT BOX ================= */
-
-div[data-baseweb="select"] > div {
-    background-color: #1F2937 !important;
-    border: 1px solid #374151 !important;
-    border-radius: 10px !important;
-    min-height: 48px !important;
-    color: white !important;
+section[data-testid="stSidebar"] *{
+    color:white !important;
 }
 
 /* ================= SEARCH BOX ================= */
 
-div[data-baseweb="base-input"] > div {
-    background-color: #FFFFFF !important;
-    border: 2px solid #2563EB !important;
-    border-radius: 12px !important;
-    min-height: 50px !important;
+div[data-baseweb="base-input"] > div{
+    background:white !important;
+    border:2px solid #2563EB !important;
+    border-radius:12px !important;
 }
 
-input[type="text"] {
-    color: #111827 !important;
-    -webkit-text-fill-color: #111827 !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    background-color: white !important;
+input{
+    color:#111827 !important;
+    font-weight:700 !important;
 }
 
-input[type="text"]::placeholder {
-    color: #6B7280 !important;
+/* ================= METRICS ================= */
+
+[data-testid="metric-container"]{
+    background:white;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 
-/* ================= TITLE ================= */
+/* ================= TABLE ================= */
 
-.main-title {
-    font-size: 52px;
-    font-weight: 900;
-    color: #111827;
-    margin-bottom: -10px;
-}
-
-.subtitle {
-    font-size: 18px;
-    color: #6B7280;
-}
-
-/* ================= PLOTLY CARDS ================= */
-
-.element-container:has(.js-plotly-plot) {
-    background: white;
-    border-radius: 20px;
-    padding: 1rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    margin-bottom: 1rem;
+[data-testid="stDataFrame"]{
+    background:white;
+    border-radius:18px;
+    padding:10px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HEADER
+# TITLE
 # =========================================================
 
 st.markdown("""
-<div class="main-title">
+<div style="
+    font-size:58px;
+    font-weight:900;
+    color:#111827;
+">
 📊 Institutional Quant Platform
 </div>
+""", unsafe_allow_html=True)
 
-<div class="subtitle">
+st.markdown("""
+<div style="
+    color:#6B7280;
+    font-size:20px;
+    margin-top:-10px;
+">
 Executive Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
 
-india_tz = pytz.timezone("Asia/Kolkata")
-
-current_time = datetime.now(india_tz)
+india = pytz.timezone("Asia/Kolkata")
 
 st.caption(
-    f"Updated: {current_time.strftime('%d-%m-%Y %I:%M:%S %p IST')}"
+    f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}"
 )
 
 st.markdown("---")
 
 # =========================================================
-# MARKET REGIME
-# =========================================================
-
-@st.cache_data(ttl=1800)
-def cached_regime():
-    return detect_market_regime()
-
-regime = cached_regime()
-
-# =========================================================
-# COLORS
-# =========================================================
-
-signal_colors = {
-    "STRONG_BUY": "#006400",
-    "BUY": "#32CD32",
-    "WATCH": "#FF8C00",
-    "AVOID": "#DC2626"
-}
-
-# =========================================================
 # LOAD STOCKS
 # =========================================================
 
-universe_path = (
-    ROOT_DIR
-    / "data"
-    / "valid_stocks.xlsx"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+excel_path = (
+    ROOT_DIR /
+    "data" /
+    "valid_stocks.xlsx"
 )
 
-universe_df = pd.read_excel(universe_path)
+universe_df = pd.read_excel(excel_path)
 
 stocks = (
-    universe_df.iloc[:, 0]
+    universe_df.iloc[:,0]
     .dropna()
     .astype(str)
     .str.upper()
-    .unique()
     .tolist()
 )
 
-stocks = [
-    s for s in stocks
-    if s.endswith(".NS")
-]
+stocks = [s for s in stocks if ".NS" in s]
 
 stocks = list(dict.fromkeys(stocks))
 
@@ -231,9 +165,9 @@ with st.sidebar:
 
     min_score = st.slider(
         "Minimum Institutional Score",
-        min_value=0,
-        max_value=100,
-        value=60
+        0,
+        100,
+        60
     )
 
     search_stock = st.text_input(
@@ -243,16 +177,16 @@ with st.sidebar:
 
     if search_stock:
 
-        matching_stocks = [
+        matches = [
             s for s in stocks
             if search_stock.upper() in s.upper()
         ][:15]
 
-        if matching_stocks:
+        if matches:
 
             st.markdown("### 🔍 Matching Stocks")
 
-            for stock in matching_stocks:
+            for m in matches:
 
                 st.markdown(
                     f"""
@@ -261,11 +195,10 @@ with st.sidebar:
                         padding:10px;
                         border-radius:10px;
                         margin-bottom:8px;
-                        color:white;
-                        font-weight:600;
-                        border-left:4px solid #32CD32;
+                        border-left:4px solid #10B981;
+                        font-weight:700;
                     ">
-                    {stock}
+                    {m}
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -277,186 +210,60 @@ with st.sidebar:
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
 
-    st.info("📈 Live Regime Detection Enabled")
+# =========================================================
+# COLORS
+# =========================================================
 
-    st.info("🧠 Sector Rotation Enabled")
+signal_colors = {
+    "STRONG_BUY": "#006400",
+    "BUY": "#32CD32",
+    "WATCH": "#FF8C00",
+    "AVOID": "#DC2626"
+}
 
 # =========================================================
 # SAFE ROUND
 # =========================================================
 
-def safe_round(value, digits=2):
+def safe_round(x, n=2):
 
     try:
-
-        if value is None:
-            return 0
-
-        if pd.isna(value):
-            return 0
-
-        if np.isinf(value):
-            return 0
-
-        return round(float(value), digits)
-
+        return round(float(x), n)
     except:
         return 0
-
-# =========================================================
-# ANALYZE STOCK
-# =========================================================
-
-def analyze_stock(symbol, close_data, regime):
-
-    try:
-
-        if symbol not in close_data.columns:
-            return None
-
-        close = close_data[symbol].dropna()
-
-        if len(close) < 40:
-            return None
-
-        returns = close.pct_change().dropna()
-
-        momentum = (
-            close.iloc[-1]
-            / close.iloc[-20]
-        ) - 1
-
-        volatility = (
-            returns.std()
-            * np.sqrt(252)
-        )
-
-        sharpe = (
-            returns.mean()
-            / max(returns.std(), 0.0001)
-        ) * np.sqrt(252)
-
-        total_return = (
-            close.iloc[-1]
-            / close.iloc[0]
-        ) - 1
-
-        sma20 = (
-            close.rolling(20)
-            .mean()
-            .iloc[-1]
-        )
-
-        sma50 = (
-            close.rolling(40)
-            .mean()
-            .iloc[-1]
-        )
-
-        trend_strength = sma20 / sma50
-
-        cmp = close.iloc[-1]
-
-        recent_volatility = (
-            close.pct_change()
-            .rolling(14)
-            .std()
-            .iloc[-1]
-        )
-
-        if pd.isna(recent_volatility):
-            recent_volatility = 0.02
-
-        stop_loss = cmp * (
-            1 - recent_volatility * 2
-        )
-
-        target_price = cmp * (
-            1 + recent_volatility * 4
-        )
-
-        risk_reward = (
-            (target_price - cmp)
-            / max(
-                cmp - stop_loss,
-                0.0001
-            )
-        )
-
-        sector = detect_sector(symbol)
-
-        final_score = sector_factor_score(
-            sector=sector,
-            momentum=momentum,
-            sharpe=sharpe,
-            trend_strength=trend_strength,
-            total_return=total_return,
-            volatility=volatility,
-            risk_reward=risk_reward,
-            regime=regime
-        )
-
-        if final_score >= 1.20:
-            classification = "STRONG_BUY"
-
-        elif final_score >= 0.80:
-            classification = "BUY"
-
-        elif final_score >= 0.50:
-            classification = "WATCH"
-
-        else:
-            classification = "AVOID"
-
-        return {
-            "Symbol": symbol,
-            "Sector": sector,
-            "CMP": safe_round(cmp),
-            "Momentum": safe_round(momentum * 100),
-            "Volatility": safe_round(volatility),
-            "Sharpe": safe_round(sharpe),
-            "Final Score": safe_round(final_score),
-            "Risk Reward": safe_round(risk_reward),
-            "Classification": classification
-        }
-
-    except:
-        return None
 
 # =========================================================
 # ANALYSIS ENGINE
 # =========================================================
 
-@st.cache_data(show_spinner=False, ttl=3600)
-def run_analysis(stock_list, regime):
-
-    ranking_data = []
-
-    failed_stocks = []
+@st.cache_data(ttl=3600, show_spinner=False)
+def run_analysis(stock_list):
 
     progress_bar = st.progress(0)
 
     status_box = st.empty()
 
+    results = []
+
+    failed_stocks = []
+
     total = len(stock_list)
-
-    start_time = datetime.now(india_tz)
-
-    batch_size = 75
 
     completed = 0
 
-    for batch_start in range(0, total, batch_size):
+    start_time = time.time()
 
-        batch = stock_list[
-            batch_start: batch_start + batch_size
-        ]
+    batch_size = 75
+
+    for i in range(0, total, batch_size):
+
+        batch = stock_list[i:i+batch_size]
 
         try:
 
             data = yf.download(
                 tickers=batch,
-                period="3mo",
+                period="6mo",
                 interval="1d",
                 auto_adjust=True,
                 progress=False,
@@ -470,43 +277,66 @@ def run_analysis(stock_list, regime):
 
             continue
 
-        close_data = pd.DataFrame()
-
-        for symbol in batch:
-
-            try:
-
-                if symbol in data.columns.levels[0]:
-
-                    close_data[symbol] = data[symbol]["Close"]
-
-                else:
-
-                    failed_stocks.append(symbol)
-
-            except:
-
-                failed_stocks.append(symbol)
-
         for symbol in batch:
 
             completed += 1
 
             try:
 
-                result = analyze_stock(
-                    symbol,
-                    close_data,
-                    regime
-                )
-
-                if result:
-
-                    ranking_data.append(result)
-
-                else:
+                if symbol not in data.columns.levels[0]:
 
                     failed_stocks.append(symbol)
+
+                    continue
+
+                close = (
+                    data[symbol]["Close"]
+                    .dropna()
+                )
+
+                if len(close) < 40:
+
+                    failed_stocks.append(symbol)
+
+                    continue
+
+                momentum = (
+                    close.iloc[-1]
+                    / close.iloc[-20]
+                ) - 1
+
+                returns = close.pct_change().dropna()
+
+                sharpe = (
+                    returns.mean()
+                    / max(returns.std(), 0.0001)
+                ) * np.sqrt(252)
+
+                score = (
+                    momentum * 0.6
+                    + sharpe * 0.4
+                )
+
+                if score >= 1.2:
+                    signal = "STRONG_BUY"
+
+                elif score >= 0.8:
+                    signal = "BUY"
+
+                elif score >= 0.4:
+                    signal = "WATCH"
+
+                else:
+                    signal = "AVOID"
+
+                results.append({
+                    "Symbol": symbol,
+                    "CMP": safe_round(close.iloc[-1]),
+                    "Momentum": safe_round(momentum * 100),
+                    "Sharpe": safe_round(sharpe),
+                    "Final Score": safe_round(score),
+                    "Classification": signal
+                })
 
             except:
 
@@ -516,43 +346,37 @@ def run_analysis(stock_list, regime):
                 completed / total
             )
 
-            elapsed_minutes = round(
-                (
-                    datetime.now(india_tz)
-                    - start_time
-                ).total_seconds() / 60,
-                1
-            )
+            elapsed = (
+                time.time() - start_time
+            ) / 60
 
-            estimated_total = round(
-                (
-                    elapsed_minutes
-                    / max(completed, 1)
-                ) * total,
-                1
-            )
+            estimated_total = (
+                elapsed / max(completed,1)
+            ) * total
 
             remaining_minutes = round(
                 max(
-                    estimated_total
-                    - elapsed_minutes,
+                    estimated_total - elapsed,
                     0
                 ),
                 1
             )
 
+            completion_pct = round(
+                (completed / total) * 100,
+                1
+            )
+
             if completed % 10 == 0:
 
-                status_box.markdown(
-                    f"""
-                    <div style="
-                        background: linear-gradient(135deg,#ffffff,#f8fafc);
-                        border-radius:22px;
-                        padding:28px;
-                        box-shadow:0 6px 24px rgba(0,0,0,0.08);
-                        border:1px solid #E5E7EB;
-                        margin-top:10px;
-                    ">
+                status_html = f"""
+                <div style="
+                    background:white;
+                    border-radius:24px;
+                    padding:30px;
+                    box-shadow:0 8px 28px rgba(0,0,0,0.08);
+                    margin-top:10px;
+                ">
 
                     <div style="
                         display:flex;
@@ -564,8 +388,8 @@ def run_analysis(stock_list, regime):
                         <div>
 
                             <div style="
-                                font-size:34px;
-                                font-weight:800;
+                                font-size:36px;
+                                font-weight:900;
                                 color:#111827;
                             ">
                             📊 Institutional Processing Engine
@@ -576,58 +400,60 @@ def run_analysis(stock_list, regime):
                                 font-size:15px;
                                 margin-top:4px;
                             ">
-                            Real-Time Institutional Quant Processing
+                            Real-Time Quant Processing
                             </div>
 
                         </div>
 
                         <div style="
-                            background:#EEF2FF;
-                            color:#2563EB;
-                            padding:10px 16px;
+                            background:#DBEAFE;
+                            color:#1D4ED8;
+                            padding:10px 18px;
                             border-radius:12px;
-                            font-weight:700;
-                            font-size:15px;
+                            font-weight:800;
                         ">
                         LIVE
                         </div>
 
                     </div>
 
+                    <!-- KPI GRID -->
+
                     <div style="
                         display:grid;
                         grid-template-columns:repeat(4,1fr);
                         gap:18px;
-                        margin-top:20px;
                     ">
+
+                        <!-- COMPLETED -->
 
                         <div style="
                             background:#ECFDF5;
-                            border-radius:18px;
                             padding:22px;
+                            border-radius:18px;
                             border-left:6px solid #10B981;
                         ">
 
                             <div style="
                                 color:#047857;
-                                font-size:15px;
+                                font-size:14px;
                                 font-weight:700;
                             ">
-                            ✅ Completed
+                            COMPLETED
                             </div>
 
                             <div style="
-                                font-size:34px;
-                                font-weight:800;
+                                margin-top:10px;
+                                font-size:36px;
+                                font-weight:900;
                                 color:#065F46;
-                                margin-top:8px;
                             ">
                             {completed}
                             </div>
 
                             <div style="
-                                margin-top:6px;
-                                color:#059669;
+                                margin-top:4px;
+                                color:#10B981;
                                 font-size:14px;
                             ">
                             out of {total}
@@ -635,113 +461,119 @@ def run_analysis(stock_list, regime):
 
                         </div>
 
+                        <!-- FAILED -->
+
                         <div style="
                             background:#FEF2F2;
-                            border-radius:18px;
                             padding:22px;
+                            border-radius:18px;
                             border-left:6px solid #DC2626;
                         ">
 
                             <div style="
                                 color:#B91C1C;
-                                font-size:15px;
+                                font-size:14px;
                                 font-weight:700;
                             ">
-                            ❌ Failed
+                            FAILED
                             </div>
 
                             <div style="
-                                font-size:34px;
-                                font-weight:800;
+                                margin-top:10px;
+                                font-size:36px;
+                                font-weight:900;
                                 color:#991B1B;
-                                margin-top:8px;
                             ">
                             {len(set(failed_stocks))}
                             </div>
 
                             <div style="
-                                margin-top:6px;
+                                margin-top:4px;
                                 color:#DC2626;
                                 font-size:14px;
                             ">
-                            download failures
+                            failed stocks
                             </div>
 
                         </div>
 
+                        <!-- UNIVERSE -->
+
                         <div style="
                             background:#EFF6FF;
-                            border-radius:18px;
                             padding:22px;
+                            border-radius:18px;
                             border-left:6px solid #2563EB;
                         ">
 
                             <div style="
                                 color:#1D4ED8;
-                                font-size:15px;
+                                font-size:14px;
                                 font-weight:700;
                             ">
-                            🌐 Universe
+                            UNIVERSE
                             </div>
 
                             <div style="
-                                font-size:34px;
-                                font-weight:800;
+                                margin-top:10px;
+                                font-size:36px;
+                                font-weight:900;
                                 color:#1E3A8A;
-                                margin-top:8px;
                             ">
                             {total}
                             </div>
 
                             <div style="
-                                margin-top:6px;
+                                margin-top:4px;
                                 color:#2563EB;
                                 font-size:14px;
                             ">
-                            NSE listed stocks
+                            NSE Stocks
                             </div>
 
                         </div>
 
+                        <!-- ETA -->
+
                         <div style="
                             background:#FFF7ED;
-                            border-radius:18px;
                             padding:22px;
+                            border-radius:18px;
                             border-left:6px solid #F59E0B;
                         ">
 
                             <div style="
                                 color:#D97706;
-                                font-size:15px;
+                                font-size:14px;
                                 font-weight:700;
                             ">
-                            ⏳ ETA
+                            ETA
                             </div>
 
                             <div style="
-                                font-size:34px;
-                                font-weight:800;
+                                margin-top:10px;
+                                font-size:36px;
+                                font-weight:900;
                                 color:#92400E;
-                                margin-top:8px;
                             ">
                             {remaining_minutes}m
                             </div>
 
                             <div style="
-                                margin-top:6px;
+                                margin-top:4px;
                                 color:#F59E0B;
                                 font-size:14px;
                             ">
-                            estimated remaining
+                            remaining
                             </div>
 
                         </div>
 
                     </div>
 
-                    <div style="
-                        margin-top:26px;
-                    ">
+                    <!-- PROGRESS -->
+
+                    <div style="margin-top:28px;">
 
                         <div style="
                             display:flex;
@@ -749,49 +581,50 @@ def run_analysis(stock_list, regime):
                             margin-bottom:8px;
                         ">
 
-                            <span style="
+                            <div style="
                                 color:#374151;
                                 font-weight:700;
-                                font-size:15px;
                             ">
                             Processing Progress
-                            </span>
+                            </div>
 
-                            <span style="
+                            <div style="
                                 color:#2563EB;
                                 font-weight:800;
-                                font-size:15px;
                             ">
-                            {round((completed/total)*100,1)}%
-                            </span>
+                            {completion_pct}%
+                            </div>
 
                         </div>
 
                         <div style="
                             width:100%;
+                            height:18px;
                             background:#E5E7EB;
-                            height:16px;
                             border-radius:999px;
                             overflow:hidden;
                         ">
 
                             <div style="
-                                width:{(completed/total)*100}%;
-                                background:linear-gradient(90deg,#2563EB,#10B981);
+                                width:{completion_pct}%;
                                 height:100%;
+                                background:linear-gradient(90deg,#2563EB,#10B981);
                                 border-radius:999px;
-                            "></div>
+                            ">
+                            </div>
 
                         </div>
 
                     </div>
 
+                    <!-- ACTIVE STOCK -->
+
                     <div style="
-                        margin-top:26px;
+                        margin-top:28px;
                         background:#111827;
                         color:white;
-                        border-radius:16px;
-                        padding:18px;
+                        border-radius:18px;
+                        padding:20px;
                         display:flex;
                         justify-content:space-between;
                         align-items:center;
@@ -800,16 +633,16 @@ def run_analysis(stock_list, regime):
                         <div>
 
                             <div style="
-                                font-size:13px;
                                 color:#9CA3AF;
-                                margin-bottom:4px;
+                                font-size:13px;
+                                margin-bottom:6px;
                             ">
                             CURRENTLY ANALYZING
                             </div>
 
                             <div style="
-                                font-size:24px;
-                                font-weight:800;
+                                font-size:26px;
+                                font-weight:900;
                             ">
                             {symbol}
                             </div>
@@ -818,46 +651,45 @@ def run_analysis(stock_list, regime):
 
                         <div style="
                             background:#10B981;
-                            padding:10px 16px;
+                            padding:10px 18px;
                             border-radius:12px;
-                            font-weight:700;
+                            font-weight:800;
                         ">
                         ACTIVE
                         </div>
 
                     </div>
 
-                    </div>
-                    """,
+                </div>
+                """
+
+                status_box.markdown(
+                    status_html,
                     unsafe_allow_html=True
                 )
 
-        time.sleep(1)
-
     progress_bar.empty()
 
-    status_box.empty()
-
-    failed_stocks = list(set(failed_stocks))
-
-    return pd.DataFrame(ranking_data), failed_stocks
+    return (
+        pd.DataFrame(results),
+        failed_stocks
+    )
 
 # =========================================================
 # RUN ANALYSIS
 # =========================================================
 
-raw_results, failed_stocks = run_analysis(
-    stocks,
-    regime
-)
+results, failed_stocks = run_analysis(stocks)
 
-if raw_results.empty:
+if results.empty:
 
-    st.error("No valid stocks analyzed.")
+    st.error("No valid results.")
 
     st.stop()
 
-results = raw_results.copy()
+# =========================================================
+# FILTERS
+# =========================================================
 
 results["Percentile"] = (
     results["Final Score"] * 100
@@ -870,7 +702,8 @@ results = results[
 if signal_filter != "All":
 
     results = results[
-        results["Classification"] == signal_filter
+        results["Classification"]
+        == signal_filter
     ]
 
 if search_stock:
@@ -883,23 +716,23 @@ if search_stock:
         )
     ]
 
-results = results.sort_values(
-    by="Final Score",
-    ascending=False
-)
-
 # =========================================================
 # KPIs
 # =========================================================
 
-k1, k2, k3, k4 = st.columns(4)
+st.markdown("<br>", unsafe_allow_html=True)
+
+k1,k2,k3,k4 = st.columns(4)
 
 with k1:
-    st.metric("Universe Size", len(results))
+    st.metric(
+        "Universe Size",
+        len(results)
+    )
 
 with k2:
     st.metric(
-        "Avg Institutional Score",
+        "Average Score",
         safe_round(
             results["Final Score"].mean() * 100
         )
@@ -907,7 +740,7 @@ with k2:
 
 with k3:
     st.metric(
-        "Strong Buy Opportunities",
+        "Strong Buy",
         len(
             results[
                 results["Classification"]
@@ -918,77 +751,67 @@ with k3:
 
 with k4:
     st.metric(
-        "Market Regime",
-        regime
+        "Failed Stocks",
+        len(set(failed_stocks))
     )
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
 # CHARTS
 # =========================================================
 
-chart1, chart2 = st.columns(2)
+left,right = st.columns(2)
 
-with chart1:
+with left:
 
-    signal_counts = (
+    signal_data = (
         results["Classification"]
         .value_counts()
         .reset_index()
     )
 
-    signal_counts.columns = [
+    signal_data.columns = [
         "Signal",
         "Count"
     ]
 
-    pie_fig = px.pie(
-        signal_counts,
+    fig1 = px.pie(
+        signal_data,
         names="Signal",
         values="Count",
-        hole=0.55,
-        title="Signal Distribution",
-        template="plotly_white",
+        hole=0.6,
         color="Signal",
-        color_discrete_map=signal_colors
+        color_discrete_map=signal_colors,
+        title="Signal Distribution"
     )
 
-    pie_fig.update_layout(height=450)
+    fig1.update_layout(
+        height=450
+    )
 
     st.plotly_chart(
-        pie_fig,
+        fig1,
         use_container_width=True
     )
 
-with chart2:
+with right:
 
-    sector_perf = (
-        results
-        .groupby("Sector")["Final Score"]
-        .mean()
-        .sort_values(ascending=False)
-        .reset_index()
+    fig2 = px.scatter(
+        results,
+        x="Momentum",
+        y="Sharpe",
+        color="Classification",
+        size="Final Score",
+        hover_name="Symbol",
+        color_discrete_map=signal_colors,
+        title="Risk Reward Opportunity Matrix"
     )
 
-    sector_fig = px.bar(
-        sector_perf.head(10),
-        x="Sector",
-        y="Final Score",
-        color="Final Score",
-        title="Top Sector Performance",
-        template="plotly_white",
-        color_continuous_scale=[
-            "#FF8C00",
-            "#32CD32",
-            "#006400"
-        ]
+    fig2.update_layout(
+        height=450
     )
-
-    sector_fig.update_layout(height=450)
 
     st.plotly_chart(
-        sector_fig,
+        fig2,
         use_container_width=True
     )
 
@@ -996,23 +819,13 @@ with chart2:
 # TABLE
 # =========================================================
 
-st.markdown("## 🏦 Top Institutional Rankings")
+st.markdown("## 🏦 Institutional Rankings")
 
 st.dataframe(
-    results.head(100),
+    results.sort_values(
+        "Final Score",
+        ascending=False
+    ),
     use_container_width=True,
-    height=650
-)
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-st.markdown("---")
-
-st.caption(
-    """
-    Institutional Quantamental Intelligence Platform •
-    Executive Analytics Dashboard • Institutional Research Engine
-    """
+    height=700
 )
