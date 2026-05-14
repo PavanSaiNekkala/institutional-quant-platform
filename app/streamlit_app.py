@@ -327,8 +327,15 @@ Executive Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
 
+from datetime import datetime
+import pytz
+
+india_tz = pytz.timezone("Asia/Kolkata")
+
+current_time = datetime.now(india_tz)
+
 st.caption(
-    f"Updated: {pd.Timestamp.now().strftime('%d-%m-%Y %H:%M:%S IST')}"
+    f"Updated: {current_time.strftime('%d-%m-%Y %I:%M:%S %p IST')}"
 )
 
 st.markdown("---")
