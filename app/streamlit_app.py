@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# UPDATED INSTITUTIONAL QUANT PLATFORM
+# FINAL UPDATED INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import sys
@@ -36,15 +36,11 @@ st.set_page_config(
 )
 
 # =========================================================
-# CUSTOM CSS
+# CSS
 # =========================================================
 
 st.markdown("""
 <style>
-
-/* =====================================================
-GLOBAL
-===================================================== */
 
 .stApp {
     background-color: #F3F4F6;
@@ -52,19 +48,11 @@ GLOBAL
     font-family: "Segoe UI", sans-serif;
 }
 
-/* =====================================================
-CONTAINER
-===================================================== */
-
 .block-container {
     padding-top: 1rem;
     padding-bottom: 2rem;
     max-width: 96%;
 }
-
-/* =====================================================
-SIDEBAR
-===================================================== */
 
 section[data-testid="stSidebar"] {
     background: #111827;
@@ -81,19 +69,11 @@ section[data-testid="stSidebar"] * {
     color: #F9FAFB !important;
 }
 
-/* =====================================================
-LABELS
-===================================================== */
-
 label {
     color: #E5E7EB !important;
     font-size: 15px !important;
     font-weight: 600 !important;
 }
-
-/* =====================================================
-SELECT BOX
-===================================================== */
 
 div[data-baseweb="select"] > div {
     background-color: #1F2937 !important;
@@ -102,10 +82,6 @@ div[data-baseweb="select"] > div {
     min-height: 48px !important;
     color: white !important;
 }
-
-/* =====================================================
-TEXT INPUT
-===================================================== */
 
 div[data-baseweb="base-input"] > div {
     background-color: #FFFFFF !important;
@@ -124,12 +100,7 @@ input[type="text"] {
 
 input[type="text"]::placeholder {
     color: #6B7280 !important;
-    opacity: 1 !important;
 }
-
-/* =====================================================
-TITLE
-===================================================== */
 
 .main-title {
     font-size: 48px;
@@ -142,10 +113,6 @@ TITLE
     font-size: 18px;
     color: #6B7280;
 }
-
-/* =====================================================
-PLOTLY CONTAINERS
-===================================================== */
 
 .element-container:has(.js-plotly-plot) {
     background: white;
@@ -241,64 +208,58 @@ with st.sidebar:
 
     st.markdown("---")
 
-    with st.form("control_form"):
+    signal_filter = st.selectbox(
+        "Trade Signal",
+        [
+            "All",
+            "STRONG_BUY",
+            "BUY",
+            "WATCH",
+            "AVOID"
+        ]
+    )
 
-        signal_filter = st.selectbox(
-            "Trade Signal",
-            [
-                "All",
-                "STRONG_BUY",
-                "BUY",
-                "WATCH",
-                "AVOID"
-            ]
-        )
+    min_score = st.slider(
+        "Minimum Institutional Score",
+        min_value=0,
+        max_value=100,
+        value=60
+    )
 
-        min_score = st.slider(
-            "Minimum Institutional Score",
-            min_value=0,
-            max_value=100,
-            value=60
-        )
+    search_stock = st.text_input(
+        "Search Stock",
+        placeholder="Type stock name..."
+    )
 
-        search_stock = st.text_input(
-            "Search Stock",
-            placeholder="Type stock name..."
-        )
+    if search_stock:
 
-        if search_stock:
+        matching_stocks = [
+            s for s in stocks
+            if search_stock.upper() in s.upper()
+        ][:15]
 
-            matching_stocks = [
-                s for s in stocks
-                if search_stock.upper() in s.upper()
-            ][:15]
+        if matching_stocks:
 
-            if matching_stocks:
+            st.markdown("### 🔍 Matching Stocks")
 
-                st.markdown("### 🔍 Matching Stocks")
+            for stock in matching_stocks:
 
-                for stock in matching_stocks:
-
-                    st.markdown(
-                        f"""
-                        <div style="
-                            background:#1F2937;
-                            padding:10px;
-                            border-radius:10px;
-                            margin-bottom:8px;
-                            color:white;
-                            font-weight:600;
-                            border-left:4px solid #32CD32;
-                        ">
-                        {stock}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-        submitted = st.form_submit_button(
-            "🚀 Apply Filters"
-        )
+                st.markdown(
+                    f"""
+                    <div style="
+                        background:#1F2937;
+                        padding:10px;
+                        border-radius:10px;
+                        margin-bottom:8px;
+                        color:white;
+                        font-weight:600;
+                        border-left:4px solid #32CD32;
+                    ">
+                    {stock}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
     st.markdown("---")
 
