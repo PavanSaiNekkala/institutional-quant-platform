@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# POWERBI STYLE INSTITUTIONAL QUANT DASHBOARD
+# EXECUTIVE POWERBI STYLE INSTITUTIONAL DASHBOARD
 # =========================================================
 
 import sys
@@ -34,155 +34,129 @@ from core.sector_models import (
 
 st.set_page_config(
     page_title="Institutional Quant Platform",
-    page_icon="📈",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # =========================================================
-# POWERBI STYLE CSS
+# CLEAN EXECUTIVE CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
 .stApp {
-    background-color: #0B1120;
+    background-color: #0E1117;
     color: white;
 }
 
-/* ================= SIDEBAR ================= */
+/* SIDEBAR */
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(
-        180deg,
-        #081120 0%,
-        #0B1629 100%
-    );
 
-    border-right: 1px solid #1E293B;
-    width: 330px !important;
+    background-color: #111827;
+    border-right: 1px solid #1F2937;
+    width: 320px !important;
 }
 
 section[data-testid="stSidebar"] > div {
-    width: 330px !important;
+    width: 320px !important;
 }
 
-/* ================= TITLES ================= */
+/* TITLE */
 
-.hero-title {
+.main-title {
 
-    font-size: 54px;
+    font-size: 48px;
     font-weight: 800;
     color: white;
-    margin-bottom: -10px;
 }
 
-.hero-subtitle {
+.subtitle {
 
-    color: #94A3B8;
-    font-size: 22px;
+    font-size: 18px;
+    color: #9CA3AF;
+    margin-top: -10px;
 }
 
-/* ================= KPI CARDS ================= */
+/* KPI CARDS */
 
 .kpi-card {
 
-    background: linear-gradient(
-        135deg,
-        rgba(17,24,39,0.95),
-        rgba(15,23,42,0.95)
-    );
+    background-color: #161B22;
 
-    border-radius: 22px;
+    border-radius: 18px;
 
     padding: 1.5rem;
 
-    border: 1px solid rgba(148,163,184,0.15);
+    border: 1px solid #2A3441;
 
     box-shadow:
-        0 4px 25px rgba(0,0,0,0.25);
-
-    transition: 0.3s;
+        0 4px 15px rgba(0,0,0,0.25);
 }
 
-.kpi-card:hover {
+.kpi-title {
 
-    transform: translateY(-5px);
-
-    border: 1px solid #38BDF8;
-}
-
-.kpi-label {
-
-    color: #94A3B8;
     font-size: 15px;
-    margin-bottom: 8px;
+
+    color: #9CA3AF;
+
+    margin-bottom: 10px;
 }
 
 .kpi-value {
 
-    font-size: 40px;
+    font-size: 38px;
+
     font-weight: 800;
+
     color: white;
 }
 
-/* ================= MARKET CARD ================= */
+/* STATUS CARD */
 
-.market-card {
+.status-card {
 
-    background: linear-gradient(
-        135deg,
-        rgba(30,41,59,0.95),
-        rgba(15,23,42,0.95)
-    );
+    background-color: #161B22;
 
-    border-radius: 20px;
-
-    padding: 1.3rem;
-
-    border: 1px solid rgba(148,163,184,0.12);
-}
-
-/* ================= PROCESS CARD ================= */
-
-.process-card {
-
-    background: linear-gradient(
-        135deg,
-        rgba(10,25,47,0.95),
-        rgba(3,15,35,0.95)
-    );
-
-    border-radius: 20px;
+    border-radius: 18px;
 
     padding: 1.5rem;
 
-    border: 1px solid rgba(56,189,248,0.15);
+    border: 1px solid #2A3441;
 }
 
-/* ================= DATAFRAME ================= */
+/* TABLE */
 
 .stDataFrame {
 
-    border-radius: 20px;
+    border-radius: 18px;
+
     overflow: hidden;
-    border: 1px solid rgba(148,163,184,0.15);
+
+    border: 1px solid #2A3441;
 }
 
-/* ================= INPUTS ================= */
+/* SELECT */
 
 div[data-baseweb="select"] > div {
 
     background-color: #0F172A !important;
+
     border: 1px solid #334155 !important;
+
     border-radius: 12px !important;
 }
+
+/* INPUT */
 
 div[data-baseweb="base-input"] > div {
 
     background-color: #0F172A !important;
+
     border: 1px solid #334155 !important;
+
     border-radius: 12px !important;
 }
 
@@ -190,32 +164,31 @@ div[data-baseweb="base-input"] > div {
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HERO
+# HEADER
 # =========================================================
 
 st.markdown("""
-<div class="hero-title">
-📈 Institutional Quant Platform
+<div class="main-title">
+📊 Institutional Quant Platform
 </div>
 
-<div class="hero-subtitle">
-AI Powered Institutional Quantitative Analytics Engine
+<div class="subtitle">
+Executive Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
 
 st.caption(
-    f"Last Updated: {pd.Timestamp.now().strftime('%d-%m-%Y %H:%M:%S IST')}"
+    f"Updated: {pd.Timestamp.now().strftime('%d-%m-%Y %H:%M:%S IST')}"
 )
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
 
 # =========================================================
-# MARKET REGIME
+# REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
 def cached_regime():
-
     return detect_market_regime()
 
 regime = cached_regime()
@@ -254,14 +227,14 @@ stocks = list(dict.fromkeys(stocks))
 
 with st.sidebar:
 
-    st.markdown("## ⚙️ Institutional Controls")
+    st.markdown("## ⚙️ Dashboard Controls")
 
     st.markdown("---")
 
     top_n = st.slider(
-        "Live Analysis Universe",
+        "Stocks To Analyze",
         min_value=100,
-        max_value=len(stocks),
+        max_value=min(len(stocks), 1000),
         value=300,
         step=50
     )
@@ -290,10 +263,9 @@ with st.sidebar:
 
     st.markdown("---")
 
-    st.success("📊 AI Quant Engine Enabled")
-    st.info("📈 Live Regime Detection Enabled")
-    st.info("🧠 Smart Sector Rotation Enabled")
-    st.info("⚡ Backtesting Engine Enabled")
+    st.success("AI Quant Engine Enabled")
+    st.info("Live Regime Detection Enabled")
+    st.info("Sector Rotation Enabled")
 
 # =========================================================
 # SAFE ROUND
@@ -425,15 +397,19 @@ def analyze_stock(symbol, regime):
         )
 
         if final_score >= 1.20:
+
             classification = "STRONG_BUY"
 
         elif final_score >= 0.80:
+
             classification = "BUY"
 
         elif final_score >= 0.50:
+
             classification = "WATCH"
 
         else:
+
             classification = "AVOID"
 
         return {
@@ -453,7 +429,7 @@ def analyze_stock(symbol, regime):
         return None
 
 # =========================================================
-# ENGINE
+# PROCESS ENGINE
 # =========================================================
 
 ranking_data = []
@@ -462,11 +438,11 @@ progress_bar = st.progress(0)
 
 status_box = st.empty()
 
-start_time = time.time()
-
 processed = 0
 success = 0
 failed = 0
+
+start_time = time.time()
 
 with ThreadPoolExecutor(max_workers=6) as executor:
 
@@ -520,13 +496,13 @@ with ThreadPoolExecutor(max_workers=6) as executor:
 
         status_box.markdown(
             f"""
-            <div class="process-card">
+            <div class="status-card">
 
-            🔄 <b>Processing:</b> {symbol}<br><br>
+            <b>Processing:</b> {symbol}<br><br>
 
-            ✅ Success: {success}<br><br>
+            ✅ Success: {success}<br>
 
-            ❌ Failed: {failed}<br><br>
+            ❌ Failed: {failed}<br>
 
             ⏳ Remaining: {int(remaining)} sec
 
@@ -578,17 +554,17 @@ results = results.sort_values(
 )
 
 # =========================================================
-# KPI CARDS
+# KPI SECTION
 # =========================================================
 
-c1, c2, c3, c4 = st.columns(4)
+k1, k2, k3, k4 = st.columns(4)
 
-with c1:
+with k1:
 
     st.markdown(
         f"""
         <div class="kpi-card">
-        <div class="kpi-label">
+        <div class="kpi-title">
         Universe Size
         </div>
 
@@ -600,57 +576,61 @@ with c1:
         unsafe_allow_html=True
     )
 
-with c2:
+with k2:
+
+    avg_score = safe_round(
+        results["Final Score"].mean() * 100
+    )
 
     st.markdown(
         f"""
         <div class="kpi-card">
-        <div class="kpi-label">
+        <div class="kpi-title">
         Avg Institutional Score
         </div>
 
         <div class="kpi-value">
-        {safe_round(results["Final Score"].mean()*100)}
+        {avg_score}
         </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with c3:
+with k3:
+
+    strong_buys = len(
+        results[
+            results["Classification"]
+            == "STRONG_BUY"
+        ]
+    )
 
     st.markdown(
         f"""
         <div class="kpi-card">
-        <div class="kpi-label">
-        Strong Buys
+        <div class="kpi-title">
+        Strong Buy Opportunities
         </div>
 
         <div class="kpi-value">
-        {
-            len(
-                results[
-                    results["Classification"]
-                    == "STRONG_BUY"
-                ]
-            )
-        }
+        {strong_buys}
         </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with c4:
+with k4:
 
     st.markdown(
         f"""
         <div class="kpi-card">
-        <div class="kpi-label">
+        <div class="kpi-title">
         Market Regime
         </div>
 
-        <div class="kpi-value" style="font-size:28px;">
+        <div class="kpi-value" style="font-size:24px;">
         {regime}
         </div>
         </div>
@@ -661,47 +641,123 @@ with c4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
+# CHARTS ROW
+# =========================================================
+
+chart1, chart2 = st.columns(2)
+
+# =========================================================
+# SIGNAL DISTRIBUTION
+# =========================================================
+
+with chart1:
+
+    signal_counts = (
+        results["Classification"]
+        .value_counts()
+        .reset_index()
+    )
+
+    signal_counts.columns = [
+        "Signal",
+        "Count"
+    ]
+
+    pie_fig = px.pie(
+
+        signal_counts,
+
+        names="Signal",
+
+        values="Count",
+
+        hole=0.55,
+
+        title="Signal Distribution",
+
+        template="plotly_dark"
+    )
+
+    pie_fig.update_layout(
+
+        paper_bgcolor="#0E1117",
+
+        plot_bgcolor="#0E1117",
+
+        font=dict(color="white"),
+
+        height=450
+    )
+
+    st.plotly_chart(
+        pie_fig,
+        width="stretch"
+    )
+
+# =========================================================
+# SECTOR PERFORMANCE
+# =========================================================
+
+with chart2:
+
+    sector_perf = (
+        results
+        .groupby("Sector")["Final Score"]
+        .mean()
+        .sort_values(ascending=False)
+        .reset_index()
+    )
+
+    sector_fig = px.bar(
+
+        sector_perf.head(10),
+
+        x="Sector",
+
+        y="Final Score",
+
+        color="Final Score",
+
+        title="Top Sector Performance",
+
+        template="plotly_dark",
+
+        color_continuous_scale="Viridis"
+    )
+
+    sector_fig.update_layout(
+
+        paper_bgcolor="#0E1117",
+
+        plot_bgcolor="#0E1117",
+
+        font=dict(color="white"),
+
+        height=450
+    )
+
+    st.plotly_chart(
+        sector_fig,
+        width="stretch"
+    )
+
+# =========================================================
 # TABLE
 # =========================================================
 
-st.markdown("## 🏦 Institutional Rankings")
+st.markdown("## 🏦 Top Institutional Rankings")
 
 st.dataframe(
-    results,
+    results.head(100),
     use_container_width=True,
     height=650
 )
 
 # =========================================================
-# BAR CHART
+# RISK REWARD MATRIX
 # =========================================================
 
-top_chart = results.head(20)
-
-fig = px.bar(
-    top_chart,
-    x="Symbol",
-    y="Final Score",
-    color="Classification",
-    template="plotly_dark",
-    title="Top Institutional Alpha Scores"
-)
-
-fig.update_layout(
-    paper_bgcolor="#0B1120",
-    plot_bgcolor="#0B1120",
-    font=dict(color="white"),
-    height=600
-)
-
-st.plotly_chart(
-    fig,
-    width="stretch"
-)
-
-# =========================================================
-# BUBBLE CHART
-# =========================================================
+st.markdown("## 📈 Risk Reward Opportunity Matrix")
 
 scatter_df = results.head(100).copy()
 
@@ -732,24 +788,21 @@ scatter = px.scatter(
     hover_data=[
         "Sector",
         "Momentum",
-        "Sharpe",
-        "Volatility"
+        "Sharpe"
     ],
-
-    title="Institutional Risk Reward Matrix",
 
     template="plotly_dark"
 )
 
 scatter.update_layout(
 
-    paper_bgcolor="#0B1120",
+    paper_bgcolor="#0E1117",
 
-    plot_bgcolor="#0B1120",
+    plot_bgcolor="#0E1117",
 
     font=dict(color="white"),
 
-    height=750
+    height=700
 )
 
 st.plotly_chart(
@@ -758,36 +811,41 @@ st.plotly_chart(
 )
 
 # =========================================================
-# SECTOR HEATMAP
+# TOP STOCKS BAR CHART
 # =========================================================
 
-st.markdown("## 🔥 Sector Performance Heatmap")
+st.markdown("## 🚀 Top Stocks By Institutional Score")
 
-sector_perf = (
-    results
-    .groupby("Sector")["Final Score"]
-    .mean()
-    .reset_index()
-)
+top_stocks = results.head(15)
 
-heatmap = px.density_heatmap(
-    sector_perf,
-    x="Sector",
+top_fig = px.bar(
+
+    top_stocks,
+
+    x="Symbol",
+
     y="Final Score",
-    z="Final Score",
-    color_continuous_scale="RdYlGn",
-    template="plotly_dark"
+
+    color="Final Score",
+
+    template="plotly_dark",
+
+    color_continuous_scale="Turbo"
 )
 
-heatmap.update_layout(
-    paper_bgcolor="#0B1120",
-    plot_bgcolor="#0B1120",
+top_fig.update_layout(
+
+    paper_bgcolor="#0E1117",
+
+    plot_bgcolor="#0E1117",
+
     font=dict(color="white"),
-    height=500
+
+    height=550
 )
 
 st.plotly_chart(
-    heatmap,
+    top_fig,
     width="stretch"
 )
 
@@ -800,6 +858,6 @@ st.markdown("---")
 st.caption(
     """
     Institutional Quantamental Intelligence Platform •
-    AI Powered • Institutional Grade • PowerBI Style Dashboard
+    Executive Analytics Dashboard • Institutional Research Engine
     """
 )
