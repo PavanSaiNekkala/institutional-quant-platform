@@ -343,14 +343,6 @@ with st.sidebar:
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
 
-    st.markdown("### 📈 Trade Signal Summary")
-
-    st.success("🟢 STRONG BUY")
-    st.info("🟩 BUY")
-    st.warning("🟠 WATCH")
-    st.info("🔵 HOLD")
-    st.error("🔴 AVOID")
-
 # =========================================================
 # COLORS
 # =========================================================
