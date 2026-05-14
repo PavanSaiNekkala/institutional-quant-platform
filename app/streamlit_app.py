@@ -15,7 +15,6 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-import plotly.graph_objects as go
 
 from concurrent.futures import (
     ThreadPoolExecutor,
@@ -40,94 +39,209 @@ st.set_page_config(
 )
 
 # =========================================================
-# CLEAN EXECUTIVE CSS
+# POWERBI EXECUTIVE CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
+/* =====================================================
+GLOBAL APP
+===================================================== */
+
 .stApp {
-    background-color: #0E1117;
-    color: white;
+
+    background-color: #F3F4F6;
+
+    color: #111827;
+
+    font-family: "Segoe UI", sans-serif;
 }
 
-/* SIDEBAR */
+/* =====================================================
+REMOVE STREAMLIT HEADER SPACE
+===================================================== */
+
+.block-container {
+
+    padding-top: 1rem;
+
+    padding-bottom: 2rem;
+
+    max-width: 96%;
+}
+
+/* =====================================================
+SIDEBAR
+===================================================== */
 
 section[data-testid="stSidebar"] {
 
-    background-color: #111827;
+    background: #111827;
+
     border-right: 1px solid #1F2937;
+
     width: 320px !important;
 }
 
 section[data-testid="stSidebar"] > div {
+
     width: 320px !important;
+
+    padding-top: 1rem;
 }
 
-/* TITLE */
+/* =====================================================
+SIDEBAR TEXT
+===================================================== */
+
+section[data-testid="stSidebar"] * {
+
+    color: #F9FAFB !important;
+}
+
+/* =====================================================
+LABELS
+===================================================== */
+
+label {
+
+    color: #E5E7EB !important;
+
+    font-size: 15px !important;
+
+    font-weight: 600 !important;
+}
+
+/* =====================================================
+SELECT BOX
+===================================================== */
+
+div[data-baseweb="select"] > div {
+
+    background-color: #1F2937 !important;
+
+    border: 1px solid #374151 !important;
+
+    border-radius: 10px !important;
+
+    min-height: 48px !important;
+
+    color: white !important;
+}
+
+/* =====================================================
+INPUT BOX
+===================================================== */
+
+div[data-baseweb="base-input"] > div {
+
+    background-color: #1F2937 !important;
+
+    border: 1px solid #374151 !important;
+
+    border-radius: 10px !important;
+
+    min-height: 48px !important;
+
+    color: white !important;
+}
+
+/* =====================================================
+SLIDER
+===================================================== */
+
+.stSlider {
+
+    padding-top: 10px;
+}
+
+/* =====================================================
+MAIN TITLE
+===================================================== */
 
 .main-title {
 
     font-size: 48px;
+
     font-weight: 800;
-    color: white;
+
+    color: #111827;
+
+    margin-bottom: -10px;
 }
 
 .subtitle {
 
     font-size: 18px;
-    color: #9CA3AF;
-    margin-top: -10px;
+
+    color: #6B7280;
 }
 
-/* KPI CARDS */
+/* =====================================================
+KPI CARDS
+===================================================== */
 
 .kpi-card {
 
-    background-color: #161B22;
+    background: white;
 
     border-radius: 18px;
 
     padding: 1.5rem;
 
-    border: 1px solid #2A3441;
+    border-left: 6px solid #2563EB;
 
     box-shadow:
-        0 4px 15px rgba(0,0,0,0.25);
+        0 2px 12px rgba(0,0,0,0.08);
+
+    transition: 0.2s;
+}
+
+.kpi-card:hover {
+
+    transform: translateY(-3px);
 }
 
 .kpi-title {
 
     font-size: 15px;
 
-    color: #9CA3AF;
+    color: #6B7280;
 
     margin-bottom: 10px;
 }
 
 .kpi-value {
 
-    font-size: 38px;
+    font-size: 40px;
 
     font-weight: 800;
 
-    color: white;
+    color: #111827;
 }
 
-/* STATUS CARD */
+/* =====================================================
+STATUS CARD
+===================================================== */
 
 .status-card {
 
-    background-color: #161B22;
+    background: white;
 
     border-radius: 18px;
 
     padding: 1.5rem;
 
-    border: 1px solid #2A3441;
+    border-left: 6px solid #10B981;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.08);
 }
 
-/* TABLE */
+/* =====================================================
+TABLE
+===================================================== */
 
 .stDataFrame {
 
@@ -135,29 +249,65 @@ section[data-testid="stSidebar"] > div {
 
     overflow: hidden;
 
-    border: 1px solid #2A3441;
+    border: 1px solid #E5E7EB;
+
+    background: white;
 }
 
-/* SELECT */
+/* =====================================================
+CHART CONTAINER
+===================================================== */
 
-div[data-baseweb="select"] > div {
+.element-container:has(.js-plotly-plot) {
 
-    background-color: #0F172A !important;
+    background: white;
 
-    border: 1px solid #334155 !important;
+    border-radius: 18px;
 
-    border-radius: 12px !important;
+    padding: 1rem;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.08);
+
+    margin-bottom: 1rem;
 }
 
-/* INPUT */
+/* =====================================================
+BUTTONS
+===================================================== */
 
-div[data-baseweb="base-input"] > div {
+.stButton button {
 
-    background-color: #0F172A !important;
+    border-radius: 10px;
 
-    border: 1px solid #334155 !important;
+    background: #2563EB;
 
-    border-radius: 12px !important;
+    color: white;
+
+    border: none;
+
+    height: 45px;
+
+    font-weight: 600;
+}
+
+/* =====================================================
+DOWNLOAD BUTTON
+===================================================== */
+
+.stDownloadButton button {
+
+    border-radius: 10px;
+
+    background: #10B981;
+
+    color: white;
+
+    border: none;
+
+    height: 45px;
+
+    font-weight: 600;
 }
 
 </style>
@@ -184,11 +334,12 @@ st.caption(
 st.markdown("---")
 
 # =========================================================
-# REGIME
+# MARKET REGIME
 # =========================================================
 
 @st.cache_data(ttl=1800)
 def cached_regime():
+
     return detect_market_regime()
 
 regime = cached_regime()
@@ -426,6 +577,7 @@ def analyze_stock(symbol, regime):
         }
 
     except:
+
         return None
 
 # =========================================================
@@ -675,23 +827,23 @@ with chart1:
 
         title="Signal Distribution",
 
-        template="plotly_dark"
+        template="plotly_white"
     )
 
     pie_fig.update_layout(
 
-        paper_bgcolor="#0E1117",
+        paper_bgcolor="white",
 
-        plot_bgcolor="#0E1117",
+        plot_bgcolor="white",
 
-        font=dict(color="white"),
+        font=dict(color="#111827"),
 
         height=450
     )
 
     st.plotly_chart(
         pie_fig,
-        width="stretch"
+        use_container_width=True
     )
 
 # =========================================================
@@ -720,25 +872,25 @@ with chart2:
 
         title="Top Sector Performance",
 
-        template="plotly_dark",
+        template="plotly_white",
 
         color_continuous_scale="Viridis"
     )
 
     sector_fig.update_layout(
 
-        paper_bgcolor="#0E1117",
+        paper_bgcolor="white",
 
-        plot_bgcolor="#0E1117",
+        plot_bgcolor="white",
 
-        font=dict(color="white"),
+        font=dict(color="#111827"),
 
         height=450
     )
 
     st.plotly_chart(
         sector_fig,
-        width="stretch"
+        use_container_width=True
     )
 
 # =========================================================
@@ -791,23 +943,23 @@ scatter = px.scatter(
         "Sharpe"
     ],
 
-    template="plotly_dark"
+    template="plotly_white"
 )
 
 scatter.update_layout(
 
-    paper_bgcolor="#0E1117",
+    paper_bgcolor="white",
 
-    plot_bgcolor="#0E1117",
+    plot_bgcolor="white",
 
-    font=dict(color="white"),
+    font=dict(color="#111827"),
 
     height=700
 )
 
 st.plotly_chart(
     scatter,
-    width="stretch"
+    use_container_width=True
 )
 
 # =========================================================
@@ -828,25 +980,38 @@ top_fig = px.bar(
 
     color="Final Score",
 
-    template="plotly_dark",
+    template="plotly_white",
 
     color_continuous_scale="Turbo"
 )
 
 top_fig.update_layout(
 
-    paper_bgcolor="#0E1117",
+    paper_bgcolor="white",
 
-    plot_bgcolor="#0E1117",
+    plot_bgcolor="white",
 
-    font=dict(color="white"),
+    font=dict(color="#111827"),
 
     height=550
 )
 
 st.plotly_chart(
     top_fig,
-    width="stretch"
+    use_container_width=True
+)
+
+# =========================================================
+# DOWNLOAD CSV
+# =========================================================
+
+csv = results.to_csv(index=False)
+
+st.download_button(
+    label="📥 Download Rankings CSV",
+    data=csv,
+    file_name="institutional_rankings.csv",
+    mime="text/csv"
 )
 
 # =========================================================
