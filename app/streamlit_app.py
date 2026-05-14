@@ -1,14 +1,16 @@
 # =========================================================
 # FILE: app/streamlit_app.py
+# FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
 # =========================================================
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-import time
 import pytz
+import time
 
 from pathlib import Path
 from datetime import datetime
@@ -25,17 +27,34 @@ st.set_page_config(
 )
 
 # =========================================================
-# CSS
+# GLOBAL CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
+/* =====================================================
+GLOBAL
+===================================================== */
+
 .stApp{
     background:#F3F4F6;
+    font-family:"Segoe UI",sans-serif;
 }
 
-/* ================= SIDEBAR ================= */
+/* =====================================================
+MAIN CONTAINER
+===================================================== */
+
+.block-container{
+    padding-top:1rem;
+    padding-bottom:2rem;
+    max-width:96%;
+}
+
+/* =====================================================
+SIDEBAR
+===================================================== */
 
 section[data-testid="stSidebar"]{
     background:#111827;
@@ -51,7 +70,9 @@ section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-/* ================= SEARCH BOX ================= */
+/* =====================================================
+SEARCH INPUT
+===================================================== */
 
 div[data-baseweb="base-input"] > div{
     background:white !important;
@@ -64,28 +85,54 @@ input{
     font-weight:700 !important;
 }
 
-/* ================= METRICS ================= */
+/* =====================================================
+SELECT BOX
+===================================================== */
+
+div[data-baseweb="select"] > div{
+    background:#1F2937 !important;
+    border:1px solid #374151 !important;
+    border-radius:12px !important;
+}
+
+/* =====================================================
+METRICS
+===================================================== */
 
 [data-testid="metric-container"]{
     background:white;
-    border-radius:18px;
-    padding:18px;
+    border-radius:20px;
+    padding:20px;
     box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 
-/* ================= TABLE ================= */
+/* =====================================================
+PLOTLY
+===================================================== */
+
+.element-container:has(.js-plotly-plot){
+    background:white;
+    border-radius:22px;
+    padding:16px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08);
+    margin-bottom:20px;
+}
+
+/* =====================================================
+TABLE
+===================================================== */
 
 [data-testid="stDataFrame"]{
     background:white;
-    border-radius:18px;
-    padding:10px;
+    border-radius:20px;
+    padding:12px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# TITLE
+# HEADER
 # =========================================================
 
 st.markdown("""
@@ -100,11 +147,11 @@ st.markdown("""
 
 st.markdown("""
 <div style="
-    color:#6B7280;
     font-size:20px;
+    color:#6B7280;
     margin-top:-10px;
 ">
-Executive Institutional Analytics Dashboard
+Enterprise Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
 
@@ -241,8 +288,6 @@ def run_analysis(stock_list):
 
     progress_bar = st.progress(0)
 
-    status_box = st.empty()
-
     results = []
 
     failed_stocks = []
@@ -254,6 +299,8 @@ def run_analysis(stock_list):
     start_time = time.time()
 
     batch_size = 75
+
+    status_placeholder = st.empty()
 
     for i in range(0, total, batch_size):
 
@@ -376,6 +423,7 @@ def run_analysis(stock_list):
                     padding:30px;
                     box-shadow:0 8px 28px rgba(0,0,0,0.08);
                     margin-top:10px;
+                    font-family:Segoe UI;
                 ">
 
                     <div style="
@@ -417,15 +465,11 @@ def run_analysis(stock_list):
 
                     </div>
 
-                    <!-- KPI GRID -->
-
                     <div style="
                         display:grid;
                         grid-template-columns:repeat(4,1fr);
                         gap:18px;
                     ">
-
-                        <!-- COMPLETED -->
 
                         <div style="
                             background:#ECFDF5;
@@ -461,8 +505,6 @@ def run_analysis(stock_list):
 
                         </div>
 
-                        <!-- FAILED -->
-
                         <div style="
                             background:#FEF2F2;
                             padding:22px;
@@ -497,8 +539,6 @@ def run_analysis(stock_list):
 
                         </div>
 
-                        <!-- UNIVERSE -->
-
                         <div style="
                             background:#EFF6FF;
                             padding:22px;
@@ -532,8 +572,6 @@ def run_analysis(stock_list):
                             </div>
 
                         </div>
-
-                        <!-- ETA -->
 
                         <div style="
                             background:#FFF7ED;
@@ -570,8 +608,6 @@ def run_analysis(stock_list):
                         </div>
 
                     </div>
-
-                    <!-- PROGRESS -->
 
                     <div style="margin-top:28px;">
 
@@ -617,8 +653,6 @@ def run_analysis(stock_list):
 
                     </div>
 
-                    <!-- ACTIVE STOCK -->
-
                     <div style="
                         margin-top:28px;
                         background:#111827;
@@ -663,10 +697,13 @@ def run_analysis(stock_list):
                 </div>
                 """
 
-                status_box.markdown(
-                    status_html,
-                    unsafe_allow_html=True
-                )
+                with status_placeholder:
+
+                    components.html(
+                        status_html,
+                        height=720,
+                        scrolling=False
+                    )
 
     progress_bar.empty()
 
@@ -717,7 +754,7 @@ if search_stock:
     ]
 
 # =========================================================
-# KPIs
+# KPI CARDS
 # =========================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -784,9 +821,7 @@ with left:
         title="Signal Distribution"
     )
 
-    fig1.update_layout(
-        height=450
-    )
+    fig1.update_layout(height=450)
 
     st.plotly_chart(
         fig1,
@@ -806,9 +841,7 @@ with right:
         title="Risk Reward Opportunity Matrix"
     )
 
-    fig2.update_layout(
-        height=450
-    )
+    fig2.update_layout(height=450)
 
     st.plotly_chart(
         fig2,
