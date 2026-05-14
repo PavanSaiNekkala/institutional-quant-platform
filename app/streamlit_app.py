@@ -290,10 +290,6 @@ with st.sidebar:
             "HOLD",
             "AVOID"
         ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
-        ]
     )
 
     min_score = st.slider(
