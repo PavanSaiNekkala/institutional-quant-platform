@@ -285,10 +285,6 @@ with st.sidebar:
             "HOLD",
             "AVOID"
         ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
-        ]
     )
 
     min_score = st.slider(
@@ -387,7 +383,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 25
+    batch_size = 50
 
     status_placeholder = st.empty()
 
