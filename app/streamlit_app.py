@@ -4,7 +4,6 @@
 # =========================================================
 
 import sys
-import time
 from pathlib import Path
 from datetime import datetime
 import pytz
@@ -17,11 +16,6 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-
-from concurrent.futures import (
-    ThreadPoolExecutor,
-    as_completed
-)
 
 from core.live_regime import detect_market_regime
 from core.sector_models import (
@@ -145,26 +139,36 @@ div[data-baseweb="base-input"] > div {
     border-radius: 12px !important;
 
     min-height: 50px !important;
+}
+
+/* =====================================================
+TEXT INPUT
+===================================================== */
+
+input[type="text"] {
 
     color: #111827 !important;
 
-    font-size: 16px !important;
-}
+    -webkit-text-fill-color: #111827 !important;
 
-input {
-
-    color: #111827 !important;
-
-    font-weight: 600 !important;
+    font-weight: 700 !important;
 
     font-size: 16px !important;
+
+    background-color: white !important;
 }
 
-input::placeholder {
+/* =====================================================
+PLACEHOLDER
+===================================================== */
+
+input[type="text"]::placeholder {
 
     color: #6B7280 !important;
 
     opacity: 1 !important;
+
+    font-weight: 500 !important;
 }
 
 /* =====================================================
@@ -199,31 +203,6 @@ MAIN TITLE
 }
 
 /* =====================================================
-KPI CARDS
-===================================================== */
-
-.kpi-card {
-
-    background: white;
-
-    border-radius: 18px;
-
-    padding: 1.5rem;
-
-    border-left: 6px solid #2563EB;
-
-    box-shadow:
-        0 2px 12px rgba(0,0,0,0.08);
-
-    transition: 0.2s;
-}
-
-.kpi-card:hover {
-
-    transform: translateY(-3px);
-}
-
-/* =====================================================
 STATUS CARD
 ===================================================== */
 
@@ -239,21 +218,6 @@ STATUS CARD
 
     box-shadow:
         0 2px 12px rgba(0,0,0,0.08);
-}
-
-/* =====================================================
-TABLE
-===================================================== */
-
-.stDataFrame {
-
-    border-radius: 18px;
-
-    overflow: hidden;
-
-    border: 1px solid #E5E7EB;
-
-    background: white;
 }
 
 /* =====================================================
@@ -382,19 +346,11 @@ with st.sidebar:
             value=60
         )
 
-        # =====================================================
-        # SEARCH STOCK
-        # =====================================================
-
         search_stock = st.text_input(
             "Search Stock",
             placeholder="Type stock name...",
             help="Search NSE stocks"
         )
-
-        # =====================================================
-        # LIVE MATCHING RESULTS
-        # =====================================================
 
         if search_stock:
 
@@ -474,28 +430,14 @@ def safe_round(value, digits=2):
 # ANALYZE STOCK
 # =========================================================
 
-def analyze_stock(symbol, regime):
+def analyze_stock(symbol, close_data, regime):
 
     try:
 
-        data = yf.download(
-            symbol,
-            period="3mo",
-            interval="1d",
-            auto_adjust=True,
-            progress=False,
-            threads=False
-        )
-
-        if data.empty:
+        if symbol not in close_data.columns:
             return None
 
-        close = data["Close"]
-
-        if isinstance(close, pd.DataFrame):
-            close = close.iloc[:, 0]
-
-        close = close.dropna()
+        close = close_data[symbol].dropna()
 
         if len(close) < 40:
             return None
@@ -611,7 +553,7 @@ def analyze_stock(symbol, regime):
         return None
 
 # =========================================================
-# CACHED ANALYSIS ENGINE
+# BULK ANALYSIS ENGINE
 # =========================================================
 
 @st.cache_data(show_spinner=False, ttl=3600)
@@ -625,48 +567,97 @@ def run_analysis(stock_list, regime):
 
     total = len(stock_list)
 
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    # =====================================================
+    # BULK DOWNLOAD
+    # =====================================================
 
-        futures = {
+    status_box.markdown(
+        """
+        <div class="status-card">
 
-            executor.submit(
-                analyze_stock,
-                symbol,
-                regime
-            ): symbol
+        📥 Downloading NSE market data...
 
-            for symbol in stock_list
-        }
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-        for idx, future in enumerate(
-            as_completed(futures)
-        ):
+    try:
 
-            symbol = futures[future]
+        data = yf.download(
 
-            try:
+            tickers=stock_list,
 
-                result = future.result()
+            period="3mo",
 
-                if result:
+            interval="1d",
 
-                    ranking_data.append(result)
+            auto_adjust=True,
 
-            except:
+            progress=False,
 
-                pass
+            threads=True,
 
-            progress_bar.progress(
-                (idx + 1) / total
-            )
+            group_by="ticker"
+        )
+
+    except Exception as e:
+
+        st.error(f"Yahoo download failed: {e}")
+
+        return pd.DataFrame()
+
+    # =====================================================
+    # BUILD CLOSE MATRIX
+    # =====================================================
+
+    close_data = pd.DataFrame()
+
+    for symbol in stock_list:
+
+        try:
+
+            if symbol in data.columns.levels[0]:
+
+                close_data[symbol] = data[symbol]["Close"]
+
+        except:
+
+            pass
+
+    # =====================================================
+    # ANALYZE STOCKS
+    # =====================================================
+
+    completed = 0
+
+    for symbol in stock_list:
+
+        completed += 1
+
+        result = analyze_stock(
+            symbol,
+            close_data,
+            regime
+        )
+
+        if result:
+
+            ranking_data.append(result)
+
+        progress_bar.progress(
+            completed / total
+        )
+
+        if completed % 25 == 0:
 
             status_box.markdown(
                 f"""
                 <div class="status-card">
 
-                <b>Processing:</b> {symbol}<br><br>
+                📈 Completed: {completed}/{total}<br><br>
 
-                📈 Completed: {idx + 1}/{total}
+                🔍 Processing: {symbol}
 
                 </div>
                 """,
