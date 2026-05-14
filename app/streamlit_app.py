@@ -366,113 +366,6 @@ st.info(
     "⚡ Running institutional analysis across full NSE universe..."
 )
 
-# =========================================================
-# ANALYSIS ENGINE
-# =========================================================
-
-@st.cache_data(ttl=3600, show_spinner=False)
-def run_analysis(stock_list):
-
-    progress_bar = st.progress(0)
-
-    results = []
-
-    failed_stocks = []
-
-    total = len(stock_list)
-
-    completed = 0
-
-    start_time = time.time()
-
-    batch_size = 25
-
-    status_placeholder = st.empty()
-
-    for i in range(0, total, batch_size):
-
-        batch = stock_list[i:i+batch_size]
-
-        try:
-
-            data = yf.download(
-                tickers=batch,
-                period="6mo",
-                interval="1d",
-                auto_adjust=True,
-                progress=False,
-                threads=False,
-                group_by="ticker"
-            )
-
-        except:
-
-            failed_stocks.extend(batch)
-
-            continue
-
-        for symbol in batch:
-
-            completed += 1
-
-            try:
-
-                if symbol not in data.columns.levels[0]:
-
-                    failed_stocks.append(symbol)
-                    continue
-
-                close = data[symbol]["Close"].dropna()
-
-                if len(close) < 40:
-
-                    failed_stocks.append(symbol)
-                    continue
-
-                momentum = (
-                    close.iloc[-1]
-                    / close.iloc[-20]
-                ) - 1
-
-                returns = close.pct_change().dropna()
-
-                sharpe = (
-                    returns.mean()
-                    / max(returns.std(),0.0001)
-                ) * np.sqrt(252)
-
-                score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
-                )
-
-                if score >= 1.5:
-                    signal = "STRONG_BUY"
-
-                elif score >= 1.0:
-                    signal = "BUY"
-
-                elif score >= 0.6:
-                    signal = "WATCH"
-
-                elif score >= 0.2:
-                    signal = "HOLD"
-
-                else:
-                    signal = "AVOID"
-
-                results.append({
-                    "Symbol":symbol,
-                    "CMP":safe_round(close.iloc[-1]),
-                    "Momentum":safe_round(momentum*100),
-                    "Sharpe":safe_round(sharpe),
-                    "Final Score":safe_round(score),
-                    "Classification":signal
-                })
-
-            except:
-                failed_stocks.append(symbol)
-
             progress_bar.progress(completed / total)
 
             elapsed = (time.time() - start_time) / 60
@@ -731,6 +624,116 @@ def run_analysis(stock_list):
                 )
 
     progress_bar.empty()
+
+# =========================================================
+# ANALYSIS ENGINE
+# =========================================================
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def run_analysis(stock_list):
+
+    progress_bar = st.progress(0)
+
+    results = []
+
+    failed_stocks = []
+
+    total = len(stock_list)
+
+    completed = 0
+
+    start_time = time.time()
+
+    batch_size = 25
+
+    status_placeholder = st.empty()
+
+    
+
+    for i in range(0, total, batch_size):
+
+        batch = stock_list[i:i+batch_size]
+
+        try:
+
+            data = yf.download(
+                tickers=batch,
+                period="6mo",
+                interval="1d",
+                auto_adjust=True,
+                progress=False,
+                threads=False,
+                group_by="ticker"
+            )
+
+        except:
+
+            failed_stocks.extend(batch)
+
+            continue
+
+        for symbol in batch:
+
+            completed += 1
+
+            try:
+
+                if symbol not in data.columns.levels[0]:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                close = data[symbol]["Close"].dropna()
+
+                if len(close) < 40:
+
+                    failed_stocks.append(symbol)
+                    continue
+
+                momentum = (
+                    close.iloc[-1]
+                    / close.iloc[-20]
+                ) - 1
+
+                returns = close.pct_change().dropna()
+
+                sharpe = (
+                    returns.mean()
+                    / max(returns.std(),0.0001)
+                ) * np.sqrt(252)
+
+                score = (
+                    momentum * 0.6
+                    + sharpe * 0.4
+                )
+
+                if score >= 1.5:
+                    signal = "STRONG_BUY"
+
+                elif score >= 1.0:
+                    signal = "BUY"
+
+                elif score >= 0.6:
+                    signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
+
+                else:
+                    signal = "AVOID"
+
+                results.append({
+                    "Symbol":symbol,
+                    "CMP":safe_round(close.iloc[-1]),
+                    "Momentum":safe_round(momentum*100),
+                    "Sharpe":safe_round(sharpe),
+                    "Final Score":safe_round(score),
+                    "Classification":signal
+                })
+
+            except:
+                failed_stocks.append(symbol)
+
 
     return pd.DataFrame(results), failed_stocks
 
