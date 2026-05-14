@@ -1,6 +1,7 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# EXECUTIVE POWERBI STYLE INSTITUTIONAL DASHBOARD
+# INSTITUTIONAL QUANT PLATFORM
+# EXECUTIVE POWERBI STYLE DASHBOARD
 # =========================================================
 
 import sys
@@ -35,14 +36,14 @@ st.set_page_config(
 )
 
 # =========================================================
-# POWERBI EXECUTIVE CSS
+# CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
 /* =====================================================
-GLOBAL APP
+GLOBAL
 ===================================================== */
 
 .stApp {
@@ -55,7 +56,7 @@ GLOBAL APP
 }
 
 /* =====================================================
-MAIN CONTAINER
+CONTAINER
 ===================================================== */
 
 .block-container {
@@ -87,10 +88,6 @@ section[data-testid="stSidebar"] > div {
     padding-top: 1rem;
 }
 
-/* =====================================================
-SIDEBAR TEXT
-===================================================== */
-
 section[data-testid="stSidebar"] * {
 
     color: #F9FAFB !important;
@@ -110,7 +107,7 @@ label {
 }
 
 /* =====================================================
-SELECT BOX
+SELECT
 ===================================================== */
 
 div[data-baseweb="select"] > div {
@@ -127,7 +124,7 @@ div[data-baseweb="select"] > div {
 }
 
 /* =====================================================
-INPUT BOX
+TEXT INPUT
 ===================================================== */
 
 div[data-baseweb="base-input"] > div {
@@ -140,10 +137,6 @@ div[data-baseweb="base-input"] > div {
 
     min-height: 50px !important;
 }
-
-/* =====================================================
-TEXT INPUT
-===================================================== */
 
 input[type="text"] {
 
@@ -158,30 +151,15 @@ input[type="text"] {
     background-color: white !important;
 }
 
-/* =====================================================
-PLACEHOLDER
-===================================================== */
-
 input[type="text"]::placeholder {
 
     color: #6B7280 !important;
 
     opacity: 1 !important;
-
-    font-weight: 500 !important;
 }
 
 /* =====================================================
-SLIDER
-===================================================== */
-
-.stSlider {
-
-    padding-top: 10px;
-}
-
-/* =====================================================
-MAIN TITLE
+TITLE
 ===================================================== */
 
 .main-title {
@@ -221,7 +199,7 @@ STATUS CARD
 }
 
 /* =====================================================
-CHART CONTAINER
+CHARTS
 ===================================================== */
 
 .element-container:has(.js-plotly-plot) {
@@ -277,7 +255,7 @@ def cached_regime():
 regime = cached_regime()
 
 # =========================================================
-# INSTITUTIONAL COLOR MAP
+# COLORS
 # =========================================================
 
 signal_colors = {
@@ -317,6 +295,14 @@ stocks = [
 stocks = list(dict.fromkeys(stocks))
 
 # =========================================================
+# LIMIT LIVE UNIVERSE
+# =========================================================
+
+MAX_STOCKS = 500
+
+stocks = stocks[:MAX_STOCKS]
+
+# =========================================================
 # SIDEBAR
 # =========================================================
 
@@ -348,8 +334,7 @@ with st.sidebar:
 
         search_stock = st.text_input(
             "Search Stock",
-            placeholder="Type stock name...",
-            help="Search NSE stocks"
+            placeholder="Type stock name..."
         )
 
         if search_stock:
@@ -363,9 +348,7 @@ with st.sidebar:
 
             if matching_stocks:
 
-                st.markdown(
-                    "### 🔍 Matching Stocks"
-                )
+                st.markdown("### 🔍 Matching Stocks")
 
                 for stock in matching_stocks:
 
@@ -386,19 +369,15 @@ with st.sidebar:
                         unsafe_allow_html=True
                     )
 
-            else:
-
-                st.warning(
-                    "No matching stocks found"
-                )
-
         submitted = st.form_submit_button(
             "🚀 Apply Filters"
         )
 
     st.markdown("---")
 
-    st.success("✅ Full NSE Universe Enabled")
+    st.success(
+        f"✅ NSE Universe Loaded: {len(stocks)}"
+    )
 
     st.info("📈 Live Regime Detection Enabled")
 
@@ -424,6 +403,7 @@ def safe_round(value, digits=2):
         return round(float(value), digits)
 
     except:
+
         return 0
 
 # =========================================================
@@ -488,6 +468,7 @@ def analyze_stock(symbol, close_data, regime):
         )
 
         if pd.isna(recent_volatility):
+
             recent_volatility = 0.02
 
         stop_loss = cmp * (
@@ -553,7 +534,7 @@ def analyze_stock(symbol, close_data, regime):
         return None
 
 # =========================================================
-# BULK ANALYSIS ENGINE
+# ANALYSIS ENGINE
 # =========================================================
 
 @st.cache_data(show_spinner=False, ttl=3600)
@@ -561,21 +542,31 @@ def run_analysis(stock_list, regime):
 
     ranking_data = []
 
+    failed_stocks = []
+
     progress_bar = st.progress(0)
 
     status_box = st.empty()
 
     total = len(stock_list)
 
+    start_time = datetime.now(india_tz)
+
     # =====================================================
-    # BULK DOWNLOAD
+    # DOWNLOAD
     # =====================================================
 
     status_box.markdown(
-        """
+        f"""
         <div class="status-card">
 
-        📥 Downloading NSE market data...
+        <h4>📥 Institutional Market Data Engine</h4>
+
+        <hr>
+
+        🌐 Stock Universe: {total}<br><br>
+
+        ⏳ Downloading NSE market data...
 
         </div>
         """,
@@ -596,7 +587,7 @@ def run_analysis(stock_list, regime):
 
             progress=False,
 
-            threads=True,
+            threads=False,
 
             group_by="ticker"
         )
@@ -605,10 +596,10 @@ def run_analysis(stock_list, regime):
 
         st.error(f"Yahoo download failed: {e}")
 
-        return pd.DataFrame()
+        return pd.DataFrame(), []
 
     # =====================================================
-    # BUILD CLOSE MATRIX
+    # BUILD CLOSE DATA
     # =====================================================
 
     close_data = pd.DataFrame()
@@ -621,12 +612,16 @@ def run_analysis(stock_list, regime):
 
                 close_data[symbol] = data[symbol]["Close"]
 
+            else:
+
+                failed_stocks.append(symbol)
+
         except:
 
-            pass
+            failed_stocks.append(symbol)
 
     # =====================================================
-    # ANALYZE STOCKS
+    # ANALYZE
     # =====================================================
 
     completed = 0
@@ -635,29 +630,74 @@ def run_analysis(stock_list, regime):
 
         completed += 1
 
-        result = analyze_stock(
-            symbol,
-            close_data,
-            regime
-        )
+        try:
 
-        if result:
+            result = analyze_stock(
+                symbol,
+                close_data,
+                regime
+            )
 
-            ranking_data.append(result)
+            if result:
+
+                ranking_data.append(result)
+
+            else:
+
+                failed_stocks.append(symbol)
+
+        except:
+
+            failed_stocks.append(symbol)
 
         progress_bar.progress(
             completed / total
         )
 
-        if completed % 25 == 0:
+        elapsed_minutes = round(
+            (
+                datetime.now(india_tz)
+                - start_time
+            ).total_seconds() / 60,
+            1
+        )
+
+        estimated_total = round(
+            (
+                elapsed_minutes
+                / max(completed, 1)
+            ) * total,
+            1
+        )
+
+        remaining_minutes = round(
+            max(
+                estimated_total
+                - elapsed_minutes,
+                0
+            ),
+            1
+        )
+
+        if completed % 10 == 0:
 
             status_box.markdown(
                 f"""
                 <div class="status-card">
 
-                📈 Completed: {completed}/{total}<br><br>
+                <h4>📊 Institutional Processing Engine</h4>
 
-                🔍 Processing: {symbol}
+                <hr>
+
+                ✅ Completed Stocks: {completed}/{total}<br><br>
+
+                ❌ Failed Stocks: {len(set(failed_stocks))}<br><br>
+
+                🌐 Stock Universe: {total}<br><br>
+
+                ⏳ Remaining Time: {remaining_minutes} min<br><br>
+
+                🔍 Current Stock: {symbol}
 
                 </div>
                 """,
@@ -668,13 +708,15 @@ def run_analysis(stock_list, regime):
 
     status_box.empty()
 
-    return pd.DataFrame(ranking_data)
+    failed_stocks = list(set(failed_stocks))
+
+    return pd.DataFrame(ranking_data), failed_stocks
 
 # =========================================================
-# RESULTS
+# RUN ANALYSIS
 # =========================================================
 
-raw_results = run_analysis(
+raw_results, failed_stocks = run_analysis(
     stocks,
     regime
 )
@@ -682,6 +724,7 @@ raw_results = run_analysis(
 if raw_results.empty:
 
     st.error("No valid stocks analyzed.")
+
     st.stop()
 
 results = raw_results.copy()
@@ -716,7 +759,28 @@ results = results.sort_values(
 )
 
 # =========================================================
-# KPI SECTION
+# FAILED STOCKS
+# =========================================================
+
+if failed_stocks:
+
+    with st.expander(
+        f"⚠️ Failed Stocks ({len(failed_stocks)})"
+    ):
+
+        failed_df = pd.DataFrame({
+
+            "Failed Stocks": failed_stocks
+        })
+
+        st.dataframe(
+            failed_df,
+            use_container_width=True,
+            height=300
+        )
+
+# =========================================================
+# KPIs
 # =========================================================
 
 k1, k2, k3, k4 = st.columns(4)
@@ -759,7 +823,7 @@ with k4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
-# CHARTS ROW
+# CHARTS
 # =========================================================
 
 chart1, chart2 = st.columns(2)
@@ -918,7 +982,7 @@ st.plotly_chart(
 )
 
 # =========================================================
-# TOP STOCKS BAR CHART
+# TOP STOCKS
 # =========================================================
 
 st.markdown("## 🚀 Top Stocks By Institutional Score")
@@ -950,7 +1014,7 @@ st.plotly_chart(
 )
 
 # =========================================================
-# DOWNLOAD CSV
+# DOWNLOAD
 # =========================================================
 
 csv = results.to_csv(index=False)
