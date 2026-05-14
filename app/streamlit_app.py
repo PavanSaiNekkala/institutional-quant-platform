@@ -599,87 +599,107 @@ def analyze_stock(symbol, regime):
         return None
 
 # =========================================================
-# PROCESS ENGINE
+# CACHED ANALYSIS ENGINE
 # =========================================================
 
-ranking_data = []
+@st.cache_data(show_spinner=False, ttl=3600)
+def run_analysis(stock_list, regime):
 
-progress_bar = st.progress(0)
+    ranking_data = []
 
-status_box = st.empty()
+    processed = 0
 
-processed = 0
-success = 0
-failed = 0
+    success = 0
 
-start_time = time.time()
+    failed = 0
 
-with ThreadPoolExecutor(max_workers=12) as executor:
+    start_time = time.time()
 
-    futures = {
+    progress_bar = st.progress(0)
 
-        executor.submit(
-            analyze_stock,
-            symbol,
-            regime
-        ): symbol
+    status_box = st.empty()
 
-        for symbol in stocks[:top_n]
-    }
+    with ThreadPoolExecutor(max_workers=12) as executor:
 
-    for future in as_completed(futures):
+        futures = {
 
-        processed += 1
+            executor.submit(
+                analyze_stock,
+                symbol,
+                regime
+            ): symbol
 
-        symbol = futures[future]
+            for symbol in stock_list
+        }
 
-        try:
+        for future in as_completed(futures):
 
-            result = future.result()
+            processed += 1
 
-            if result:
+            symbol = futures[future]
 
-                ranking_data.append(result)
+            try:
 
-                success += 1
+                result = future.result()
 
-            else:
+                if result:
+
+                    ranking_data.append(result)
+
+                    success += 1
+
+                else:
+
+                    failed += 1
+
+            except:
 
                 failed += 1
 
-        except:
+            progress_bar.progress(
+                processed / len(stock_list)
+            )
 
-            failed += 1
+            remaining = (
+                (
+                    time.time()
+                    - start_time
+                ) / max(processed, 1)
+            ) * (
+                len(stock_list) - processed
+            )
 
-        progress_bar.progress(
-            processed / top_n
-        )
+            status_box.markdown(
+                f"""
+                <div class="status-card">
 
-        remaining = (
-            (
-                time.time()
-                - start_time
-            ) / max(processed, 1)
-        ) * (
-            top_n - processed
-        )
+                <b>Processing:</b> {symbol}<br><br>
 
-        status_box.markdown(
-            f"""
-            <div class="status-card">
+                ✅ Success: {success}<br>
 
-            <b>Processing:</b> {symbol}<br><br>
+                ❌ Failed: {failed}<br>
 
-            ✅ Success: {success}<br>
+                ⏳ Remaining: {int(remaining)} sec
 
-            ❌ Failed: {failed}<br>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-            ⏳ Remaining: {int(remaining)} sec
+    progress_bar.empty()
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    status_box.empty()
+
+    return pd.DataFrame(ranking_data)
+
+# =========================================================
+# RUN ANALYSIS ONLY ONCE
+# =========================================================
+
+results = run_analysis(
+    stocks[:top_n],
+    regime
+)
 
 # =========================================================
 # RESULTS
