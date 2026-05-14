@@ -1,10 +1,9 @@
 # =========================================================
 # INSTITUTIONAL QUANT PLATFORM
-# FINAL CLEAN ENTERPRISE STREAMLIT APP
+# FINAL ENTERPRISE STREAMLIT DASHBOARD
 # =========================================================
 
 import streamlit as st
-
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -27,7 +26,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# CSS
+# GLOBAL CSS
 # =========================================================
 
 st.markdown("""
@@ -37,22 +36,25 @@ st.markdown("""
 GLOBAL
 ===================================================== */
 
-.stApp{
-    background:#F3F4F6;
+html, body, [class*="css"]{
     font-family:"Segoe UI",sans-serif;
 }
 
+.stApp{
+    background:#F3F4F6;
+}
+
 /* =====================================================
-REMOVE STREAMLIT HEADER
+STREAMLIT HEADER
 ===================================================== */
 
 header[data-testid="stHeader"]{
-    background:transparent !important;
-    height:0px !important;
+    background:transparent;
+    height:0px;
 }
 
 div[data-testid="stToolbar"]{
-    right:1rem !important;
+    right:1rem;
 }
 
 /* =====================================================
@@ -72,7 +74,12 @@ SIDEBAR
 ===================================================== */
 
 section[data-testid="stSidebar"]{
-    background:#111827;
+    background:
+    linear-gradient(
+        180deg,
+        #0F172A,
+        #111827
+    );
     border-right:1px solid #1F2937;
 }
 
@@ -81,7 +88,7 @@ section[data-testid="stSidebar"] *{
 }
 
 /* =====================================================
-SEARCH INPUT
+INPUTS
 ===================================================== */
 
 div[data-baseweb="base-input"] > div{
@@ -98,7 +105,7 @@ input[type="text"]{
     color:#111827 !important;
     background:white !important;
     font-size:18px !important;
-    font-weight:800 !important;
+    font-weight:700 !important;
     -webkit-text-fill-color:#111827 !important;
 }
 
@@ -123,8 +130,8 @@ METRIC CARDS
 [data-testid="metric-container"]{
     background:white;
     border-radius:18px;
-    padding:14px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    padding:18px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
 }
 
 /* =====================================================
@@ -134,13 +141,13 @@ PLOTLY
 .element-container:has(.js-plotly-plot){
     background:white;
     border-radius:18px;
-    padding:10px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    padding:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
     margin-bottom:18px;
 }
 
 /* =====================================================
-TABLE
+DATAFRAME
 ===================================================== */
 
 [data-testid="stDataFrame"]{
@@ -150,26 +157,14 @@ TABLE
 }
 
 /* =====================================================
-PROCESSING PANEL
-===================================================== */
-
-.processing-container{
-    background:white;
-    border-radius:18px;
-    padding:14px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.08);
-    margin-top:10px;
-    margin-bottom:18px;
-}
-
-/* =====================================================
 RESPONSIVE
 ===================================================== */
 
 @media (max-width:1200px){
 
-    .processing-container{
-        zoom:0.92;
+    .block-container{
+        padding-left:0.5rem !important;
+        padding-right:0.5rem !important;
     }
 
 }
@@ -182,17 +177,18 @@ RESPONSIVE
 # =========================================================
 
 st.markdown(
-    """
+    f"""
     <div style="
-        background:linear-gradient(
+        background:
+        linear-gradient(
             135deg,
             #0F172A,
             #111827
         );
-        padding:18px 24px;
-        border-radius:22px;
+        border-radius:24px;
+        padding:22px 28px;
+        box-shadow:0 10px 28px rgba(0,0,0,0.18);
         margin-bottom:12px;
-        box-shadow:0 8px 24px rgba(0,0,0,0.15);
     ">
 
         <div style="
@@ -200,12 +196,13 @@ st.markdown(
             justify-content:space-between;
             align-items:center;
             flex-wrap:wrap;
+            gap:12px;
         ">
 
             <div>
 
                 <div style="
-                    font-size:38px;
+                    font-size:42px;
                     font-weight:900;
                     color:white;
                     line-height:1.1;
@@ -215,12 +212,22 @@ st.markdown(
                 </div>
 
                 <div style="
-                    margin-top:6px;
                     color:#CBD5E1;
-                    font-size:14px;
+                    margin-top:6px;
+                    font-size:15px;
                     font-weight:500;
                 ">
                     Enterprise Institutional Analytics Dashboard
+                </div>
+
+                <div style="
+                    color:#94A3B8;
+                    margin-top:8px;
+                    font-size:12px;
+                    font-weight:700;
+                ">
+                    Updated:
+                    {datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%d-%m-%Y %I:%M:%S %p IST')}
                 </div>
 
             </div>
@@ -228,11 +235,11 @@ st.markdown(
             <div style="
                 background:#10B981;
                 color:white;
-                padding:8px 16px;
-                border-radius:12px;
+                padding:10px 18px;
+                border-radius:14px;
                 font-size:13px;
-                font-weight:800;
-                margin-top:8px;
+                font-weight:900;
+                letter-spacing:0.5px;
             ">
                 LIVE NSE ENGINE
             </div>
@@ -245,29 +252,7 @@ st.markdown(
 )
 
 # =========================================================
-# TIMESTAMP
-# =========================================================
-
-india = pytz.timezone("Asia/Kolkata")
-
-st.markdown(
-    f"""
-    <div style="
-        color:#6B7280;
-        font-size:11px;
-        margin-top:-2px;
-        margin-bottom:12px;
-        font-weight:700;
-    ">
-    Updated:
-    {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# =========================================================
-# LOAD NSE STOCKS
+# LOAD STOCKS
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -296,11 +281,11 @@ with st.sidebar:
 
     st.markdown("""
     <div style="
-        font-size:28px;
+        font-size:32px;
         font-weight:900;
-        margin-bottom:10px;
+        margin-bottom:14px;
     ">
-    ⚙️ Dashboard Controls
+        ⚙️ Dashboard Controls
     </div>
     """, unsafe_allow_html=True)
 
@@ -315,10 +300,7 @@ with st.sidebar:
             "HOLD",
             "AVOID"
         ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
-        ]
+
     )
 
     min_score = st.slider(
@@ -352,7 +334,7 @@ signal_colors = {
 }
 
 # =========================================================
-# SAFE ROUND
+# HELPERS
 # =========================================================
 
 def safe_round(x, n=2):
@@ -377,10 +359,10 @@ st.info(
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
 
-    progress_bar = st.progress(0)
+    progress_placeholder = st.empty()
+    status_placeholder = st.empty()
 
     results = []
-
     failed_stocks = []
 
     total = len(stock_list)
@@ -390,8 +372,6 @@ def run_analysis(stock_list):
     start_time = time.time()
 
     batch_size = 25
-
-    status_placeholder = st.empty()
 
     for i in range(0, total, batch_size):
 
@@ -478,7 +458,10 @@ def run_analysis(stock_list):
 
                 failed_stocks.append(symbol)
 
-            progress_bar.progress(completed / total)
+            completion_pct = round(
+                (completed / total) * 100,
+                1
+            )
 
             elapsed = (time.time() - start_time) / 60
 
@@ -491,223 +474,268 @@ def run_analysis(stock_list):
                 1
             )
 
-            completion_pct = round(
-                (completed / total) * 100,
-                1
+            progress_placeholder.progress(
+                completed / total
             )
 
-            if completed % 10 == 0:
+            status_html = f"""
+            <div style="
+                background:white;
+                border-radius:22px;
+                padding:20px;
+                margin-top:14px;
+                box-shadow:0 10px 28px rgba(0,0,0,0.08);
+            ">
 
-                status_placeholder.markdown(
-                    f"""
-                    <div class="processing-container">
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    flex-wrap:wrap;
+                    gap:12px;
+                    margin-bottom:18px;
+                ">
+
+                    <div>
 
                         <div style="
-                            display:flex;
-                            justify-content:space-between;
-                            align-items:center;
-                            margin-bottom:12px;
-                            flex-wrap:wrap;
+                            font-size:32px;
+                            font-weight:900;
+                            color:#111827;
+                            line-height:1.1;
                         ">
-
-                            <div>
-
-                                <div style="
-                                    font-size:22px;
-                                    font-weight:900;
-                                    color:#111827;
-                                ">
-                                📊 Institutional Processing Engine
-                                </div>
-
-                                <div style="
-                                    color:#6B7280;
-                                    font-size:13px;
-                                ">
-                                Real-Time Quant Processing
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                background:#DBEAFE;
-                                color:#1D4ED8;
-                                padding:6px 12px;
-                                border-radius:10px;
-                                font-weight:800;
-                                font-size:11px;
-                            ">
-                            LIVE
-                            </div>
-
+                            📊 Institutional Processing Engine
                         </div>
 
                         <div style="
-                            display:grid;
-                            grid-template-columns:
-                            repeat(auto-fit,minmax(160px,1fr));
-                            gap:10px;
+                            color:#6B7280;
+                            font-size:14px;
+                            margin-top:5px;
                         ">
-
-                            <div style="
-                                background:#ECFDF5;
-                                padding:10px;
-                                border-radius:14px;
-                                border-left:5px solid #10B981;
-                            ">
-                                <div style="
-                                    color:#047857;
-                                    font-size:11px;
-                                    font-weight:700;
-                                ">
-                                COMPLETED
-                                </div>
-
-                                <div style="
-                                    margin-top:6px;
-                                    font-size:18px;
-                                    font-weight:900;
-                                    color:#065F46;
-                                ">
-                                {completed}
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                background:#FEF2F2;
-                                padding:10px;
-                                border-radius:14px;
-                                border-left:5px solid #DC2626;
-                            ">
-                                <div style="
-                                    color:#B91C1C;
-                                    font-size:11px;
-                                    font-weight:700;
-                                ">
-                                FAILED
-                                </div>
-
-                                <div style="
-                                    margin-top:6px;
-                                    font-size:18px;
-                                    font-weight:900;
-                                    color:#991B1B;
-                                ">
-                                {len(set(failed_stocks))}
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                background:#EFF6FF;
-                                padding:10px;
-                                border-radius:14px;
-                                border-left:5px solid #2563EB;
-                            ">
-                                <div style="
-                                    color:#1D4ED8;
-                                    font-size:11px;
-                                    font-weight:700;
-                                ">
-                                UNIVERSE
-                                </div>
-
-                                <div style="
-                                    margin-top:6px;
-                                    font-size:18px;
-                                    font-weight:900;
-                                    color:#1E3A8A;
-                                ">
-                                {total}
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                background:#FFF7ED;
-                                padding:10px;
-                                border-radius:14px;
-                                border-left:5px solid #F59E0B;
-                            ">
-                                <div style="
-                                    color:#D97706;
-                                    font-size:11px;
-                                    font-weight:700;
-                                ">
-                                ETA
-                                </div>
-
-                                <div style="
-                                    margin-top:6px;
-                                    font-size:18px;
-                                    font-weight:900;
-                                    color:#92400E;
-                                ">
-                                {remaining_minutes}m
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div style="margin-top:10px;">
-
-                            <div style="
-                                display:flex;
-                                justify-content:space-between;
-                                margin-bottom:5px;
-                            ">
-
-                                <div style="
-                                    color:#374151;
-                                    font-weight:700;
-                                    font-size:12px;
-                                ">
-                                Processing Progress
-                                </div>
-
-                                <div style="
-                                    color:#2563EB;
-                                    font-weight:800;
-                                    font-size:12px;
-                                ">
-                                {completion_pct}%
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                width:100%;
-                                height:7px;
-                                background:#E5E7EB;
-                                border-radius:999px;
-                                overflow:hidden;
-                            ">
-
-                                <div style="
-                                    width:{completion_pct}%;
-                                    height:100%;
-                                    background:
-                                    linear-gradient(
-                                        90deg,
-                                        #2563EB,
-                                        #10B981
-                                    );
-                                    border-radius:999px;
-                                ">
-                                </div>
-
-                            </div>
-
+                            Real-Time Quant Processing
                         </div>
 
                     </div>
-                    """,
-                    unsafe_allow_html=True
-                )
 
-    progress_bar.empty()
+                    <div style="
+                        background:#DBEAFE;
+                        color:#1D4ED8;
+                        padding:8px 16px;
+                        border-radius:12px;
+                        font-size:12px;
+                        font-weight:900;
+                    ">
+                        LIVE
+                    </div>
+
+                </div>
+
+                <div style="
+                    display:grid;
+                    grid-template-columns:
+                    repeat(auto-fit,minmax(180px,1fr));
+                    gap:14px;
+                    margin-bottom:18px;
+                ">
+
+                    <div style="
+                        background:#ECFDF5;
+                        border-left:6px solid #10B981;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+
+                        <div style="
+                            color:#047857;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            COMPLETED
+                        </div>
+
+                        <div style="
+                            font-size:24px;
+                            font-weight:900;
+                            color:#065F46;
+                            margin-top:6px;
+                        ">
+                            {completed}
+                        </div>
+
+                        <div style="
+                            color:#10B981;
+                            font-size:13px;
+                            margin-top:4px;
+                        ">
+                            out of {total}
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        background:#FEF2F2;
+                        border-left:6px solid #DC2626;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+
+                        <div style="
+                            color:#B91C1C;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            FAILED
+                        </div>
+
+                        <div style="
+                            font-size:24px;
+                            font-weight:900;
+                            color:#991B1B;
+                            margin-top:6px;
+                        ">
+                            {len(set(failed_stocks))}
+                        </div>
+
+                        <div style="
+                            color:#DC2626;
+                            font-size:13px;
+                            margin-top:4px;
+                        ">
+                            failed stocks
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        background:#EFF6FF;
+                        border-left:6px solid #2563EB;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+
+                        <div style="
+                            color:#1D4ED8;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            UNIVERSE
+                        </div>
+
+                        <div style="
+                            font-size:24px;
+                            font-weight:900;
+                            color:#1E3A8A;
+                            margin-top:6px;
+                        ">
+                            {total}
+                        </div>
+
+                        <div style="
+                            color:#2563EB;
+                            font-size:13px;
+                            margin-top:4px;
+                        ">
+                            NSE Stocks
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        background:#FFF7ED;
+                        border-left:6px solid #F59E0B;
+                        border-radius:16px;
+                        padding:16px;
+                    ">
+
+                        <div style="
+                            color:#D97706;
+                            font-size:12px;
+                            font-weight:800;
+                        ">
+                            ETA
+                        </div>
+
+                        <div style="
+                            font-size:24px;
+                            font-weight:900;
+                            color:#92400E;
+                            margin-top:6px;
+                        ">
+                            {remaining_minutes}m
+                        </div>
+
+                        <div style="
+                            color:#F59E0B;
+                            font-size:13px;
+                            margin-top:4px;
+                        ">
+                            remaining
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        margin-bottom:8px;
+                    ">
+
+                        <div style="
+                            color:#374151;
+                            font-size:14px;
+                            font-weight:700;
+                        ">
+                            Processing Progress
+                        </div>
+
+                        <div style="
+                            color:#2563EB;
+                            font-size:14px;
+                            font-weight:900;
+                        ">
+                            {completion_pct}%
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        width:100%;
+                        height:12px;
+                        background:#E5E7EB;
+                        border-radius:999px;
+                        overflow:hidden;
+                    ">
+
+                        <div style="
+                            width:{completion_pct}%;
+                            height:100%;
+                            background:
+                            linear-gradient(
+                                90deg,
+                                #2563EB,
+                                #10B981
+                            );
+                            border-radius:999px;
+                        ">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            """
+
+            status_placeholder.markdown(
+                status_html,
+                unsafe_allow_html=True
+            )
+
+    progress_placeholder.empty()
 
     return pd.DataFrame(results), failed_stocks
 
@@ -752,7 +780,7 @@ if search_stock:
     ]
 
 # =========================================================
-# KPI CARDS
+# KPI SECTION
 # =========================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -801,8 +829,8 @@ with left:
     )
 
     fig1.update_layout(
-        height=320,
-        margin=dict(l=10, r=10, t=40, b=10)
+        height=380,
+        margin=dict(l=10, r=10, t=50, b=10)
     )
 
     st.plotly_chart(
@@ -824,8 +852,8 @@ with right:
     )
 
     fig2.update_layout(
-        height=320,
-        margin=dict(l=10, r=10, t=40, b=10)
+        height=380,
+        margin=dict(l=10, r=10, t=50, b=10)
     )
 
     st.plotly_chart(
@@ -845,5 +873,5 @@ st.dataframe(
         ascending=False
     ),
     use_container_width=True,
-    height=500
+    height=550
 )
