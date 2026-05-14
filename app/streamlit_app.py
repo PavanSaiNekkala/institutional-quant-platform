@@ -369,14 +369,14 @@ def run_analysis(stock_list):
     progress_bar = st.progress(0)
 
     status_placeholder = st.empty()
-                completion_pct = round(
-                (completed / total) * 100,
-                1
-            )
+    completion_pct = round(
+    (completed / total) * 100,
+    1
+    )
 
-            elapsed = (time.time() - start_time) / 60
+    elapsed = (time.time() - start_time) / 60
 
-            estimated_total = (
+    estimated_total = (
                 elapsed / max(completed, 1)
             ) * total
 
