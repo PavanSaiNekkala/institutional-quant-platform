@@ -1,6 +1,6 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL FULL UPDATED CODE
+# INSTITUTIONAL QUANT PLATFORM - FINAL ENTERPRISE UI
 # =========================================================
 
 import sys
@@ -34,12 +34,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# =========================================================
-# CLEAR CACHE (RUN ONCE THEN REMOVE)
-# =========================================================
-
-st.cache_data.clear()
 
 # =========================================================
 # CSS
@@ -83,7 +77,7 @@ label {
     font-weight: 600 !important;
 }
 
-/* ================= SELECTBOX ================= */
+/* ================= SELECT BOX ================= */
 
 div[data-baseweb="select"] > div {
     background-color: #1F2937 !important;
@@ -117,8 +111,8 @@ input[type="text"]::placeholder {
 /* ================= TITLE ================= */
 
 .main-title {
-    font-size: 48px;
-    font-weight: 800;
+    font-size: 52px;
+    font-weight: 900;
     color: #111827;
     margin-bottom: -10px;
 }
@@ -128,13 +122,13 @@ input[type="text"]::placeholder {
     color: #6B7280;
 }
 
-/* ================= PLOTLY ================= */
+/* ================= PLOTLY CARDS ================= */
 
 .element-container:has(.js-plotly-plot) {
     background: white;
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 1rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     margin-bottom: 1rem;
 }
 
@@ -552,95 +546,285 @@ def run_analysis(stock_list, regime):
                 status_box.markdown(
                     f"""
                     <div style="
-                        background:white;
-                        border-radius:18px;
-                        padding:18px;
-                        border-left:6px solid #10B981;
-                        box-shadow:0 2px 12px rgba(0,0,0,0.08);
-                        height:260px;
-                        overflow:hidden;
+                        background: linear-gradient(135deg,#ffffff,#f8fafc);
+                        border-radius:22px;
+                        padding:28px;
+                        box-shadow:0 6px 24px rgba(0,0,0,0.08);
+                        border:1px solid #E5E7EB;
+                        margin-top:10px;
                     ">
-
-                    <h3 style="
-                        margin-top:0;
-                        margin-bottom:12px;
-                        color:#111827;
-                    ">
-                    📊 Institutional Processing Engine
-                    </h3>
-
-                    <hr style="margin:8px 0 14px 0;">
 
                     <div style="
-                        display:grid;
-                        grid-template-columns:1fr 1fr;
-                        gap:14px;
-                        font-size:17px;
-                        font-weight:600;
-                        color:#374151;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        margin-bottom:20px;
                     ">
 
                         <div>
-                            ✅ Completed<br>
 
-                            <span style="
-                                font-size:26px;
-                                color:#10B981;
+                            <div style="
+                                font-size:34px;
                                 font-weight:800;
+                                color:#111827;
                             ">
-                                {completed}/{total}
-                            </span>
+                            📊 Institutional Processing Engine
+                            </div>
+
+                            <div style="
+                                color:#6B7280;
+                                font-size:15px;
+                                margin-top:4px;
+                            ">
+                            Real-Time Institutional Quant Processing
+                            </div>
+
                         </div>
 
-                        <div>
-                            ❌ Failed<br>
-
-                            <span style="
-                                font-size:26px;
-                                color:#DC2626;
-                                font-weight:800;
-                            ">
-                                {len(set(failed_stocks))}
-                            </span>
-                        </div>
-
-                        <div>
-                            🌐 Universe<br>
-
-                            <span style="
-                                font-size:24px;
-                                color:#2563EB;
-                                font-weight:800;
-                            ">
-                                {total}
-                            </span>
-                        </div>
-
-                        <div>
-                            ⏳ Remaining<br>
-
-                            <span style="
-                                font-size:24px;
-                                color:#F59E0B;
-                                font-weight:800;
-                            ">
-                                {remaining_minutes}m
-                            </span>
+                        <div style="
+                            background:#EEF2FF;
+                            color:#2563EB;
+                            padding:10px 16px;
+                            border-radius:12px;
+                            font-weight:700;
+                            font-size:15px;
+                        ">
+                        LIVE
                         </div>
 
                     </div>
 
                     <div style="
-                        margin-top:16px;
-                        padding:12px;
-                        border-radius:12px;
-                        background:#F3F4F6;
-                        font-size:15px;
-                        font-weight:600;
-                        color:#111827;
+                        display:grid;
+                        grid-template-columns:repeat(4,1fr);
+                        gap:18px;
+                        margin-top:20px;
                     ">
-                        🔍 Current Stock:
-                        {symbol}
+
+                        <div style="
+                            background:#ECFDF5;
+                            border-radius:18px;
+                            padding:22px;
+                            border-left:6px solid #10B981;
+                        ">
+
+                            <div style="
+                                color:#047857;
+                                font-size:15px;
+                                font-weight:700;
+                            ">
+                            ✅ Completed
+                            </div>
+
+                            <div style="
+                                font-size:34px;
+                                font-weight:800;
+                                color:#065F46;
+                                margin-top:8px;
+                            ">
+                            {completed}
+                            </div>
+
+                            <div style="
+                                margin-top:6px;
+                                color:#059669;
+                                font-size:14px;
+                            ">
+                            out of {total}
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#FEF2F2;
+                            border-radius:18px;
+                            padding:22px;
+                            border-left:6px solid #DC2626;
+                        ">
+
+                            <div style="
+                                color:#B91C1C;
+                                font-size:15px;
+                                font-weight:700;
+                            ">
+                            ❌ Failed
+                            </div>
+
+                            <div style="
+                                font-size:34px;
+                                font-weight:800;
+                                color:#991B1B;
+                                margin-top:8px;
+                            ">
+                            {len(set(failed_stocks))}
+                            </div>
+
+                            <div style="
+                                margin-top:6px;
+                                color:#DC2626;
+                                font-size:14px;
+                            ">
+                            download failures
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#EFF6FF;
+                            border-radius:18px;
+                            padding:22px;
+                            border-left:6px solid #2563EB;
+                        ">
+
+                            <div style="
+                                color:#1D4ED8;
+                                font-size:15px;
+                                font-weight:700;
+                            ">
+                            🌐 Universe
+                            </div>
+
+                            <div style="
+                                font-size:34px;
+                                font-weight:800;
+                                color:#1E3A8A;
+                                margin-top:8px;
+                            ">
+                            {total}
+                            </div>
+
+                            <div style="
+                                margin-top:6px;
+                                color:#2563EB;
+                                font-size:14px;
+                            ">
+                            NSE listed stocks
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#FFF7ED;
+                            border-radius:18px;
+                            padding:22px;
+                            border-left:6px solid #F59E0B;
+                        ">
+
+                            <div style="
+                                color:#D97706;
+                                font-size:15px;
+                                font-weight:700;
+                            ">
+                            ⏳ ETA
+                            </div>
+
+                            <div style="
+                                font-size:34px;
+                                font-weight:800;
+                                color:#92400E;
+                                margin-top:8px;
+                            ">
+                            {remaining_minutes}m
+                            </div>
+
+                            <div style="
+                                margin-top:6px;
+                                color:#F59E0B;
+                                font-size:14px;
+                            ">
+                            estimated remaining
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        margin-top:26px;
+                    ">
+
+                        <div style="
+                            display:flex;
+                            justify-content:space-between;
+                            margin-bottom:8px;
+                        ">
+
+                            <span style="
+                                color:#374151;
+                                font-weight:700;
+                                font-size:15px;
+                            ">
+                            Processing Progress
+                            </span>
+
+                            <span style="
+                                color:#2563EB;
+                                font-weight:800;
+                                font-size:15px;
+                            ">
+                            {round((completed/total)*100,1)}%
+                            </span>
+
+                        </div>
+
+                        <div style="
+                            width:100%;
+                            background:#E5E7EB;
+                            height:16px;
+                            border-radius:999px;
+                            overflow:hidden;
+                        ">
+
+                            <div style="
+                                width:{(completed/total)*100}%;
+                                background:linear-gradient(90deg,#2563EB,#10B981);
+                                height:100%;
+                                border-radius:999px;
+                            "></div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        margin-top:26px;
+                        background:#111827;
+                        color:white;
+                        border-radius:16px;
+                        padding:18px;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                    ">
+
+                        <div>
+
+                            <div style="
+                                font-size:13px;
+                                color:#9CA3AF;
+                                margin-bottom:4px;
+                            ">
+                            CURRENTLY ANALYZING
+                            </div>
+
+                            <div style="
+                                font-size:24px;
+                                font-weight:800;
+                            ">
+                            {symbol}
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#10B981;
+                            padding:10px 16px;
+                            border-radius:12px;
+                            font-weight:700;
+                        ">
+                        ACTIVE
+                        </div>
+
                     </div>
 
                     </div>
@@ -703,26 +887,6 @@ results = results.sort_values(
     by="Final Score",
     ascending=False
 )
-
-# =========================================================
-# FAILED STOCKS
-# =========================================================
-
-if failed_stocks:
-
-    with st.expander(
-        f"⚠️ Failed Stocks ({len(failed_stocks)})"
-    ):
-
-        failed_df = pd.DataFrame({
-            "Failed Stocks": failed_stocks
-        })
-
-        st.dataframe(
-            failed_df,
-            use_container_width=True,
-            height=300
-        )
 
 # =========================================================
 # KPIs
