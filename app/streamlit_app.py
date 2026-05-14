@@ -568,27 +568,99 @@ def run_analysis(stock_list, regime):
         # =================================================
 
         status_box.markdown(
-            f"""
-            <div class="status-card">
+    f"""
+    <div style="
+        background:white;
+        border-radius:18px;
+        padding:18px;
+        border-left:6px solid #10B981;
+        box-shadow:0 2px 12px rgba(0,0,0,0.08);
+        height:260px;
+        overflow:hidden;
+    ">
 
-            <h4>📥 Institutional Market Data Engine</h4>
+    <h3 style="
+        margin-top:0;
+        margin-bottom:12px;
+        color:#111827;
+    ">
+    📊 Institutional Processing Engine
+    </h3>
 
-            <hr>
+    <hr style="margin:8px 0 14px 0;">
 
-            🌐 Stock Universe: {total}<br><br>
+    <div style="
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+        font-size:17px;
+        font-weight:600;
+        color:#374151;
+    ">
 
-            📦 Current Batch:
-            {batch_start + 1}
-            -
-            {min(batch_start + batch_size, total)}<br><br>
+        <div>
+        ✅ Completed<br>
+        <span style="
+            font-size:26px;
+            color:#10B981;
+            font-weight:800;
+        ">
+        {completed}/{total}
+        </span>
+        </div>
 
-            ⏳ Downloading NSE market data...
+        <div>
+        ❌ Failed<br>
+        <span style="
+            font-size:26px;
+            color:#DC2626;
+            font-weight:800;
+        ">
+        {len(set(failed_stocks))}
+        </span>
+        </div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        <div>
+        🌐 Universe<br>
+        <span style="
+            font-size:24px;
+            color:#2563EB;
+            font-weight:800;
+        ">
+        {total}
+        </span>
+        </div>
 
+        <div>
+        ⏳ Remaining<br>
+        <span style="
+            font-size:24px;
+            color:#F59E0B;
+            font-weight:800;
+        ">
+        {remaining_minutes}m
+        </span>
+        </div>
+
+    </div>
+
+    <div style="
+        margin-top:16px;
+        padding:12px;
+        border-radius:12px;
+        background:#F3F4F6;
+        font-size:15px;
+        font-weight:600;
+        color:#111827;
+    ">
+    🔍 Current Stock:
+    {symbol}
+    </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
         # =================================================
         # DOWNLOAD BATCH
         # =================================================
