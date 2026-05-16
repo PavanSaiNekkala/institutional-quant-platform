@@ -451,25 +451,44 @@ def run_analysis(stock_list):
                     / max(returns.std(), 0.0001)
                 ) * np.sqrt(252)
 
-                score = (
+                # =====================================================
+                # RAW SCORE
+                # =====================================================
+
+                raw_score = (
                     momentum * 0.6
                     + sharpe * 0.4
+                )
+
+                # =====================================================
+                # NORMALIZED INSTITUTIONAL SCORE
+                # =====================================================
+
+                score = max(
+                    0,
+                    min(
+                        round(
+                            raw_score * 35,
+                            2
+                        ),
+                        100
+                    )
                 )
 
                 # =====================================================
                 # SIGNAL CLASSIFICATION
                 # =====================================================
 
-                if score >= 1.5:
+                if score >= 85:
                     signal = "STRONG_BUY"
 
-                elif score >= 1.0:
+                elif score >= 70:
                     signal = "BUY"
 
-                elif score >= 0.6:
+                elif score >= 55:
                     signal = "WATCH"
 
-                elif score >= 0.2:
+                elif score >= 40:
                     signal = "HOLD"
 
                 else:
