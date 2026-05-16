@@ -474,14 +474,89 @@ def run_analysis(stock_list):
 
                 else:
                     signal = "AVOID"
+                # =====================================================
+                # STOPLOSS
+                # =====================================================
 
+                stop_loss = round(
+                    close.iloc[-1] - (
+                        close.iloc[-1] * 0.04
+                    ),
+                    2
+                )
+
+                # =====================================================
+                # TARGET
+                # =====================================================
+
+                target = round(
+                    close.iloc[-1] + (
+                        close.iloc[-1] * 0.10
+                    ),
+                    2
+                )
+
+                # =====================================================
+                # UPSIDE %
+                # =====================================================
+
+                upside_pct = round(
+                    (
+                        (
+                            target - close.iloc[-1]
+                        )
+                        /
+                        close.iloc[-1]
+                    ) * 100,
+                    2
+                )
+
+                # =====================================================
+                # RISK REWARD
+                # =====================================================
+
+                risk = max(
+                    close.iloc[-1] - stop_loss,
+                    1
+                )
+
+                reward = max(
+                    target - close.iloc[-1],
+                    0
+                )
+
+                rr_ratio = round(
+                    reward / risk,
+                    2
+                )
+
+                # =====================================================
+                # ESTIMATED DAYS
+                # =====================================================
+
+                daily_move = max(
+                    close.pct_change().std() * close.iloc[-1],
+                    1
+                )
+
+                estimated_days = round(
+                    max(
+                       reward / daily_move,
+                        1
+                    )
+                )
                 results.append({
                     "Symbol": symbol,
                     "CMP": safe_round(close.iloc[-1]),
-                    "Momentum": safe_round(momentum * 100),
+                    "Momentum": safe_round(momentum * 100), 
                     "Sharpe": safe_round(sharpe),
                     "Final Score": safe_round(score),
-                    "Classification": signal
+                    "Classification": signal,
+                    "STOP_LOSS": stop_loss,
+                    "TARGET": target,
+                    "UPSIDE_%": upside_pct,
+                    "RR_RATIO": rr_ratio,
+                    "ESTIMATED_DAYS": estimated_days
                 })
 
             except:
@@ -895,11 +970,41 @@ with right:
 
 st.markdown("## 🏦 Institutional Rankings")
 
+display_cols = [
+
+    "Symbol",
+
+    "CMP",
+
+    "Classification",
+
+    "Momentum",
+
+    "Sharpe",
+
+    "Final Score",
+
+    "STOP_LOSS",
+
+    "TARGET",
+
+    "UPSIDE_%",
+
+    "RR_RATIO",
+
+    "ESTIMATED_DAYS"
+]
+
 st.dataframe(
-    results.sort_values(
+
+    results[display_cols]
+
+    .sort_values(
         "Final Score",
         ascending=False
     ),
+
     use_container_width=True,
+
     height=550
 )
