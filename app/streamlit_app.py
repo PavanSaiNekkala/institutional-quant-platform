@@ -489,8 +489,6 @@ def run_analysis(stock_list):
                 if symbol not in failed_stocks:
                     failed_stocks.append(symbol)
 
-            progress_bar.progress(completed / total)
-
             elapsed = (time.time() - start_time) / 60
 
             estimated_total = (
