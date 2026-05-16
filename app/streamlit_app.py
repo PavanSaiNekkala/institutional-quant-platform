@@ -464,19 +464,23 @@ def run_analysis(stock_list):
                 # SIGNAL CLASSIFICATION
                 # =====================================================
 
-                if score >= 1.5:
+                # =====================================================
+                # INSTITUTIONAL CLASSIFICATION
+                # =====================================================
+
+                if score >= 1.0:
 
                     signal = "STRONG_BUY"
 
-                elif score >= 1.0:
+                elif score >= 0.75:
 
                     signal = "BUY"
 
-                elif score >= 0.6:
+                elif score >= 0.5:
 
                     signal = "WATCH"
 
-                elif score >= 0.2:
+                elif score >= 0.25:
 
                     signal = "HOLD"
 
