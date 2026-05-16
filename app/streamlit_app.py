@@ -479,16 +479,16 @@ def run_analysis(stock_list):
                 # SIGNAL CLASSIFICATION
                 # =====================================================
 
-                if score >= 85:
+                if score >= 75:
                     signal = "STRONG_BUY"
 
-                elif score >= 70:
+                elif score >= 60:
                     signal = "BUY"
 
-                elif score >= 55:
+                elif score >= 45:
                     signal = "WATCH"
 
-                elif score >= 40:
+                elif score >= 30:
                     signal = "HOLD"
 
                 else:
