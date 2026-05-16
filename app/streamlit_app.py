@@ -378,8 +378,6 @@ def safe_round(x, n=2):
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
 
-    progress_bar = st.progress(0)
-
     results = []
 
     failed_stocks = []
