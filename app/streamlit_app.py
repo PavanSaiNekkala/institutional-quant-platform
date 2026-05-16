@@ -753,8 +753,6 @@ def run_analysis(stock_list):
                 with status_placeholder:
                     st.html(status_html)
 
-    progress_bar.empty()
-
     return (
         pd.DataFrame(results),
         failed_stocks
