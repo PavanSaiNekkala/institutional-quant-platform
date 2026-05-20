@@ -1092,9 +1092,43 @@ display_cols = [
 # SORT RESULTS
 # =====================================================
 
+# =====================================================
+# APPLY MARKET CAP FILTER
+# =====================================================
+
+filtered_results = results.copy()
+
+if market_cap_filter:
+
+    filtered_results = filtered_results[
+
+        filtered_results[
+            "MARKET_CAP_CATEGORY"
+        ].isin(market_cap_filter)
+
+    ]
+
+# =====================================================
+# APPLY SIGNAL FILTER
+# =====================================================
+
+if signal_filter:
+
+    filtered_results = filtered_results[
+
+        filtered_results[
+            "Classification"
+        ].isin(signal_filter)
+
+    ]
+
+# =====================================================
+# FINAL EXPORT DATAFRAME
+# =====================================================
+
 export_df = (
 
-    results[display_cols]
+    filtered_results[display_cols]
 
     .sort_values(
         "Final Score",
