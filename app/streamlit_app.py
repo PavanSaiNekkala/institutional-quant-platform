@@ -385,7 +385,40 @@ def safe_round(x, n=2):
         return round(float(x), n)
     except:
         return 0
+# =========================================================
+# LOAD MARKET CAPS CSV
+# =========================================================
 
+market_cap_file = (
+
+    ROOT_DIR
+    / "data"
+    / "market_caps.csv"
+
+)
+
+market_cap_df = pd.read_csv(
+    market_cap_file
+)
+
+market_cap_df["Symbol"] = (
+
+    market_cap_df["Symbol"]
+    .astype(str)
+    .str.replace(".NS", "", regex=False)
+)
+
+market_cap_map = dict(
+
+    zip(
+
+        market_cap_df["Symbol"],
+
+        market_cap_df["MarketCap"]
+
+    )
+
+)
 # =========================================================
 # ANALYSIS ENGINE
 # =========================================================
@@ -445,54 +478,55 @@ def run_analysis(stock_list):
 
                 close = data[symbol]["Close"].dropna()
                 # =====================================================
-                # MARKET CAP
+                # MARKET CAP FROM CSV
                 # =====================================================
 
-                try:
+                clean_symbol = symbol.replace(
+                    ".NS",
+                    ""
+                )
 
-                    stock_info = yf.Ticker(symbol).fast_info
+                market_cap = market_cap_map.get(
+                    clean_symbol,
+                    0
+                )
 
-                    market_cap = stock_info.get(
-                        "market_cap",
-                        0
+                # =====================================================
+                # MARKET CAP CATEGORY
+                # =====================================================
+
+                if market_cap >= 2_00_000_00_00_000:
+
+                    market_cap_category = "Large Cap"
+
+                elif market_cap >= 20_000_00_000:
+
+                    market_cap_category = "Mid Cap"
+
+                else:
+
+                    market_cap_category = "Small Cap"
+
+                # =====================================================
+                # MARKET CAP DISPLAY
+                # =====================================================
+
+                if market_cap >= 1_00_000_00_00_000:
+
+                    market_cap_display = (
+                        f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
                     )
 
-                    # =====================================================
-                    # MARKET CAP CATEGORY
-                    # =====================================================
+                elif market_cap >= 1_00_00_00_000:
 
-                    if market_cap >= 2_00_000_00_00_000:
+                    market_cap_display = (
+                        f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
+                    )
 
-                        market_cap_category = "Large Cap"
+                else:
 
-                    elif market_cap >= 20_000_00_000:
-
-                        market_cap_category = "Mid Cap"
-
-                    else:
-
-                       market_cap_category = "Small Cap"
-
-                    # =====================================================
-                    # MARKET CAP DISPLAY
-                    # =====================================================
-
-                    if market_cap >= 1_00_000_00_00_000:
-
-                        market_cap_display = f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
-
-                    elif market_cap >= 1_00_00_00_000:
-
-                        market_cap_display = f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
-
-                    else:
-
-                        market_cap_display = str(market_cap)
-
-                except:
-
-                    market_cap_display = "N/A"
-
+                    market_cap_display = str(market_cap)
+                
                 if len(close) < 40:
 
                     if symbol not in failed_stocks:
@@ -944,24 +978,25 @@ results = results[
 ]
 
 if signal_filter:
-    # =====================================================
-    # MARKET CAP FILTERING
-    # =====================================================
+    # =========================================================
+    # MARKET CAP FILTER
+    # =========================================================
 
     if market_cap_filter:
-
         results = results[
-
             results["MARKET_CAP_CATEGORY"]
-
             .isin(market_cap_filter)
-
         ]
 
-    results = results[
-        results["Classification"]
-        .isin(signal_filter)
-    ]
+    # =========================================================
+    # SIGNAL FILTER
+    # =========================================================
+
+    if signal_filter:
+        results = results[
+            results["Classification"]
+            .isin(signal_filter)
+        ]
 
 if search_stock:
 
@@ -1108,16 +1143,6 @@ display_cols = [
 # =====================================================
 
 filtered_results = results.copy()
-
-if market_cap_filter:
-
-    filtered_results = filtered_results[
-
-        filtered_results[
-            "MARKET_CAP_CATEGORY"
-        ].isin(market_cap_filter)
-
-    ]
 
 # =====================================================
 # APPLY SIGNAL FILTER
