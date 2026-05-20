@@ -493,21 +493,21 @@ def run_analysis(stock_list):
                     0
                 )
 
-            # =====================================================
-            # MARKET CAP CATEGORY
-            # =====================================================
+        # =====================================================
+        # MARKET CAP CATEGORY
+        # =====================================================
 
-            if market_cap >= 1000000000000:
+        if market_cap >= 1000000000000:
 
-                market_cap_category = "Large Cap"
+            market_cap_category = "Large Cap"
 
-            elif market_cap >= 200000000000:
+        elif market_cap >= 200000000000:
 
-                market_cap_category = "Mid Cap"
+            market_cap_category = "Mid Cap"
 
-            else:
+        else:
 
-                market_cap_category = "Small Cap"
+            market_cap_category = "Small Cap"
 
                 # =====================================================
                 # MARKET CAP DISPLAY
@@ -540,6 +540,7 @@ def run_analysis(stock_list):
                     close.iloc[-1]
                     / close.iloc[-20]
                 ) - 1
+                
                 # =====================================================
                 # EXPECTED RETURNS
                 # =====================================================
