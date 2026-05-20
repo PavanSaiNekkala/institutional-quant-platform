@@ -993,7 +993,7 @@ with k2:
 with k3:
     st.metric(
         "Filtered Opportunities",
-        len(export_df)
+        len(results)
     )
 
 with k4:
