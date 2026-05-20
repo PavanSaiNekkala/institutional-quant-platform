@@ -660,7 +660,7 @@ def run_analysis(stock_list):
                 1
             )
 
-            if completed % 100 == 0:
+            if completed % 50 == 0:
 
                 status_html = f"""
                 <div class="processing-container" style="
