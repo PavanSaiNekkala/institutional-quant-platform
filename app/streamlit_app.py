@@ -493,21 +493,18 @@ def run_analysis(stock_list):
                     0
                 )
 
-                # =====================================================
-                # MARKET CAP CATEGORY
-                # =====================================================
+               # =====================================================
+               # MARKET CAP CATEGORY
+               # =====================================================
 
-                if market_cap >= 2_00_000_00_00_000:
+               if market_cap >= 1000000000000:
+                   market_cap_category = "Large Cap"
 
-                    market_cap_category = "Large Cap"
+               elif market_cap >= 200000000000:
+                   market_cap_category = "Mid Cap"
 
-                elif market_cap >= 20_000_00_000:
-
-                    market_cap_category = "Mid Cap"
-
-                else:
-
-                    market_cap_category = "Small Cap"
+               else:
+                   market_cap_category = "Small Cap"
 
                 # =====================================================
                 # MARKET CAP DISPLAY
@@ -540,6 +537,24 @@ def run_analysis(stock_list):
                     close.iloc[-1]
                     / close.iloc[-20]
                 ) - 1
+                # =====================================================
+                # EXPECTED RETURNS
+                # =====================================================
+
+                ret_5d = round(
+                    momentum * 5,
+                    2
+                )
+
+                ret_15d = round(
+                    momentum * 15,
+                    2
+                )
+
+                ret_30d = round(
+                    momentum * 30,
+                    2
+                )
 
                 returns = close.pct_change().dropna()
 
@@ -659,8 +674,11 @@ def run_analysis(stock_list):
                     "CMP": safe_round(close.iloc[-1]),
                     "STOP_LOSS": stop_loss,
                     "TARGET": target,
-                    "Momentum": safe_round(momentum * 100), 
+                    "Momentum": safe_round(momentum * 100),
                     "Sharpe": safe_round(sharpe),
+                    "5D_RETURN_%": ret_5d,
+                    "15D_RETURN_%": ret_15d,
+                    "30D_RETURN_%": ret_30d,
                     "Final Score": safe_round(score),
                     "Classification": signal,
                     "UPSIDE_%": upside_pct,
@@ -1132,29 +1150,20 @@ st.markdown("## 🏦 Institutional Rankings")
 display_cols = [
 
     "Symbol",
-    
     "MARKET_CAP",
-
     "MARKET_CAP_CATEGORY",
-
     "CMP",
-    
     "STOP_LOSS",
-
     "TARGET",
-
     "Classification",
-
     "Momentum",
-
     "Sharpe",
-
+    "5D_RETURN_%",
+    "15D_RETURN_%",
+    "30D_RETURN_%",
     "Final Score",
-
     "UPSIDE_%",
-
     "RR_RATIO",
-
     "ESTIMATED_DAYS"
 ]
 
