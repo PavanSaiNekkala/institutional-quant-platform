@@ -284,10 +284,25 @@ stocks = list(dict.fromkeys(stocks))
 # =========================================================
 
 with st.sidebar:
-
     st.markdown("## ⚙️ Dashboard Controls")
-
     st.markdown("---")
+
+    # =====================================================
+    # MARKET CAP FILTER
+    # =====================================================
+
+    market_cap_filter = st.multiselect(
+        "🏢 Market Cap Filter",
+        options=[
+            "Large Cap",
+            "Mid Cap",
+            "Small Cap"
+        ]
+    )
+
+    # =====================================================
+    # TRADE SIGNAL FILTER
+    # =====================================================
 
     signal_filter = st.multiselect(
         "📈 Trade Signal Filter",
@@ -431,6 +446,54 @@ def run_analysis(stock_list):
                     continue
 
                 close = data[symbol]["Close"].dropna()
+                # =====================================================
+                # MARKET CAP
+                # =====================================================
+
+                try:
+
+                    stock_info = yf.Ticker(symbol).info
+
+                    market_cap = stock_info.get(
+                        "marketCap",
+                        0
+                    )
+
+                    # =====================================================
+                    # MARKET CAP CATEGORY
+                    # =====================================================
+
+                    if market_cap >= 2_00_000_00_00_000:
+
+                        market_cap_category = "Large Cap"
+
+                    elif market_cap >= 20_000_00_000:
+
+                        market_cap_category = "Mid Cap"
+
+                    else:
+
+                       market_cap_category = "Small Cap"
+
+                    # =====================================================
+                    # MARKET CAP DISPLAY
+                    # =====================================================
+
+                    if market_cap >= 1_00_000_00_00_000:
+
+                        market_cap_display = f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
+
+                    elif market_cap >= 1_00_00_00_000:
+
+                        market_cap_display = f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
+
+                    else:
+
+                        market_cap_display = str(market_cap)
+
+                except:
+
+                    market_cap_display = "N/A"
 
                 if len(close) < 40:
 
@@ -561,16 +624,19 @@ def run_analysis(stock_list):
                 )
                 results.append({
                     "Symbol": symbol,
+                    "MARKET_CAP": market_cap_display,
+                    "MARKET_CAP_CATEGORY": market_cap_category,
                     "CMP": safe_round(close.iloc[-1]),
+                    "STOP_LOSS": stop_loss,
+                    "TARGET": target,
                     "Momentum": safe_round(momentum * 100), 
                     "Sharpe": safe_round(sharpe),
                     "Final Score": safe_round(score),
                     "Classification": signal,
-                    "STOP_LOSS": stop_loss,
-                    "TARGET": target,
                     "UPSIDE_%": upside_pct,
                     "RR_RATIO": rr_ratio,
                     "ESTIMATED_DAYS": estimated_days
+
                 })
 
             except:
@@ -871,6 +937,19 @@ results = results[
 ]
 
 if signal_filter:
+    # =====================================================
+    # MARKET CAP FILTERING
+    # =====================================================
+
+    if market_cap_filter:
+
+        results = results[
+
+            results["MARKET_CAP_CATEGORY"]
+
+            .isin(market_cap_filter)
+
+        ]
 
     results = results[
         results["Classification"]
@@ -987,8 +1066,16 @@ st.markdown("## 🏦 Institutional Rankings")
 display_cols = [
 
     "Symbol",
+    
+    "MARKET_CAP",
+
+    "MARKET_CAP_CATEGORY",
 
     "CMP",
+    
+    "STOP_LOSS",
+
+    "TARGET",
 
     "Classification",
 
@@ -997,10 +1084,6 @@ display_cols = [
     "Sharpe",
 
     "Final Score",
-
-    "STOP_LOSS",
-
-    "TARGET",
 
     "UPSIDE_%",
 
