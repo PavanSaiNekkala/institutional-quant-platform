@@ -1092,16 +1092,112 @@ display_cols = [
     "ESTIMATED_DAYS"
 ]
 
-st.dataframe(
+# =====================================================
+# SORT RESULTS
+# =====================================================
+
+export_df = (
 
     results[display_cols]
 
     .sort_values(
         "Final Score",
         ascending=False
-    ),
+    )
+
+)
+
+# =====================================================
+# DISPLAY TABLE
+# =====================================================
+
+st.dataframe(
+
+    export_df,
 
     use_container_width=True,
 
     height=550
+
+)
+
+# =====================================================
+# EXCEL EXPORT WITH AUTO WIDTH
+# =====================================================
+
+from io import BytesIO
+
+output = BytesIO()
+
+with pd.ExcelWriter(
+    output,
+    engine="openpyxl"
+) as writer:
+
+    export_df.to_excel(
+
+        writer,
+
+        index=False,
+
+        sheet_name="Institutional Rankings"
+
+    )
+
+    worksheet = writer.sheets[
+        "Institutional Rankings"
+    ]
+
+    # =================================================
+    # AUTO FIT COLUMN WIDTH
+    # =================================================
+
+    for column_cells in worksheet.columns:
+
+        max_length = 0
+
+        column_letter = (
+            column_cells[0].column_letter
+        )
+
+        for cell in column_cells:
+
+            try:
+
+                cell_length = len(
+                    str(cell.value)
+                )
+
+                if cell_length > max_length:
+
+                    max_length = cell_length
+
+            except:
+                pass
+
+        adjusted_width = max_length + 4
+
+        worksheet.column_dimensions[
+            column_letter
+        ].width = adjusted_width
+
+excel_data = output.getvalue()
+
+# =====================================================
+# DOWNLOAD BUTTON
+# =====================================================
+
+st.download_button(
+
+    label="📥 Download Excel Report",
+
+    data=excel_data,
+
+    file_name="institutional_rankings.xlsx",
+
+    mime=(
+        "application/vnd.openxmlformats-"
+        "officedocument.spreadsheetml.sheet"
+    )
+
 )
