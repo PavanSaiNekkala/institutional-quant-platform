@@ -641,8 +641,14 @@ def run_analysis(stock_list):
 
             elapsed = (time.time() - start_time) / 60
 
+            processed_count = (
+                completed +
+                len(failed_stocks)
+            )
+
             estimated_total = (
-                elapsed / max(completed,1)
+                elapsed /
+                max(processed_count,1)
             ) * total
 
             remaining_minutes = round(
@@ -651,7 +657,12 @@ def run_analysis(stock_list):
             )
 
             completion_pct = round(
-                (completed / total) * 100,
+                (
+                    (
+                        completed +
+                        len(failed_stocks)
+                    ) / total
+                ) * 100,
                 1
             )
 
@@ -736,7 +747,7 @@ def run_analysis(stock_list):
                             font-weight:900;
                             color:#065F46;
                         ">
-                        {completed}
+                        {completed + len(failed_stocks)}
                         </div>
 
                         <div style="
@@ -905,14 +916,15 @@ def run_analysis(stock_list):
 
     return (
         pd.DataFrame(results),
-        failed_stocks
+        failed_stocks,
+        completed
     )
 
 # =========================================================
 # RUN ANALYSIS
 # =========================================================
 
-results, failed_stocks = run_analysis(stocks)
+results, failed_stocks, completed = run_analysis(stocks)
 
 if results.empty:
 
@@ -975,13 +987,13 @@ with k1:
 with k2:
     st.metric(
         "Processed Stocks",
-        len(results)
+        completed + len(failed_stocks)
     )
 
 with k3:
     st.metric(
         "Filtered Opportunities",
-        len(results)
+        len(export_df)
     )
 
 with k4:
@@ -989,7 +1001,7 @@ with k4:
         "Failed Stocks",
         len(failed_stocks)
     )
-
+    
 # =========================================================
 # CHARTS
 # =========================================================
