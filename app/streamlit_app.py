@@ -297,7 +297,8 @@ with st.sidebar:
             "Large Cap",
             "Mid Cap",
             "Small Cap"
-        ]
+        ],
+        default=[]
     )
 
     # =====================================================
@@ -313,6 +314,7 @@ with st.sidebar:
             "HOLD",
             "AVOID"
         ],
+        default=[]
     )
 
     min_score = st.slider(
@@ -966,46 +968,68 @@ if results.empty:
     st.stop()
 
 # =========================================================
-# FILTERS
+# MASTER FILTER ENGINE
 # =========================================================
 
-results["Percentile"] = (
-    results["Final Score"] * 100
+filtered_results = results.copy()
+
+# =========================================================
+# SCORE FILTER
+# =========================================================
+
+filtered_results["Percentile"] = (
+    filtered_results["Final Score"] * 100
 )
 
-results = results[
-    results["Percentile"] >= min_score
+filtered_results = filtered_results[
+
+    filtered_results["Percentile"] >= min_score
+
 ]
 
+# =========================================================
+# MARKET CAP FILTER
+# =========================================================
+
+if market_cap_filter:
+
+    filtered_results = filtered_results[
+
+        filtered_results[
+            "MARKET_CAP_CATEGORY"
+        ].isin(market_cap_filter)
+
+    ]
+
+# =========================================================
+# SIGNAL FILTER
+# =========================================================
+
 if signal_filter:
-    # =========================================================
-    # MARKET CAP FILTER
-    # =========================================================
 
-    if market_cap_filter:
-        results = results[
-            results["MARKET_CAP_CATEGORY"]
-            .isin(market_cap_filter)
-        ]
+    filtered_results = filtered_results[
 
-    # =========================================================
-    # SIGNAL FILTER
-    # =========================================================
+        filtered_results[
+            "Classification"
+        ].isin(signal_filter)
 
-    if signal_filter:
-        results = results[
-            results["Classification"]
-            .isin(signal_filter)
-        ]
+    ]
+
+# =========================================================
+# SEARCH FILTER
+# =========================================================
 
 if search_stock:
 
-    results = results[
-        results["Symbol"]
-        .str.contains(
+    filtered_results = filtered_results[
+
+        filtered_results[
+            "Symbol"
+        ].str.contains(
             search_stock.upper(),
             na=False
         )
+
     ]
 
 # =========================================================
@@ -1028,7 +1052,7 @@ with k2:
 with k3:
     st.metric(
         "Filtered Opportunities",
-        len(results)
+        len(filtered_results)
     )
 
 with k4:
@@ -1046,7 +1070,7 @@ left,right = st.columns(2)
 with left:
 
     signal_data = (
-        results["Classification"]
+        filtered_results["Classification"]
         .value_counts()
         .reset_index()
     )
@@ -1079,7 +1103,7 @@ with left:
 with right:
 
     fig2 = px.scatter(
-        results,
+        filtered_results,
         x="Momentum",
         y="Sharpe",
         color="Classification",
@@ -1133,30 +1157,6 @@ display_cols = [
 
     "ESTIMATED_DAYS"
 ]
-
-# =====================================================
-# SORT RESULTS
-# =====================================================
-
-# =====================================================
-# APPLY MARKET CAP FILTER
-# =====================================================
-
-filtered_results = results.copy()
-
-# =====================================================
-# APPLY SIGNAL FILTER
-# =====================================================
-
-if signal_filter:
-
-    filtered_results = filtered_results[
-
-        filtered_results[
-            "Classification"
-        ].isin(signal_filter)
-
-    ]
 
 # =====================================================
 # FINAL EXPORT DATAFRAME
