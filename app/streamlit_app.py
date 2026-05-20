@@ -403,7 +403,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 50
+    batch_size = 25
 
     status_placeholder = st.empty()
 
@@ -522,10 +522,6 @@ def run_analysis(stock_list):
                     momentum * 0.6
                     + sharpe * 0.4
                 )
-
-                # =====================================================
-                # SIGNAL CLASSIFICATION
-                # =====================================================
 
                 # =====================================================
                 # INSTITUTIONAL CLASSIFICATION
