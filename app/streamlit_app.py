@@ -395,7 +395,7 @@ def run_analysis(stock_list):
 
     results = []
 
-    failed_stocks = []
+    failed_stocks = set()
 
     total = len(stock_list)
 
@@ -428,20 +428,18 @@ def run_analysis(stock_list):
             for symbol in batch:
 
                 if symbol not in failed_stocks:
-                    failed_stocks.append(symbol)
+                    failed_stocks.add(symbol)
 
             continue
 
         for symbol in batch:
-
-            completed += 1
 
             try:
 
                 if symbol not in data.columns.levels[0]:
 
                     if symbol not in failed_stocks:
-                        failed_stocks.append(symbol)
+                        failed_stocks.add(symbol)
 
                     continue
 
@@ -498,7 +496,7 @@ def run_analysis(stock_list):
                 if len(close) < 40:
 
                     if symbol not in failed_stocks:
-                        failed_stocks.append(symbol)
+                        failed_stocks.add(symbol)
 
                     continue
 
@@ -632,13 +630,14 @@ def run_analysis(stock_list):
                     "UPSIDE_%": upside_pct,
                     "RR_RATIO": rr_ratio,
                     "ESTIMATED_DAYS": estimated_days
-
                 })
+                
+                completed += 1
 
             except:
 
                 if symbol not in failed_stocks:
-                    failed_stocks.append(symbol)
+                    failed_stocks.add(symbol)
 
             elapsed = (time.time() - start_time) / 60
 
@@ -769,7 +768,7 @@ def run_analysis(stock_list):
                             font-weight:900;
                             color:#991B1B;
                         ">
-                        {len(set(failed_stocks))}
+                        {len(failed_stocks)}
                         </div>
 
                         <div style="
@@ -988,7 +987,7 @@ with k3:
 with k4:
     st.metric(
         "Failed Stocks",
-        len(set(failed_stocks))
+        len(failed_stocks)
     )
 
 # =========================================================
