@@ -452,10 +452,10 @@ def run_analysis(stock_list):
 
                 try:
 
-                    stock_info = yf.Ticker(symbol).info
+                    stock_info = yf.Ticker(symbol).fast_info
 
                     market_cap = stock_info.get(
-                        "marketCap",
+                        "market_cap",
                         0
                     )
 
