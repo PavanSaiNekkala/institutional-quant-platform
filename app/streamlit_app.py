@@ -493,18 +493,21 @@ def run_analysis(stock_list):
                     0
                 )
 
-               # =====================================================
-               # MARKET CAP CATEGORY
-               # =====================================================
+              # =====================================================
+              # MARKET CAP CATEGORY
+              # =====================================================
 
-               if market_cap >= 1000000000000:
-                   market_cap_category = "Large Cap"
+              if market_cap >= 1000000000000:
 
-               elif market_cap >= 200000000000:
-                   market_cap_category = "Mid Cap"
+                  market_cap_category = "Large Cap"
 
-               else:
-                   market_cap_category = "Small Cap"
+              elif market_cap >= 200000000000:
+
+                  market_cap_category = "Mid Cap"
+
+              else:
+
+                  market_cap_category = "Small Cap"
 
                 # =====================================================
                 # MARKET CAP DISPLAY
@@ -567,11 +570,68 @@ def run_analysis(stock_list):
                 # RAW SCORE
                 # =====================================================
 
-                score = (
+                raw_score = (
                     momentum * 0.6
                     + sharpe * 0.4
                 )
 
+                # =====================================================
+                # FINAL SCORE NORMALIZATION
+                # =====================================================
+
+                final_score = round(
+
+                    min(
+
+                        max(
+                            raw_score * 50,
+                            0
+                        ),
+
+                        100
+                    ),
+
+                    2
+                )
+
+                # =====================================================
+                # INSTITUTIONAL CONFIDENCE SCORE
+                # =====================================================
+
+                institutional_confidence = round(
+
+                    min(
+                        max(final_score, 0),
+                        100
+                    ),
+
+                    2
+                )
+
+                # =====================================================
+                # CONVICTION ENGINE
+                # =====================================================
+
+                if institutional_confidence >= 85:
+
+                    conviction = "ELITE"
+
+                elif institutional_confidence >= 70:
+
+                    conviction = "HIGH"
+
+                elif institutional_confidence >= 55:
+                
+                    conviction = "MEDIUM"
+
+                elif institutional_confidence >= 40:
+
+                    conviction = "LOW"
+
+                else:
+
+                    conviction = "AVOID"
+                    
                 # =====================================================
                 # INSTITUTIONAL CLASSIFICATION
                 # =====================================================
@@ -679,7 +739,9 @@ def run_analysis(stock_list):
                     "5D_RETURN_%": ret_5d,
                     "15D_RETURN_%": ret_15d,
                     "30D_RETURN_%": ret_30d,
-                    "Final Score": safe_round(score),
+                    "Final Score": final_score,
+                    "Institutional_Confidence": institutional_confidence,
+                    "Conviction": conviction,
                     "Classification": signal,
                     "UPSIDE_%": upside_pct,
                     "RR_RATIO": rr_ratio,
@@ -1162,6 +1224,8 @@ display_cols = [
     "15D_RETURN_%",
     "30D_RETURN_%",
     "Final Score",
+    "Institutional_Confidence",
+    "Conviction",
     "UPSIDE_%",
     "RR_RATIO",
     "ESTIMATED_DAYS"
@@ -1186,9 +1250,23 @@ export_df = (
 # DISPLAY TABLE
 # =====================================================
 
+styled_df = export_df.style.background_gradient(
+
+    subset=[
+
+        "Institutional_Confidence",
+
+        "Final Score"
+
+    ],
+
+    cmap="RdYlGn"
+
+)
+
 st.dataframe(
 
-    export_df,
+    styled_df,
 
     use_container_width=True,
 
