@@ -1,7 +1,8 @@
 import pandas as pd
 import yfinance as yf
+import time
+
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # =========================================================
 # PATHS
@@ -14,16 +15,13 @@ NSE_FILE = ROOT_DIR / "data" / "valid_stocks.xlsx"
 OUTPUT_FILE = ROOT_DIR / "data" / "market_caps.csv"
 
 # =========================================================
-# LOAD NSE STOCKS
+# LOAD STOCKS
 # =========================================================
 
 df = pd.read_excel(NSE_FILE)
 
-# =========================================================
-# AUTO DETECT SYMBOL COLUMN
-# =========================================================
-
 possible_cols = [
+    "Stock",
     "Symbol",
     "SYMBOL",
     "symbol"
@@ -50,115 +48,161 @@ symbols = (
     df[symbol_col]
     .dropna()
     .astype(str)
+    .str.strip()
     .unique()
     .tolist()
 )
 
 # =========================================================
-# FORMAT SYMBOLS
+# FORMAT NSE SYMBOLS
 # =========================================================
 
 symbols = [
 
-    s if s.endswith(".NS")
-    else f"{s}.NS"
+    s.replace(".NS", "") + ".NS"
 
     for s in symbols
 ]
 
-print(f"\n✅ Total NSE Stocks Loaded: {len(symbols)}")
+print(f"\n✅ Loaded Stocks: {len(symbols)}")
 
 # =========================================================
-# FETCH MARKET CAP
-# =========================================================
-
-def fetch_market_cap(symbol):
-
-    try:
-
-        ticker = yf.Ticker(symbol)
-
-        fast_info = ticker.fast_info
-
-        market_cap = fast_info.get(
-            "market_cap",
-            0
-        )
-
-        return {
-
-            "Symbol": symbol,
-
-            "MarketCap": market_cap
-
-        }
-
-    except Exception as e:
-
-        print(f"❌ Error: {symbol} -> {e}")
-
-        return {
-
-            "Symbol": symbol,
-
-            "MarketCap": 0
-
-        }
-
-# =========================================================
-# MULTITHREADED DOWNLOAD
+# FETCH MARKET CAPS
 # =========================================================
 
 results = []
 
-MAX_WORKERS = 20
+BATCH_SIZE = 50
 
-with ThreadPoolExecutor(
-    max_workers=MAX_WORKERS
-) as executor:
+for start in range(0, len(symbols), BATCH_SIZE):
 
-    future_to_symbol = {
+    batch = symbols[start:start + BATCH_SIZE]
 
-        executor.submit(
-            fetch_market_cap,
-            symbol
-        ): symbol
+    print(
+        f"\n🚀 Processing Batch "
+        f"{start + 1} to "
+        f"{start + len(batch)}"
+    )
 
-        for symbol in symbols
-    }
+    try:
 
-    for idx, future in enumerate(
-        as_completed(future_to_symbol),
-        start=1
-    ):
+        tickers = yf.Tickers(
+            " ".join(batch)
+        )
 
-        result = future.result()
+        for symbol in batch:
 
-        results.append(result)
+            try:
+
+                ticker = tickers.tickers[symbol]
+
+                market_cap = 0
+
+                # =========================================
+                # FAST INFO
+                # =========================================
+
+                try:
+
+                    market_cap = (
+                        ticker.fast_info.get(
+                            "market_cap",
+                            0
+                        )
+                    )
+
+                except Exception:
+
+                    pass
+
+                # =========================================
+                # FALLBACK
+                # =========================================
+
+                if not market_cap:
+
+                    try:
+
+                        market_cap = (
+                            ticker.info.get(
+                                "marketCap",
+                                0
+                            )
+                        )
+
+                    except Exception:
+
+                        pass
+
+                print(
+                    f"✅ {symbol} | "
+                    f"{market_cap}"
+                )
+
+                results.append({
+
+                    "Symbol": symbol.replace(
+                        ".NS",
+                        ""
+                    ),
+
+                    "MarketCap": market_cap
+
+                })
+
+            except Exception as e:
+
+                print(
+                    f"❌ {symbol} | ERROR"
+                )
+
+                results.append({
+
+                    "Symbol": symbol.replace(
+                        ".NS",
+                        ""
+                    ),
+
+                    "MarketCap": 0
+
+                })
+
+        # =============================================
+        # SAVE AFTER EACH BATCH
+        # =============================================
+
+        temp_df = pd.DataFrame(results)
+
+        temp_df.to_csv(
+            OUTPUT_FILE,
+            index=False
+        )
 
         print(
-            f"{idx}/{len(symbols)} | "
-            f"{result['Symbol']} | "
-            f"Market Cap: {result['MarketCap']}"
+            f"💾 Auto Saved"
+        )
+
+        # =============================================
+        # SMALL COOL DOWN
+        # =============================================
+
+        time.sleep(2)
+
+    except Exception as e:
+
+        print(
+            f"❌ Batch Failed: {e}"
         )
 
 # =========================================================
-# CREATE DATAFRAME
+# FINAL DATAFRAME
 # =========================================================
 
 market_cap_df = pd.DataFrame(results)
 
-# =========================================================
-# REMOVE DUPLICATES
-# =========================================================
-
 market_cap_df = market_cap_df.drop_duplicates(
     subset=["Symbol"]
 )
-
-# =========================================================
-# SORT BY MARKET CAP
-# =========================================================
 
 market_cap_df = market_cap_df.sort_values(
     by="MarketCap",
@@ -166,7 +210,7 @@ market_cap_df = market_cap_df.sort_values(
 )
 
 # =========================================================
-# SAVE CSV
+# SAVE FINAL CSV
 # =========================================================
 
 market_cap_df.to_csv(
@@ -174,12 +218,32 @@ market_cap_df.to_csv(
     index=False
 )
 
-print(
-    f"\n✅ market_caps.csv saved successfully "
-    f"at:\n{OUTPUT_FILE}"
+# =========================================================
+# SUMMARY
+# =========================================================
+
+success = len(
+    market_cap_df[
+        market_cap_df["MarketCap"] > 0
+    ]
 )
 
-print(
-    f"\n✅ Total Stocks Saved: "
-    f"{len(market_cap_df)}"
+failed = len(
+    market_cap_df[
+        market_cap_df["MarketCap"] <= 0
+    ]
 )
+
+print("\n================================")
+
+print("✅ market_caps.csv saved")
+
+print(f"✅ Success: {success}")
+
+print(f"❌ Failed: {failed}")
+
+print(
+    f"📁 File: {OUTPUT_FILE}"
+)
+
+print("================================\n")
