@@ -438,7 +438,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 50
+    batch_size = 20
 
     status_placeholder = st.empty()
 
