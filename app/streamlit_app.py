@@ -726,273 +726,271 @@ def run_analysis(stock_list):
                                 failed_stocks.add(symbol)
 
                                 # =====================================================
-                                                # LIVE STATUS PANEL
-                                                # =====================================================
+                                # LIVE STATUS PANEL
+                                # =====================================================
                                 
-                                                elapsed = (time.time() - start_time) / 60
-                                
-                                                processed_count = (
-                                                        completed +
-                                                        len(failed_stocks)
-                                                )
+        elapsed = (
+                time.time() - start_time
+        ) / 60
 
-                                                estimated_total = (
-                                                        elapsed /
-                                                        max(processed_count, 1)
-                                                ) * total
+        estimated_total = (
+                elapsed /
+                max(processed_count, 1)
+        ) * total
 
-                                                remaining_minutes = round(
-                                                        max(estimated_total - elapsed, 0),
-                                                        1
-                                                )
+        remaining_minutes = round(
+                max(
+                        estimated_total - elapsed,
+                        0
+                ),
+                1
+        )
 
-                                                completion_pct = round(
-                                                        (
-                                                                processed_count / total
-                                                        ) * 100,
-                                                        1
-                                                )
+        completion_pct = round(
+                (
+                        processed_count / total
+                ) * 100,
+                1
+        )
 
-                                                status_html = f"""
-                                                <div style="
-                                                        background:white;
-                                                        border-radius:18px;
-                                                        padding:20px;
-                                                        box-shadow:0 6px 20px rgba(0,0,0,0.08);
-                                                        margin-bottom:18px;
-                                                ">
+        status_html = f"""
+        <div style="
+                background:white;
+                border-radius:18px;
+                padding:20px;
+                box-shadow:0 6px 20px rgba(0,0,0,0.08);
+                margin-bottom:18px;
+        ">
 
-                                                        <div style="
-                                                                display:flex;
-                                                                justify-content:space-between;
-                                                                align-items:center;
-                                                                flex-wrap:wrap;
-                                                                gap:12px;
-                                                        ">
+                <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        flex-wrap:wrap;
+                        gap:12px;
+                ">
 
-                                                                <div>
+                        <div>
 
-                                                                        <h2 style="
-                                                                                margin:0;
-                                                                                color:#111827;
-                                                                                font-size:20px;
-                                                                                font-weight:800;
-                                                                        ">
-                                                                        📊 Institutional Processing Engine
-                                                                        </h2>
-                                
-                                                                        <p style="
-                                                                                color:#6B7280;
-                                                                                margin-top:6px;
-                                                                                margin-bottom:0;
-                                                                                font-size:14px;
-                                                                        ">
-                                                                        Real-Time Quant Processing
-                                                                        </p>
+                                <h2 style="
+                                        margin:0;
+                                        color:#111827;
+                                        font-size:20px;
+                                        font-weight:800;
+                                ">
+                                📊 Institutional Processing Engine
+                                </h2>
 
-                                                                </div>
+                                <p style="
+                                        color:#6B7280;
+                                        margin-top:6px;
+                                        margin-bottom:0;
+                                        font-size:14px;
+                                ">
+                                Real-Time Quant Processing
+                                </p>
 
-                                                                <div style="
-                                                                        background:#DBEAFE;
-                                                                        color:#1D4ED8;
-                                                                        padding:8px 14px;
-                                                                        border-radius:12px;
-                                                                        font-weight:700;
-                                                                        font-size:13px;
-                                                                ">
-                                                                LIVE
-                                                                </div>
+                        </div>
 
-                                                        </div>
+                        <div style="
+                                background:#DBEAFE;
+                                color:#1D4ED8;
+                                padding:8px 14px;
+                                border-radius:12px;
+                                font-weight:700;
+                                font-size:13px;
+                        ">
+                        LIVE
+                        </div>
 
-                                                        <br>
+                </div>
 
-                                                        <div style="
-                                                                display:grid;
-                                                                grid-template-columns:
-                                                                repeat(auto-fit,minmax(180px,1fr));
-                                                                gap:14px;
-                                                        ">
+                <br>
 
-                                                                <div style="
-                                                                        background:#ECFDF5;
-                                                                        padding:18px;
-                                                                        border-radius:14px;
-                                                                        border-left:5px solid #10B981;
-                                                                ">
-                                                                        <div style="
-                                                                                color:#047857;
-                                                                                font-size:13px;
-                                                                                font-weight:700;
-                                                                        ">
-                                                                        COMPLETED
-                                                                        </div>
+                <div style="
+                        display:grid;
+                        grid-template-columns:
+                        repeat(auto-fit,minmax(180px,1fr));
+                        gap:14px;
+                ">
 
-                                                                        <h1 style="
-                                                                                margin:8px 0 4px 0;
-                                                                                color:#065F46;
-                                                                        ">
-                                                                        {processed_count}
-                                                                        </h1>
+                        <div style="
+                                background:#ECFDF5;
+                                padding:18px;
+                                border-radius:14px;
+                                border-left:5px solid #10B981;
+                        ">
 
-                                                                        <div style="
-                                                                                color:#10B981;
-                                                                                font-size:13px;
-                                                                        ">
-                                                                        out of {total}
-                                                                        </div>
+                                <div style="
+                                        color:#047857;
+                                        font-size:13px;
+                                        font-weight:700;
+                                ">
+                                COMPLETED
+                                </div>
 
-                                                                </div>
+                                <h1 style="
+                                        margin:8px 0 4px 0;
+                                        color:#065F46;
+                                ">
+                                {processed_count}
+                                </h1>
 
-                                                                <div style="
-                                                                        background:#FEF2F2;
-                                                                        padding:18px;
-                                                                        border-radius:14px;
-                                                                        border-left:5px solid #DC2626;
-                                                                ">
-                                                                        <div style="
-                                                                                color:#B91C1C;
-                                                                                font-size:13px;
-                                                                                font-weight:700;
-                                                                        ">
-                                                                        FAILED
-                                                                        </div>
+                                <div style="
+                                        color:#10B981;
+                                        font-size:13px;
+                                ">
+                                out of {total}
+                                </div>
 
-                                                                        <h1 style="
-                                                                                margin:8px 0 4px 0;
-                                                                                color:#991B1B;
-                                                                        ">
-                                                                        {len(failed_stocks)}
-                                                                        </h1>
+                        </div>
 
-                                                                        <div style="
-                                                                                color:#EF4444;
-                                                                                font-size:13px;
-                                                                        ">
-                                                                        failed stocks
-                                                                        </div>
+                        <div style="
+                                background:#FEF2F2;
+                                padding:18px;
+                                border-radius:14px;
+                                border-left:5px solid #DC2626;
+                        ">
 
-                                                                </div>
+                                <div style="
+                                        color:#B91C1C;
+                                        font-size:13px;
+                                        font-weight:700;
+                                ">
+                                FAILED
+                                </div>
 
-                                                                <div style="
-                                                                        background:#EFF6FF;
-                                                                        padding:18px;
-                                                                        border-radius:14px;
-                                                                        border-left:5px solid #2563EB;
-                                                                ">
-                                                                        <div style="
-                                                                                color:#1D4ED8;
-                                                                               font-size:13px;
-                                                                                font-weight:700;
-                                                                        ">
-                                                                        UNIVERSE
-                                                                        </div>
+                                <h1 style="
+                                        margin:8px 0 4px 0;
+                                        color:#991B1B;
+                                ">
+                                {len(failed_stocks)}
+                                </h1>
 
-                                                                        <h1 style="
-                                                                                margin:8px 0 4px 0;
-                                                                                color:#1E3A8A;
-                                                                        ">
-                                                                        {total}
-                                                                        </h1>
+                                <div style="
+                                        color:#EF4444;
+                                        font-size:13px;
+                                ">
+                                failed stocks
+                                </div>
 
-                                                                        <div style="
-                                                                                color:#2563EB;
-                                                                                font-size:13px;
-                                                                        ">
-                                                                        NSE Stocks
-                                                                        </div>
+                        </div>
 
-                                                                </div>
+                        <div style="
+                                background:#EFF6FF;
+                                padding:18px;
+                                border-radius:14px;
+                                border-left:5px solid #2563EB;
+                        ">
 
-                                                                <div style="
-                                                                        background:#FFF7ED;
-                                                                        padding:18px;
-                                                                        border-radius:14px;
-                                                                        border-left:5px solid #F59E0B;
-                                                                ">
-                                                                        <div style="
-                                                                                color:#C2410C;
-                                                                                font-size:13px;
-                                                                                font-weight:700;
-                                                                        ">
-                                                                        ETA
-                                                                        </div>
+                                <div style="
+                                        color:#1D4ED8;
+                                        font-size:13px;
+                                        font-weight:700;
+                                ">
+                                UNIVERSE
+                                </div>
 
-                                                                        <h1 style="
-                                                                                margin:8px 0 4px 0;
-                                                                                color:#9A3412;
-                                                                        ">
-                                                                        {remaining_minutes}m
-                                                                        </h1>
+                                <h1 style="
+                                        margin:8px 0 4px 0;
+                                        color:#1E3A8A;
+                                ">
+                                {total}
+                                </h1>
 
-                                                                        <div style="
-                                                                                color:#F59E0B;
-                                                                                font-size:13px;
-                                                                        ">
-                                                                        remaining
-                                                                        </div>
+                                <div style="
+                                        color:#2563EB;
+                                        font-size:13px;
+                                ">
+                                NSE Stocks
+                                </div>
 
-                                                                </div>
+                        </div>
 
-                                                        </div>
+                        <div style="
+                                background:#FFF7ED;
+                                padding:18px;
+                                border-radius:14px;
+                                border-left:5px solid #F59E0B;
+                        ">
 
-                                                        <br>
+                                <div style="
+                                        color:#C2410C;
+                                        font-size:13px;
+                                        font-weight:700;
+                                ">
+                                ETA
+                                </div>
 
-                                                        <div style="
-                                                                font-size:14px;
-                                                                font-weight:700;
-                                                                margin-bottom:8px;
-                                                                color:#374151;
-                                                        ">                                
-                                                        Processing Progress
-                                                        </div>
+                                <h1 style="
+                                        margin:8px 0 4px 0;
+                                        color:#9A3412;
+                                ">
+                                {remaining_minutes}m
+                                </h1>
 
-                                                        <div style="
-                                                                width:100%;
-                                                                height:14px;
-                                                                background:#E5E7EB;
-                                                                border-radius:999px;
-                                                                overflow:hidden;
-                                                        ">
+                                <div style="
+                                        color:#F59E0B;
+                                        font-size:13px;
+                                ">
+                                remaining
+                                </div>
 
-                                                                <div style="
-                                                                        width:{completion_pct}%;
-                                                                        height:100%;
-                                                                        border-radius:999px;
-                                                                        background:linear-gradient(
-                                                                                90deg,
-                                                                                #2563EB,
-                                                                                #10B981
-                                                                        );
-                                                                ">
-                                                                </div>
+                        </div>
 
-                                                        </div>
+                </div>
 
-                                                        <div style="
-                                                                margin-top:10px;
-                                                                text-align:right;
-                                                                font-weight:800;
-                                                                color:#2563EB;
-                                                        ">
-                                                        {completion_pct}%
-                                                        </div>
+                <br>
 
-                                                </div>
-                                                """
+                <div style="
+                        font-size:14px;
+                        font-weight:700;
+                        margin-bottom:8px;
+                        color:#374151;
+                ">
+                Processing Progress
+                </div>
 
-                                                with status_placeholder:
+                <div style="
+                        width:100%;
+                        height:14px;
+                        background:#E5E7EB;
+                        border-radius:999px;
+                        overflow:hidden;
+                ">
 
-                                                        st.markdown(
-                                                                status_html,
-                                                                unsafe_allow_html=True
-                                                        )
+                        <div style="
+                                width:{completion_pct}%;
+                                height:100%;
+                                border-radius:999px;
+                                background:linear-gradient(
+                                        90deg,
+                                        #2563EB,
+                                        #10B981
+                                );
+                        ">
+                        </div>
 
-                                        return (
-                                                pd.DataFrame(results),
-                                                failed_stocks,
-                                                completed
-                                        )
+                </div>
+
+                <div style="
+                        margin-top:10px;
+                        text-align:right;
+                        font-weight:800;
+                        color:#2563EB;
+                ">
+                {completion_pct}%
+                </div>
+
+        </div>
+        """
+
+        with status_placeholder:
+
+                st.markdown(
+                        status_html,
+                        unsafe_allow_html=True
+                )
 
 # =========================================================
 # RUN ANALYSIS
