@@ -723,6 +723,7 @@ def run_analysis(stock_list):
                 except Exception:
 
                         failed_stocks.add(symbol)
+                    
             elapsed = (time.time() - start_time) / 60
 
             processed_count = (
