@@ -469,293 +469,260 @@ def run_analysis(stock_list):
 
         for symbol in batch:
 
-            try:
+                try:
 
-                if symbol not in data.columns.levels[0]:
+                        # ============================================
+                        # SYMBOL EXISTS CHECK
+                        # ============================================
 
-                    if symbol not in failed_stocks:
-                        failed_stocks.add(symbol)
+                        if symbol not in data.columns.levels[0]:
 
-                    continue
+                                failed_stocks.add(symbol)
+                                continue
 
-                close = data[symbol]["Close"].dropna()
-                # =====================================================
-                # MARKET CAP FROM CSV
-                # =====================================================
+                        close = data[symbol]["Close"].dropna()
 
-                clean_symbol = symbol.replace(
-                    ".NS",
-                    ""
-                )
+                        # ============================================
+                        # MINIMUM DATA CHECK
+                        # ============================================
 
-                market_cap = market_cap_map.get(
-                    clean_symbol,
-                    0
-                )
+                        if len(close) < 40:
 
-                # =====================================================
-                # MARKET CAP CATEGORY
-                # =====================================================
+                                failed_stocks.add(symbol)
+                                continue
 
-                if market_cap >= 1000000000000:
+                        # ============================================
+                        # MARKET CAP
+                        # ============================================
 
-                    market_cap_category = "Large Cap"
+                        clean_symbol = symbol.replace(".NS", "")
 
-                elif market_cap >= 200000000000:
-        
-                    market_cap_category = "Mid Cap"
-
-                else:
-
-                    market_cap_category = "Small Cap"
-
-                # =====================================================
-                # MARKET CAP DISPLAY
-                # =====================================================
-
-                if market_cap >= 1_00_000_00_00_000:
-
-                    market_cap_display = (
-                        f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
-                    )
-
-                elif market_cap >= 1_00_00_00_000:
-
-                    market_cap_display = (
-                        f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
-                    )
-
-                else:
-
-                    market_cap_display = str(market_cap)
-                
-                if len(close) < 40:
-
-                    if symbol not in failed_stocks:
-                        failed_stocks.add(symbol)
-
-                    continue
-
-                momentum = (
-                    close.iloc[-1]
-                    / close.iloc[-20]
-                ) - 1
-                
-                # =====================================================
-                # EXPECTED RETURNS
-                # =====================================================
-
-                ret_5d = round(
-                    momentum * 5,
-                    2
-                )
-
-                ret_15d = round(
-                    momentum * 15,
-                    2
-                )
-
-                ret_30d = round(
-                    momentum * 30,
-                    2
-                )
-
-                returns = close.pct_change().dropna()
-
-                sharpe = (
-                    returns.mean()
-                    / max(returns.std(), 0.0001)
-                ) * np.sqrt(252)
-
-                # =====================================================
-                # RAW SCORE
-                # =====================================================
-
-                raw_score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
-                )
-
-                # =====================================================
-                # FINAL SCORE NORMALIZATION
-                # =====================================================
-
-                final_score = round(
-
-                    min(
-
-                        max(
-                            raw_score * 50,
-                            0
-                        ),
-
-                        100
-                    ),
-
-                    2
-                )
-
-                # =====================================================
-                # INSTITUTIONAL CONFIDENCE SCORE
-                # =====================================================
-
-                institutional_confidence = round(
-
-                    min(
-                        max(final_score, 0),
-                        100
-                    ),
-
-                    2
-                )
-
-                # =====================================================
-                # CONVICTION ENGINE
-                # =====================================================
-
-                if institutional_confidence >= 85:
-
-                    conviction = "ELITE"
-
-                elif institutional_confidence >= 70:
-
-                    conviction = "HIGH"
-
-                elif institutional_confidence >= 55:
-                
-                    conviction = "MEDIUM"
-
-                elif institutional_confidence >= 40:
-
-                    conviction = "LOW"
-
-                else:
-
-                    conviction = "AVOID"
-                    
-                # =====================================================
-                # INSTITUTIONAL CLASSIFICATION
-                # =====================================================
-
-                if score >= 1.0:
-
-                    signal = "STRONG_BUY"
-
-                elif score >= 0.75:
-
-                    signal = "BUY"
-
-                elif score >= 0.5:
-
-                    signal = "WATCH"
-
-                elif score >= 0.25:
-
-                    signal = "HOLD"
-
-                else:
-
-                    signal = "AVOID"
-                    
-                # =====================================================
-                # STOPLOSS
-                # =====================================================
-
-                stop_loss = round(
-                    close.iloc[-1] - (
-                        close.iloc[-1] * 0.04
-                    ),
-                    2
-                )
-
-                # =====================================================
-                # TARGET
-                # =====================================================
-
-                target = round(
-                    close.iloc[-1] + (
-                        close.iloc[-1] * 0.10
-                    ),
-                    2
-                )
-
-                # =====================================================
-                # UPSIDE %
-                # =====================================================
-
-                upside_pct = round(
-                    (
-                        (
-                            target - close.iloc[-1]
+                        market_cap = market_cap_map.get(
+                                clean_symbol,
+                                0
                         )
-                        /
-                        close.iloc[-1]
-                    ) * 100,
-                    2
-                )
 
-                # =====================================================
-                # RISK REWARD
-                # =====================================================
+                        # ============================================
+                        # MARKET CAP CATEGORY
+                        # ============================================
 
-                risk = max(
-                    close.iloc[-1] - stop_loss,
-                    1
-                )
+                        if market_cap >= 1000000000000:
 
-                reward = max(
-                    target - close.iloc[-1],
-                    0
-                )
+                                market_cap_category = "Large Cap"
 
-                rr_ratio = round(
-                    reward / risk,
-                    2
-                )
+                        elif market_cap >= 200000000000:
 
-                # =====================================================
-                # ESTIMATED DAYS
-                # =====================================================
+                                market_cap_category = "Mid Cap"
 
-                daily_move = max(
-                    close.pct_change().std() * close.iloc[-1],
-                    1
-                )
+                        else:
 
-                estimated_days = round(
-                    max(
-                       reward / daily_move,
-                        1
-                    )
-                )
-                results.append({
-                    "Symbol": symbol,
-                    "MARKET_CAP": market_cap_display,
-                    "MARKET_CAP_CATEGORY": market_cap_category,
-                    "CMP": safe_round(close.iloc[-1]),
-                    "STOP_LOSS": stop_loss,
-                    "TARGET": target,
-                    "Momentum": safe_round(momentum * 100),
-                    "Sharpe": safe_round(sharpe),
-                    "5D_RETURN_%": ret_5d,
-                    "15D_RETURN_%": ret_15d,
-                    "30D_RETURN_%": ret_30d,
-                    "Final Score": final_score,
-                    "Institutional_Confidence": institutional_confidence,
-                    "Conviction": conviction,
-                    "Classification": signal,
-                    "UPSIDE_%": upside_pct,
-                    "RR_RATIO": rr_ratio,
-                    "ESTIMATED_DAYS": estimated_days
-                })
-                
-                completed += 1
+                                market_cap_category = "Small Cap"
 
-            except:
+                        # ============================================
+                        # MARKET CAP DISPLAY
+                        # ============================================
 
-                if symbol not in failed_stocks:
-                    failed_stocks.add(symbol)
+                        if market_cap >= 1_00_000_00_00_000:
 
+                                market_cap_display = (
+                                        f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
+                                )
+
+                        elif market_cap >= 1_00_00_00_000:
+
+                                market_cap_display = (
+                                        f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
+                                )
+
+                        else:
+
+                                market_cap_display = str(market_cap)
+
+                        # ============================================
+                        # MOMENTUM
+                        # ============================================
+
+                        momentum = (
+                                close.iloc[-1] /
+                                close.iloc[-20]
+                        ) - 1
+
+                        # ============================================
+                        # RETURNS
+                        # ============================================
+
+                        ret_5d = round(momentum * 5, 2)
+                        ret_15d = round(momentum * 15, 2)
+                        ret_30d = round(momentum * 30, 2)
+
+                        # ============================================
+                        # SHARPE
+                        # ============================================
+
+                        returns = close.pct_change().dropna()
+
+                        sharpe = (
+                                returns.mean()
+                                / max(returns.std(), 0.0001)
+                        ) * np.sqrt(252)
+
+                        # ============================================
+                        # SCORE ENGINE
+                        # ============================================
+
+                        raw_score = (
+                                momentum * 0.6 +
+                                sharpe * 0.4
+                        )
+
+                        final_score = round(
+
+                                min(
+                                        max(raw_score * 50, 0),
+                                        100
+                                ),
+
+                                2
+                        )
+
+                        institutional_confidence = final_score
+
+                        # ============================================
+                        # CONVICTION
+                        # ============================================
+
+                        if institutional_confidence >= 85:
+
+                                conviction = "ELITE"
+
+                        elif institutional_confidence >= 70:
+
+                                conviction = "HIGH"
+
+                        elif institutional_confidence >= 55:
+
+                                conviction = "MEDIUM"
+
+                        elif institutional_confidence >= 40:
+
+                                conviction = "LOW"
+
+                        else:
+
+                                conviction = "AVOID"
+
+                        # ============================================
+                        # SIGNAL
+                        # ============================================
+
+                        if raw_score >= 1.0:
+
+                                signal = "STRONG_BUY"
+
+                        elif raw_score >= 0.75:
+
+                                signal = "BUY"
+
+                        elif raw_score >= 0.5:
+
+                                signal = "WATCH"
+
+                        elif raw_score >= 0.25:
+
+                                signal = "HOLD"
+
+                        else:
+
+                                signal = "AVOID"
+
+                        # ============================================
+                        # TARGETS
+                        # ============================================
+
+                        cmp_price = round(close.iloc[-1], 2)
+
+                        stop_loss = round(
+                                cmp_price * 0.96,
+                                2
+                        )
+
+                        target = round(
+                                cmp_price * 1.10,
+                                2
+                        )
+
+                        upside_pct = round(
+                                (
+                                        (target - cmp_price)
+                                        / cmp_price
+                                ) * 100,
+                                2
+                        )
+
+                        # ============================================
+                        # RR
+                        # ============================================
+
+                        risk = max(
+                                cmp_price - stop_loss,
+                                1
+                        )
+
+                        reward = max(
+                                target - cmp_price,
+                                0
+                        )
+
+                        rr_ratio = round(
+                                reward / risk,
+                                2
+                        )
+
+                        # ============================================
+                        # ETA
+                        # ============================================
+
+                        daily_move = max(
+                                close.pct_change().std() * cmp_price,
+                                1
+                        )
+
+                        estimated_days = round(
+                                max(reward / daily_move, 1)
+                        )
+
+                        # ============================================
+                        # SAVE RESULT
+                        # ============================================
+
+                        results.append({
+
+                                "Symbol": symbol,
+                                "MARKET_CAP": market_cap_display,
+                                "MARKET_CAP_CATEGORY": market_cap_category,
+                                "CMP": cmp_price,
+                                "STOP_LOSS": stop_loss,
+                                "TARGET": target,
+                                "Momentum": safe_round(momentum * 100),
+                                "Sharpe": safe_round(sharpe),
+                                "5D_RETURN_%": ret_5d,
+                                "15D_RETURN_%": ret_15d,
+                                "30D_RETURN_%": ret_30d,
+                                "Final Score": final_score,
+                                "Institutional_Confidence": institutional_confidence,
+                                "Conviction": conviction,
+                                "Classification": signal,
+                                "UPSIDE_%": upside_pct,
+                                "RR_RATIO": rr_ratio,
+                                "ESTIMATED_DAYS": estimated_days
+
+                        })
+
+                        completed += 1
+
+                except Exception:
+
+                        failed_stocks.add(symbol)
             elapsed = (time.time() - start_time) / 60
 
             processed_count = (
