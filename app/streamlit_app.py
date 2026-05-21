@@ -725,7 +725,7 @@ def run_analysis(stock_list):
 
                                 failed_stocks.add(symbol)
 
-                # =====================================================
+                                # =====================================================
                 # LIVE STATUS PANEL
                 # =====================================================
 
@@ -762,19 +762,48 @@ def run_analysis(stock_list):
                         margin-bottom:18px;
                 ">
 
-                        <h2 style="
-                                margin:0;
-                                color:#111827;
+                        <div style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                flex-wrap:wrap;
+                                gap:12px;
                         ">
-                        📊 Institutional Processing Engine
-                        </h2>
 
-                        <p style="
-                                color:#6B7280;
-                                margin-top:6px;
-                        ">
-                        Real-Time Quant Processing
-                        </p>
+                                <div>
+
+                                        <h2 style="
+                                                margin:0;
+                                                color:#111827;
+                                                font-size:20px;
+                                                font-weight:800;
+                                        ">
+                                        📊 Institutional Processing Engine
+                                        </h2>
+
+                                        <p style="
+                                                color:#6B7280;
+                                                margin-top:6px;
+                                                margin-bottom:0;
+                                                font-size:14px;
+                                        ">
+                                        Real-Time Quant Processing
+                                        </p>
+
+                                </div>
+
+                                <div style="
+                                        background:#DBEAFE;
+                                        color:#1D4ED8;
+                                        padding:8px 14px;
+                                        border-radius:12px;
+                                        font-weight:700;
+                                        font-size:13px;
+                                ">
+                                LIVE
+                                </div>
+
+                        </div>
 
                         <br>
 
@@ -789,41 +818,134 @@ def run_analysis(stock_list):
                                         background:#ECFDF5;
                                         padding:18px;
                                         border-radius:14px;
+                                        border-left:5px solid #10B981;
                                 ">
-                                        <div>COMPLETED</div>
-                                        <h1>{processed_count}</h1>
+                                        <div style="
+                                                color:#047857;
+                                                font-size:13px;
+                                                font-weight:700;
+                                        ">
+                                        COMPLETED
+                                        </div>
+
+                                        <h1 style="
+                                                margin:8px 0 4px 0;
+                                                color:#065F46;
+                                        ">
+                                        {processed_count}
+                                        </h1>
+
+                                        <div style="
+                                                color:#10B981;
+                                                font-size:13px;
+                                        ">
+                                        out of {total}
+                                        </div>
+
                                 </div>
 
                                 <div style="
                                         background:#FEF2F2;
                                         padding:18px;
                                         border-radius:14px;
+                                        border-left:5px solid #DC2626;
                                 ">
-                                        <div>FAILED</div>
-                                        <h1>{len(failed_stocks)}</h1>
+                                        <div style="
+                                                color:#B91C1C;
+                                                font-size:13px;
+                                                font-weight:700;
+                                        ">
+                                        FAILED
+                                        </div>
+
+                                        <h1 style="
+                                                margin:8px 0 4px 0;
+                                                color:#991B1B;
+                                        ">
+                                        {len(failed_stocks)}
+                                        </h1>
+
+                                        <div style="
+                                                color:#EF4444;
+                                                font-size:13px;
+                                        ">
+                                        failed stocks
+                                        </div>
+
                                 </div>
 
                                 <div style="
                                         background:#EFF6FF;
                                         padding:18px;
                                         border-radius:14px;
+                                        border-left:5px solid #2563EB;
                                 ">
-                                        <div>UNIVERSE</div>
-                                        <h1>{total}</h1>
+                                        <div style="
+                                                color:#1D4ED8;
+                                                font-size:13px;
+                                                font-weight:700;
+                                        ">
+                                        UNIVERSE
+                                        </div>
+
+                                        <h1 style="
+                                                margin:8px 0 4px 0;
+                                                color:#1E3A8A;
+                                        ">
+                                        {total}
+                                        </h1>
+
+                                        <div style="
+                                                color:#2563EB;
+                                                font-size:13px;
+                                        ">
+                                        NSE Stocks
+                                        </div>
+
                                 </div>
 
                                 <div style="
                                         background:#FFF7ED;
                                         padding:18px;
                                         border-radius:14px;
+                                        border-left:5px solid #F59E0B;
                                 ">
-                                        <div>ETA</div>
-                                        <h1>{remaining_minutes}m</h1>
+                                        <div style="
+                                                color:#C2410C;
+                                                font-size:13px;
+                                                font-weight:700;
+                                        ">
+                                        ETA
+                                        </div>
+
+                                        <h1 style="
+                                                margin:8px 0 4px 0;
+                                                color:#9A3412;
+                                        ">
+                                        {remaining_minutes}m
+                                        </h1>
+
+                                        <div style="
+                                                color:#F59E0B;
+                                                font-size:13px;
+                                        ">
+                                        remaining
+                                        </div>
+
                                 </div>
 
                         </div>
 
                         <br>
+
+                        <div style="
+                                font-size:14px;
+                                font-weight:700;
+                                margin-bottom:8px;
+                                color:#374151;
+                        ">
+                        Processing Progress
+                        </div>
 
                         <div style="
                                 width:100%;
@@ -836,6 +958,7 @@ def run_analysis(stock_list):
                                 <div style="
                                         width:{completion_pct}%;
                                         height:100%;
+                                        border-radius:999px;
                                         background:linear-gradient(
                                                 90deg,
                                                 #2563EB,
@@ -847,11 +970,12 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                                margin-top:8px;
-                                font-weight:700;
+                                margin-top:10px;
+                                text-align:right;
+                                font-weight:800;
                                 color:#2563EB;
                         ">
-                        {completion_pct}% Completed
+                        {completion_pct}%
                         </div>
 
                 </div>
