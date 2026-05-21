@@ -428,582 +428,447 @@ market_cap_map = dict(
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
 
-    results = []
+        results = []
 
-    failed_stocks = set()
+        failed_stocks = set()
 
-    total = len(stock_list)
+        total = len(stock_list)
 
-    completed = 0
+        completed = 0
 
-    start_time = time.time()
+        start_time = time.time()
 
-    batch_size = 20
+        batch_size = 20
 
-    status_placeholder = st.empty()
+        status_placeholder = st.empty()
 
-    for i in range(0, total, batch_size):
+        for i in range(0, total, batch_size):
 
-        batch = stock_list[i:i+batch_size]
-
-        try:
-
-            data = yf.download(
-                tickers=batch,
-                period="6mo",
-                interval="1d",
-                auto_adjust=True,
-                progress=False,
-                threads=False,
-                group_by="ticker"
-            )
-
-        except:
-
-            for symbol in batch:
-
-                if symbol not in failed_stocks:
-                    failed_stocks.add(symbol)
-
-            continue
-
-        for symbol in batch:
+                batch = stock_list[i:i + batch_size]
 
                 try:
 
-                        # ============================================
-                        # SYMBOL EXISTS CHECK
-                        # ============================================
-
-                        if symbol not in data.columns.levels[0]:
-
-                                failed_stocks.add(symbol)
-                                continue
-
-                        close = data[symbol]["Close"].dropna()
-
-                        # ============================================
-                        # MINIMUM DATA CHECK
-                        # ============================================
-
-                        if len(close) < 40:
-
-                                failed_stocks.add(symbol)
-                                continue
-
-                        # ============================================
-                        # MARKET CAP
-                        # ============================================
-
-                        clean_symbol = symbol.replace(".NS", "")
-
-                        market_cap = market_cap_map.get(
-                                clean_symbol,
-                                0
+                        data = yf.download(
+                                tickers=batch,
+                                period="6mo",
+                                interval="1d",
+                                auto_adjust=True,
+                                progress=False,
+                                threads=False,
+                                group_by="ticker"
                         )
-
-                        # ============================================
-                        # MARKET CAP CATEGORY
-                        # ============================================
-
-                        if market_cap >= 1000000000000:
-
-                                market_cap_category = "Large Cap"
-
-                        elif market_cap >= 200000000000:
-
-                                market_cap_category = "Mid Cap"
-
-                        else:
-
-                                market_cap_category = "Small Cap"
-
-                        # ============================================
-                        # MARKET CAP DISPLAY
-                        # ============================================
-
-                        if market_cap >= 1_00_000_00_00_000:
-
-                                market_cap_display = (
-                                        f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
-                                )
-
-                        elif market_cap >= 1_00_00_00_000:
-
-                                market_cap_display = (
-                                        f"{round(market_cap / 1_00_00_00_000, 2)} Cr"
-                                )
-
-                        else:
-
-                                market_cap_display = str(market_cap)
-
-                        # ============================================
-                        # MOMENTUM
-                        # ============================================
-
-                        momentum = (
-                                close.iloc[-1] /
-                                close.iloc[-20]
-                        ) - 1
-
-                        # ============================================
-                        # RETURNS
-                        # ============================================
-
-                        ret_5d = round(momentum * 5, 2)
-                        ret_15d = round(momentum * 15, 2)
-                        ret_30d = round(momentum * 30, 2)
-
-                        # ============================================
-                        # SHARPE
-                        # ============================================
-
-                        returns = close.pct_change().dropna()
-
-                        sharpe = (
-                                returns.mean()
-                                / max(returns.std(), 0.0001)
-                        ) * np.sqrt(252)
-
-                        # ============================================
-                        # SCORE ENGINE
-                        # ============================================
-
-                        raw_score = (
-                                momentum * 0.6 +
-                                sharpe * 0.4
-                        )
-
-                        final_score = round(
-
-                                min(
-                                        max(raw_score * 50, 0),
-                                        100
-                                ),
-
-                                2
-                        )
-
-                        institutional_confidence = final_score
-
-                        # ============================================
-                        # CONVICTION
-                        # ============================================
-
-                        if institutional_confidence >= 85:
-
-                                conviction = "ELITE"
-
-                        elif institutional_confidence >= 70:
-
-                                conviction = "HIGH"
-
-                        elif institutional_confidence >= 55:
-
-                                conviction = "MEDIUM"
-
-                        elif institutional_confidence >= 40:
-
-                                conviction = "LOW"
-
-                        else:
-
-                                conviction = "AVOID"
-
-                        # ============================================
-                        # SIGNAL
-                        # ============================================
-
-                        if raw_score >= 1.0:
-
-                                signal = "STRONG_BUY"
-
-                        elif raw_score >= 0.75:
-
-                                signal = "BUY"
-
-                        elif raw_score >= 0.5:
-
-                                signal = "WATCH"
-
-                        elif raw_score >= 0.25:
-
-                                signal = "HOLD"
-
-                        else:
-
-                                signal = "AVOID"
-
-                        # ============================================
-                        # TARGETS
-                        # ============================================
-
-                        cmp_price = round(close.iloc[-1], 2)
-
-                        stop_loss = round(
-                                cmp_price * 0.96,
-                                2
-                        )
-
-                        target = round(
-                                cmp_price * 1.10,
-                                2
-                        )
-
-                        upside_pct = round(
-                                (
-                                        (target - cmp_price)
-                                        / cmp_price
-                                ) * 100,
-                                2
-                        )
-
-                        # ============================================
-                        # RR
-                        # ============================================
-
-                        risk = max(
-                                cmp_price - stop_loss,
-                                1
-                        )
-
-                        reward = max(
-                                target - cmp_price,
-                                0
-                        )
-
-                        rr_ratio = round(
-                                reward / risk,
-                                2
-                        )
-
-                        # ============================================
-                        # ETA
-                        # ============================================
-
-                        daily_move = max(
-                                close.pct_change().std() * cmp_price,
-                                1
-                        )
-
-                        estimated_days = round(
-                                max(reward / daily_move, 1)
-                        )
-
-                        # ============================================
-                        # SAVE RESULT
-                        # ============================================
-
-                        results.append({
-
-                                "Symbol": symbol,
-                                "MARKET_CAP": market_cap_display,
-                                "MARKET_CAP_CATEGORY": market_cap_category,
-                                "CMP": cmp_price,
-                                "STOP_LOSS": stop_loss,
-                                "TARGET": target,
-                                "Momentum": safe_round(momentum * 100),
-                                "Sharpe": safe_round(sharpe),
-                                "5D_RETURN_%": ret_5d,
-                                "15D_RETURN_%": ret_15d,
-                                "30D_RETURN_%": ret_30d,
-                                "Final Score": final_score,
-                                "Institutional_Confidence": institutional_confidence,
-                                "Conviction": conviction,
-                                "Classification": signal,
-                                "UPSIDE_%": upside_pct,
-                                "RR_RATIO": rr_ratio,
-                                "ESTIMATED_DAYS": estimated_days
-
-                        })
-
-                        completed += 1
 
                 except Exception:
 
-                        failed_stocks.add(symbol)
-                    
-            elapsed = (time.time() - start_time) / 60
+                        for symbol in batch:
 
-            processed_count = (
-                completed +
-                len(failed_stocks)
-            )
+                                failed_stocks.add(symbol)
 
-            estimated_total = (
-                elapsed /
-                max(processed_count,1)
-            ) * total
+                        continue
 
-            remaining_minutes = round(
-                max(estimated_total - elapsed, 0),
-                1
-            )
+                # =====================================================
+                # PROCESS EACH STOCK
+                # =====================================================
 
-            completion_pct = round(
-                (
-                    (
+                for symbol in batch:
+
+                        try:
+
+                                # ============================================
+                                # SYMBOL EXISTS CHECK
+                                # ============================================
+
+                                if symbol not in data.columns.levels[0]:
+
+                                        failed_stocks.add(symbol)
+                                        continue
+
+                                close = data[symbol]["Close"].dropna()
+
+                                # ============================================
+                                # MINIMUM DATA CHECK
+                                # ============================================
+
+                                if len(close) < 40:
+
+                                        failed_stocks.add(symbol)
+                                        continue
+
+                                # ============================================
+                                # MARKET CAP
+                                # ============================================
+
+                                clean_symbol = symbol.replace(".NS", "")
+
+                                market_cap = market_cap_map.get(
+                                        clean_symbol,
+                                        0
+                                )
+
+                                # ============================================
+                                # MARKET CAP CATEGORY
+                                # ============================================
+
+                                if market_cap >= 1000000000000:
+
+                                        market_cap_category = "Large Cap"
+
+                                elif market_cap >= 200000000000:
+
+                                        market_cap_category = "Mid Cap"
+
+                                else:
+
+                                        market_cap_category = "Small Cap"
+
+                                # ============================================
+                                # MARKET CAP DISPLAY
+                                # ============================================
+
+                                if market_cap >= 1_00_000_00_00_000:
+
+                                        market_cap_display = (
+                                                f"{round(market_cap / 1_00_000_00_00_000, 2)} LCr"
+                                        )
+
+                                elif market_cap >= 1_00_00_00_000:
+
+                                        market_cap_display = (
+                                                f"{round(market_cap / 1_00_00_000, 2)} Cr"
+                                        )
+
+                                else:
+
+                                        market_cap_display = str(market_cap)
+
+                                # ============================================
+                                # MOMENTUM
+                                # ============================================
+
+                                momentum = (
+                                        close.iloc[-1] /
+                                        close.iloc[-20]
+                                ) - 1
+
+                                # ============================================
+                                # RETURNS
+                                # ============================================
+
+                                ret_5d = round(momentum * 5, 2)
+                                ret_15d = round(momentum * 15, 2)
+                                ret_30d = round(momentum * 30, 2)
+
+                                # ============================================
+                                # SHARPE
+                                # ============================================
+
+                                returns = close.pct_change().dropna()
+
+                                sharpe = (
+                                        returns.mean()
+                                        / max(returns.std(), 0.0001)
+                                ) * np.sqrt(252)
+
+                                # ============================================
+                                # SCORE ENGINE
+                                # ============================================
+
+                                raw_score = (
+                                        momentum * 0.6 +
+                                        sharpe * 0.4
+                                )
+
+                                final_score = round(
+                                        min(
+                                                max(raw_score * 50, 0),
+                                                100
+                                        ),
+                                        2
+                                )
+
+                                institutional_confidence = final_score
+
+                                # ============================================
+                                # CONVICTION
+                                # ============================================
+
+                                if institutional_confidence >= 85:
+
+                                        conviction = "ELITE"
+
+                                elif institutional_confidence >= 70:
+
+                                        conviction = "HIGH"
+
+                                elif institutional_confidence >= 55:
+
+                                        conviction = "MEDIUM"
+
+                                elif institutional_confidence >= 40:
+
+                                        conviction = "LOW"
+
+                                else:
+
+                                        conviction = "AVOID"
+
+                                # ============================================
+                                # SIGNAL
+                                # ============================================
+
+                                if raw_score >= 1.0:
+
+                                        signal = "STRONG_BUY"
+
+                                elif raw_score >= 0.75:
+
+                                        signal = "BUY"
+
+                                elif raw_score >= 0.5:
+
+                                        signal = "WATCH"
+
+                                elif raw_score >= 0.25:
+
+                                        signal = "HOLD"
+
+                                else:
+
+                                        signal = "AVOID"
+
+                                # ============================================
+                                # TARGETS
+                                # ============================================
+
+                                cmp_price = round(close.iloc[-1], 2)
+
+                                stop_loss = round(
+                                        cmp_price * 0.96,
+                                        2
+                                )
+
+                                target = round(
+                                        cmp_price * 1.10,
+                                        2
+                                )
+
+                                upside_pct = round(
+                                        (
+                                                (target - cmp_price)
+                                                / cmp_price
+                                        ) * 100,
+                                        2
+                                )
+
+                                # ============================================
+                                # RR
+                                # ============================================
+
+                                risk = max(
+                                        cmp_price - stop_loss,
+                                        1
+                                )
+
+                                reward = max(
+                                        target - cmp_price,
+                                        0
+                                )
+
+                                rr_ratio = round(
+                                        reward / risk,
+                                        2
+                                )
+
+                                # ============================================
+                                # ETA
+                                # ============================================
+
+                                daily_move = max(
+                                        close.pct_change().std() * cmp_price,
+                                        1
+                                )
+
+                                estimated_days = round(
+                                        max(reward / daily_move, 1)
+                                )
+
+                                # ============================================
+                                # SAVE RESULT
+                                # ============================================
+
+                                results.append({
+
+                                        "Symbol": symbol,
+                                        "MARKET_CAP": market_cap_display,
+                                        "MARKET_CAP_CATEGORY": market_cap_category,
+                                        "CMP": cmp_price,
+                                        "STOP_LOSS": stop_loss,
+                                        "TARGET": target,
+                                        "Momentum": safe_round(momentum * 100),
+                                        "Sharpe": safe_round(sharpe),
+                                        "5D_RETURN_%": ret_5d,
+                                        "15D_RETURN_%": ret_15d,
+                                        "30D_RETURN_%": ret_30d,
+                                        "Final Score": final_score,
+                                        "Institutional_Confidence": institutional_confidence,
+                                        "Conviction": conviction,
+                                        "Classification": signal,
+                                        "UPSIDE_%": upside_pct,
+                                        "RR_RATIO": rr_ratio,
+                                        "ESTIMATED_DAYS": estimated_days
+
+                                })
+
+                                completed += 1
+
+                        except Exception:
+
+                                failed_stocks.add(symbol)
+
+                # =====================================================
+                # LIVE STATUS PANEL
+                # =====================================================
+
+                elapsed = (time.time() - start_time) / 60
+
+                processed_count = (
                         completed +
                         len(failed_stocks)
-                    ) / total
-                ) * 100,
-                1
-            )
+                )
 
-            if completed % 50 == 0:
+                estimated_total = (
+                        elapsed /
+                        max(processed_count, 1)
+                ) * total
+
+                remaining_minutes = round(
+                        max(estimated_total - elapsed, 0),
+                        1
+                )
+
+                completion_pct = round(
+                        (
+                                processed_count / total
+                        ) * 100,
+                        1
+                )
 
                 status_html = f"""
-                <div class="processing-container" style="
-                    background:white;
-                    border-radius:18px;
-                    padding:20px;
-                    width:100%;
-                    box-sizing:border-box;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.08);
-                    margin-top:8px;
-                    font-family:Segoe UI;
-                ">
-
                 <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    margin-bottom:14px;
+                        background:white;
+                        border-radius:18px;
+                        padding:20px;
+                        box-shadow:0 6px 20px rgba(0,0,0,0.08);
+                        margin-bottom:18px;
                 ">
 
-                    <div>
-
-                        <div style="
-                            font-size:30px;
-                            font-weight:900;
-                            color:#111827;
+                        <h2 style="
+                                margin:0;
+                                color:#111827;
                         ">
                         📊 Institutional Processing Engine
-                        </div>
+                        </h2>
 
-                        <div style="
-                            color:#6B7280;
-                            font-size:15px;
-                            margin-top:4px;
+                        <p style="
+                                color:#6B7280;
+                                margin-top:6px;
                         ">
                         Real-Time Quant Processing
-                        </div>
+                        </p>
 
-                    </div>
-
-                    <div style="
-                        background:#DBEAFE;
-                        color:#1D4ED8;
-                        padding:8px 14px;
-                        border-radius:10px;
-                        font-weight:800;
-                        font-size:12px;
-                    ">
-                    LIVE
-                    </div>
-
-                </div>
-
-                <div style="
-                    display:grid;
-                    grid-template-columns:
-                    repeat(auto-fit,minmax(180px,1fr));
-                    gap:12px;
-                ">
-
-                    <div style="
-                        background:#ECFDF5;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #10B981;
-                    ">
-                        <div style="
-                            color:#047857;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        COMPLETED
-                        </div>
+                        <br>
 
                         <div style="
-                            margin-top:8px;
-                            font-size:28px;
-                            font-weight:900;
-                            color:#065F46;
+                                display:grid;
+                                grid-template-columns:
+                                repeat(auto-fit,minmax(180px,1fr));
+                                gap:14px;
                         ">
-                        {completed + len(failed_stocks)}
+
+                                <div style="
+                                        background:#ECFDF5;
+                                        padding:18px;
+                                        border-radius:14px;
+                                ">
+                                        <div>COMPLETED</div>
+                                        <h1>{processed_count}</h1>
+                                </div>
+
+                                <div style="
+                                        background:#FEF2F2;
+                                        padding:18px;
+                                        border-radius:14px;
+                                ">
+                                        <div>FAILED</div>
+                                        <h1>{len(failed_stocks)}</h1>
+                                </div>
+
+                                <div style="
+                                        background:#EFF6FF;
+                                        padding:18px;
+                                        border-radius:14px;
+                                ">
+                                        <div>UNIVERSE</div>
+                                        <h1>{total}</h1>
+                                </div>
+
+                                <div style="
+                                        background:#FFF7ED;
+                                        padding:18px;
+                                        border-radius:14px;
+                                ">
+                                        <div>ETA</div>
+                                        <h1>{remaining_minutes}m</h1>
+                                </div>
+
                         </div>
 
-                        <div style="
-                            margin-top:2px;
-                            color:#10B981;
-                            font-size:12px;
-                        ">
-                        out of {total}
-                        </div>
-                    </div>
-
-                    <div style="
-                        background:#FEF2F2;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #DC2626;
-                    ">
-                        <div style="
-                            color:#B91C1C;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        FAILED
-                        </div>
+                        <br>
 
                         <div style="
-                            margin-top:8px;
-                            font-size:28px;
-                            font-weight:900;
-                            color:#991B1B;
+                                width:100%;
+                                height:14px;
+                                background:#E5E7EB;
+                                border-radius:999px;
+                                overflow:hidden;
                         ">
-                        {len(failed_stocks)}
+
+                                <div style="
+                                        width:{completion_pct}%;
+                                        height:100%;
+                                        background:linear-gradient(
+                                                90deg,
+                                                #2563EB,
+                                                #10B981
+                                        );
+                                ">
+                                </div>
+
                         </div>
 
                         <div style="
-                            margin-top:2px;
-                            color:#DC2626;
-                            font-size:12px;
+                                margin-top:8px;
+                                font-weight:700;
+                                color:#2563EB;
                         ">
-                        failed stocks
+                        {completion_pct}% Completed
                         </div>
-                    </div>
-
-                    <div style="
-                        background:#EFF6FF;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #2563EB;
-                    ">
-                        <div style="
-                            color:#1D4ED8;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        UNIVERSE
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:28px;
-                            font-weight:900;
-                            color:#1E3A8A;
-                        ">
-                        {total}
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#2563EB;
-                            font-size:12px;
-                        ">
-                        NSE Stocks
-                        </div>
-                    </div>
-
-                    <div style="
-                        background:#FFF7ED;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #F59E0B;
-                    ">
-                        <div style="
-                            color:#D97706;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        ETA
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:28px;
-                            font-weight:900;
-                            color:#92400E;
-                        ">
-                        {remaining_minutes}m
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#F59E0B;
-                            font-size:12px;
-                        ">
-                        remaining
-                        </div>
-                    </div>
-
-                </div>
-
-                <div style="margin-top:18px;">
-
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        margin-bottom:6px;
-                    ">
-
-                        <div style="
-                            color:#374151;
-                            font-weight:700;
-                            font-size:13px;
-                        ">
-                        Processing Progress
-                        </div>
-
-                        <div style="
-                            color:#2563EB;
-                            font-weight:800;
-                            font-size:13px;
-                        ">
-                        {completion_pct}%
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        width:100%;
-                        height:12px;
-                        background:#E5E7EB;
-                        border-radius:999px;
-                        overflow:hidden;
-                    ">
-
-                        <div style="
-                            width:{completion_pct}%;
-                            height:100%;
-                            background:
-                            linear-gradient(
-                                90deg,
-                                #2563EB,
-                                #10B981
-                            );
-                            border-radius:999px;
-                        ">
-                        </div>
-
-                    </div>
-
-                </div>
 
                 </div>
                 """
 
                 with status_placeholder:
-                    st.html(status_html)
 
-    return (
-        pd.DataFrame(results),
-        failed_stocks,
-        completed
-    )
+                        st.markdown(
+                                status_html,
+                                unsafe_allow_html=True
+                        )
+
+        return (
+                pd.DataFrame(results),
+                failed_stocks,
+                completed
+        )
 
 # =========================================================
 # RUN ANALYSIS
