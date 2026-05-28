@@ -42,28 +42,58 @@ RS_WINDOWS = {
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
+DATA_DIR = ROOT_DIR / "data"
+
 INPUT_FILE = (
-    ROOT_DIR
-    / "data"
+    DATA_DIR
     / "valid_stocks.xlsx"
 )
 
+# =========================================================
+# IMPORTANT FIX
+# =========================================================
+# PIPELINE EXPECTS:
+# institutional_rankings.csv
+# =========================================================
+
 OUTPUT_FILE = (
-    ROOT_DIR
-    / "data"
-    / "relative_strength.csv"
+    DATA_DIR
+    / "institutional_rankings.csv"
+)
+
+# =========================================================
+# CREATE DATA DIRECTORY
+# =========================================================
+
+DATA_DIR.mkdir(
+    parents=True,
+    exist_ok=True
 )
 
 # =========================================================
 # LOAD STOCKS
 # =========================================================
 
+print("\n📥 Loading Stock Universe...")
+
+if not INPUT_FILE.exists():
+
+    raise FileNotFoundError(
+
+        f"\n❌ Missing file:\n"
+        f"{INPUT_FILE}"
+    )
+
 df = pd.read_excel(INPUT_FILE)
 
 possible_cols = [
+
     "Stock",
+
     "Symbol",
+
     "SYMBOL",
+
     "symbol"
 ]
 
@@ -74,13 +104,17 @@ for col in possible_cols:
     if col in df.columns:
 
         symbol_col = col
+
         break
 
 if symbol_col is None:
 
     raise Exception(
-        f"Symbol column not found.\n"
+
+        f"\n❌ Symbol column not found.\n"
+
         f"Available columns:\n"
+
         f"{df.columns.tolist()}"
     )
 
@@ -112,17 +146,27 @@ print(f"\n✅ Loaded {len(symbols)} symbols")
 print("\n📥 Downloading Benchmark...")
 
 benchmark_df = yf.download(
+
     BENCHMARK,
+
     period=DOWNLOAD_PERIOD,
+
     auto_adjust=True,
+
     progress=False,
+
     threads=False
 )
+
+# =========================================================
+# EMPTY CHECK
+# =========================================================
 
 if benchmark_df.empty:
 
     raise Exception(
-        "❌ Failed to download benchmark data"
+
+        "\n❌ Failed to download benchmark data"
     )
 
 # =========================================================
@@ -135,11 +179,25 @@ if isinstance(
 ):
 
     benchmark_df.columns = (
-        benchmark_df.columns.get_level_values(0)
+
+        benchmark_df.columns
+        .get_level_values(0)
+    )
+
+# =========================================================
+# CLOSE SERIES
+# =========================================================
+
+if "Close" not in benchmark_df.columns:
+
+    raise Exception(
+        "\n❌ Benchmark Close column missing"
     )
 
 benchmark_close = (
+
     benchmark_df["Close"]
+
     .dropna()
 )
 
@@ -148,15 +206,18 @@ benchmark_close = (
 # =========================================================
 
 benchmark_returns = (
+
     benchmark_close
+
     .pct_change()
+
     .dropna()
 )
 
 print("\n✅ Benchmark Ready")
 
 # =========================================================
-# CALCULATE RS
+# RS CALCULATION
 # =========================================================
 
 def calculate_rs(symbol):
@@ -174,14 +235,19 @@ def calculate_rs(symbol):
             symbol = f"{symbol}.NS"
 
         # =================================================
-        # DOWNLOAD DATA
+        # DOWNLOAD STOCK DATA
         # =================================================
 
         data = yf.download(
+
             symbol,
+
             period=DOWNLOAD_PERIOD,
+
             auto_adjust=True,
+
             progress=False,
+
             threads=False
         )
 
@@ -205,11 +271,13 @@ def calculate_rs(symbol):
         ):
 
             data.columns = (
-                data.columns.get_level_values(0)
+
+                data.columns
+                .get_level_values(0)
             )
 
         # =================================================
-        # CLOSE SERIES
+        # CLOSE CHECK
         # =================================================
 
         if "Close" not in data.columns:
@@ -219,7 +287,9 @@ def calculate_rs(symbol):
             return None
 
         close = (
+
             data["Close"]
+
             .dropna()
         )
 
@@ -230,6 +300,7 @@ def calculate_rs(symbol):
         if len(close) < MIN_HISTORY:
 
             print(
+
                 f"❌ {symbol} -> "
                 f"Insufficient History"
             )
@@ -241,13 +312,16 @@ def calculate_rs(symbol):
         # =================================================
 
         stock_returns = (
+
             close
+
             .pct_change()
+
             .dropna()
         )
 
         # =================================================
-        # ALIGN DATES
+        # ALIGN RETURNS
         # =================================================
 
         combined = pd.concat(
@@ -272,12 +346,13 @@ def calculate_rs(symbol):
         combined = combined.dropna()
 
         # =================================================
-        # MIN DATA CHECK
+        # ALIGNMENT CHECK
         # =================================================
 
         if len(combined) < MIN_HISTORY:
 
             print(
+
                 f"❌ {symbol} -> "
                 f"Alignment Failed"
             )
@@ -285,7 +360,7 @@ def calculate_rs(symbol):
             return None
 
         # =================================================
-        # MULTI TIMEFRAME RS
+        # RS CALCULATION
         # =================================================
 
         rs_data = {}
@@ -344,14 +419,15 @@ def calculate_rs(symbol):
 
         try:
 
-            rs_acceleration = (
+            rs_acceleration = round(
 
                 rs_data["RS_5D"]
 
                 -
 
-                rs_data["RS_30D"]
+                rs_data["RS_30D"],
 
+                2
             )
 
         except:
@@ -362,13 +438,15 @@ def calculate_rs(symbol):
         # VOLATILITY
         # =================================================
 
-        volatility = (
+        volatility = round(
 
             combined["STOCK"]
 
             .std()
 
-            * np.sqrt(252)
+            * np.sqrt(252),
+
+            4
         )
 
         # =================================================
@@ -377,15 +455,12 @@ def calculate_rs(symbol):
 
         try:
 
-            vol_adj_rs = (
+            vol_adj_rs = round(
 
                 rs_data["RS_30D"]
 
-                / volatility
-            )
+                / volatility,
 
-            vol_adj_rs = round(
-                vol_adj_rs,
                 2
             )
 
@@ -416,6 +491,9 @@ def calculate_rs(symbol):
             "RS_ACCELERATION":
                 rs_acceleration,
 
+            "VOLATILITY":
+                volatility,
+
             "VOL_ADJ_RS":
                 vol_adj_rs
         }
@@ -427,7 +505,7 @@ def calculate_rs(symbol):
         return None
 
 # =========================================================
-# MULTITHREADING
+# MULTITHREAD EXECUTION
 # =========================================================
 
 print("\n🚀 Calculating Relative Strength...")
@@ -451,7 +529,9 @@ with ThreadPoolExecutor(
     total = len(futures)
 
     for idx, future in enumerate(
+
         as_completed(futures),
+
         start=1
     ):
 
@@ -470,7 +550,6 @@ with ThreadPoolExecutor(
                 f"RS_30D: "
 
                 f"{result['RS_30D']}"
-
             )
 
 # =========================================================
@@ -486,7 +565,7 @@ rs_df = pd.DataFrame(results)
 if rs_df.empty:
 
     raise Exception(
-        "❌ No valid stocks processed"
+        "\n❌ No valid stocks processed"
     )
 
 # =========================================================
@@ -508,20 +587,32 @@ rs_df = rs_df.sort_values(
         "RS_30D",
 
         "RS_ACCELERATION"
-
     ],
 
     ascending=False
 )
 
 # =========================================================
-# SAVE
+# SAVE OUTPUT
 # =========================================================
 
 rs_df.to_csv(
+
     OUTPUT_FILE,
+
     index=False
 )
+
+# =========================================================
+# VALIDATION
+# =========================================================
+
+if not OUTPUT_FILE.exists():
+
+    raise Exception(
+
+        "\n❌ Output validation failed"
+    )
 
 # =========================================================
 # OUTPUT
@@ -530,10 +621,15 @@ rs_df.to_csv(
 print("\n✅ Relative Strength Generated")
 
 print(
+
     f"\n📁 Saved to:\n"
+
     f"{OUTPUT_FILE}"
 )
 
 print("\n🏆 Top Institutional RS Stocks:\n")
 
-print(rs_df.head(10))
+print(
+
+    rs_df.head(10)
+)
