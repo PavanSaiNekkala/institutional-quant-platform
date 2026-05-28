@@ -18,10 +18,10 @@ OUTPUT_FILE = ROOT_DIR / "data" / "stock_metadata.csv"
 # CONFIG
 # =========================================================
 
-MAX_WORKERS = 3
-REQUEST_DELAY = 0.8
+MAX_WORKERS = 5
+REQUEST_DELAY = 0.5
 BATCH_SIZE = 50
-BATCH_COOLDOWN = 15
+BATCH_COOLDOWN = 5
 MAX_RETRIES = 3
 
 # =========================================================
