@@ -4,14 +4,16 @@ on:
 
   schedule:
 
-    # Runs at:
-    # 08:00 AM IST
-    # 02:00 PM IST
-    # 08:00 PM IST
-    # 02:00 AM IST
-
-    # UTC Conversion:
+    # =====================================================
+    # Runs Every 6 Hours Starting From 08:00 AM IST
+    #
     # IST = UTC + 5:30
+    #
+    # 08:00 AM IST = 02:30 UTC
+    # 02:00 PM IST = 08:30 UTC
+    # 08:00 PM IST = 14:30 UTC
+    # 02:00 AM IST = 20:30 UTC
+    # =====================================================
 
     - cron: '30 2,8,14,20 * * *'
 
@@ -71,27 +73,10 @@ jobs:
 
           python -m pip install --upgrade pip
 
-          pip install pandas numpy yfinance scipy scikit-learn
-
-          pip install streamlit plotly openpyxl
+          pip install -r requirements.txt
 
       # =====================================================
-      # CLEAN OLD GENERATED DATA
-      # =====================================================
-
-      - name: Remove Old Generated Files
-
-        run: |
-
-          echo "Cleaning old generated data..."
-
-          rm -rf data/*.csv || true
-          rm -rf data/*.xlsx || true
-          rm -rf data/*.json || true
-          rm -rf data/*.parquet || true
-
-      # =====================================================
-      # CREATE DATA DIRECTORY
+      # ENSURE DATA DIRECTORY
       # =====================================================
 
       - name: Ensure Data Directory Exists
@@ -99,6 +84,18 @@ jobs:
         run: |
 
           mkdir -p data
+
+      # =====================================================
+      # VERIFY CRITICAL INPUT FILES
+      # =====================================================
+
+      - name: Verify Required Input Files
+
+        run: |
+
+          echo "Checking critical dependency files..."
+
+          test -f data/valid_stocks.xlsx || (echo "Missing valid_stocks.xlsx" && exit 1)
 
       # =====================================================
       # RUN FULL PIPELINE
@@ -133,7 +130,7 @@ jobs:
           git status
 
       # =====================================================
-      # COMMIT UPDATED DATA
+      # COMMIT UPDATED FILES
       # =====================================================
 
       - name: Commit Updated Data
@@ -146,10 +143,10 @@ jobs:
 
           git add data/
 
-          git commit -m "Automated Institutional Pipeline Update" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "Automated Institutional Pipeline Update"
 
       # =====================================================
-      # PULL BEFORE PUSH
+      # PULL LATEST CHANGES
       # =====================================================
 
       - name: Pull Latest Changes
