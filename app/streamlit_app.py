@@ -46,27 +46,29 @@ MAIN CONTAINER
 ===================================================== */
 
 .block-container{
-    padding-top:1rem;
-    padding-bottom:2rem;
+    padding-top:0.2rem;
+    padding-bottom:1rem;
+    padding-left:1rem !important;
+    padding-right:1rem !important;
     max-width:100%;
 }
 
 /* =====================================================
-RESPONSIVE SIDEBAR
+SIDEBAR
 ===================================================== */
 
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
-    min-width:280px !important;
-    max-width:340px !important;
-    width:22vw !important;
+    min-width:250px !important;
+    max-width:300px !important;
+    width:20vw !important;
 }
 
 section[data-testid="stSidebar"] > div{
-    min-width:280px !important;
-    max-width:340px !important;
-    width:22vw !important;
+    min-width:250px !important;
+    max-width:300px !important;
+    width:20vw !important;
 }
 
 section[data-testid="stSidebar"] *{
@@ -74,28 +76,73 @@ section[data-testid="stSidebar"] *{
 }
 
 /* =====================================================
-RESPONSIVE MAIN AREA
+AUTO EXPAND MAIN SCREEN
 ===================================================== */
 
+[data-testid="collapsedControl"]{
+    z-index:9999 !important;
+}
+
 .main .block-container{
-    padding-top:1rem;
-    padding-bottom:2rem;
     max-width:100% !important;
     width:100% !important;
 }
 
+section.main > div{
+    width:100% !important;
+    max-width:100% !important;
+}
+
 /* =====================================================
-AUTO FIT PROCESSING ENGINE
+FULL WIDTH COMPONENTS
+===================================================== */
+
+.element-container,
+.stPlotlyChart,
+[data-testid="stDataFrame"],
+[data-testid="metric-container"]{
+    width:100% !important;
+}
+
+[data-testid="column"]{
+    width:100% !important;
+}
+
+/* =====================================================
+PROCESSING ENGINE
 ===================================================== */
 
 .processing-container{
     width:100% !important;
     max-width:100% !important;
     overflow:hidden !important;
+    max-height:none !important;
 }
 
 /* =====================================================
-SEARCH INPUT FIX
+REMOVE SCROLLBARS
+===================================================== */
+
+iframe{
+    overflow:hidden !important;
+}
+
+.element-container{
+    overflow:hidden !important;
+}
+
+.stHtml{
+    overflow:hidden !important;
+    padding-bottom:0px !important;
+    margin-bottom:0px !important;
+}
+
+html, body, [class*="css"]{
+    overflow-x:hidden !important;
+}
+
+/* =====================================================
+SEARCH INPUT
 ===================================================== */
 
 div[data-baseweb="base-input"]{
@@ -107,13 +154,13 @@ div[data-baseweb="base-input"] > div{
     background:white !important;
     border:2px solid #2563EB !important;
     border-radius:12px !important;
-    min-height:52px !important;
+    min-height:48px !important;
 }
 
 input[type="text"]{
     color:#111827 !important;
     background:white !important;
-    font-size:20px !important;
+    font-size:18px !important;
     font-weight:800 !important;
     opacity:1 !important;
     -webkit-text-fill-color:#111827 !important;
@@ -137,14 +184,24 @@ div[data-baseweb="select"] > div{
 }
 
 /* =====================================================
+MULTISELECT TAGS
+===================================================== */
+
+[data-baseweb="tag"]{
+    background:#2563EB !important;
+    color:white !important;
+}
+
+/* =====================================================
 METRICS
 ===================================================== */
 
 [data-testid="metric-container"]{
     background:white;
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    border-radius:18px;
+    padding:12px;
+    min-height:100px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* =====================================================
@@ -153,10 +210,10 @@ PLOTLY
 
 .element-container:has(.js-plotly-plot){
     background:white;
-    border-radius:22px;
-    padding:16px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.08);
-    margin-bottom:20px;
+    border-radius:18px;
+    padding:10px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    margin-bottom:16px;
 }
 
 /* =====================================================
@@ -165,25 +222,13 @@ TABLE
 
 [data-testid="stDataFrame"]{
     background:white;
-    border-radius:20px;
-    padding:12px;
+    border-radius:18px;
+    padding:10px;
 }
 
 /* =====================================================
-MOBILE RESPONSIVE
+MOBILE
 ===================================================== */
-
-@media (max-width: 1200px){
-
-    section[data-testid="stSidebar"]{
-        width:280px !important;
-    }
-
-    section[data-testid="stSidebar"] > div{
-        width:280px !important;
-    }
-
-}
 
 @media (max-width: 768px){
 
@@ -206,7 +251,7 @@ MOBILE RESPONSIVE
 
 st.markdown("""
 <div style="
-    font-size:58px;
+    font-size:30px;
     font-weight:900;
     color:#111827;
 ">
@@ -216,9 +261,9 @@ st.markdown("""
 
 st.markdown("""
 <div style="
-    font-size:20px;
+    font-size:13px;
     color:#6B7280;
-    margin-top:-10px;
+    margin-top:-6px;
 ">
 Enterprise Institutional Analytics Dashboard
 </div>
@@ -226,14 +271,25 @@ Enterprise Institutional Analytics Dashboard
 
 india = pytz.timezone("Asia/Kolkata")
 
-st.caption(
-    f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}"
+st.markdown(
+    f"""
+    <div style="
+        color:#6B7280;
+        font-size:12px;
+        margin-top:-4px;
+        margin-bottom:8px;
+        font-weight:600;
+    ">
+    Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 st.markdown("---")
 
 # =========================================================
-# LOAD STOCKS
+# LOAD NSE UNIVERSE
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -268,14 +324,18 @@ with st.sidebar:
 
     st.markdown("---")
 
-    signal_filter = st.selectbox(
-        "Trade Signal",
-        [
-            "All",
+    signal_filter = st.multiselect(
+        "📈 Trade Signal Filter",
+        options=[
             "STRONG_BUY",
             "BUY",
             "WATCH",
+            "HOLD",
             "AVOID"
+        ],
+        default=[
+            "STRONG_BUY",
+            "BUY"
         ]
     )
 
@@ -308,11 +368,12 @@ with st.sidebar:
                     f"""
                     <div style="
                         background:#1F2937;
-                        padding:10px;
-                        border-radius:10px;
-                        margin-bottom:8px;
+                        padding:8px;
+                        border-radius:8px;
+                        margin-bottom:6px;
                         border-left:4px solid #10B981;
                         font-weight:700;
+                        font-size:13px;
                     ">
                     {m}
                     </div>
@@ -326,13 +387,6 @@ with st.sidebar:
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
 
-    st.markdown("### 📈 Trade Signal Summary")
-
-    st.success("🟢 STRONG BUY")
-    st.info("🟩 BUY")
-    st.warning("🟠 WATCH")
-    st.error("🔴 AVOID")
-
 # =========================================================
 # COLORS
 # =========================================================
@@ -340,7 +394,8 @@ with st.sidebar:
 signal_colors = {
     "STRONG_BUY": "#006400",
     "BUY": "#32CD32",
-    "WATCH": "#FF8C00",
+    "WATCH": "#F59E0B",
+    "HOLD": "#3B82F6",
     "AVOID": "#DC2626"
 }
 
@@ -354,6 +409,12 @@ def safe_round(x, n=2):
         return round(float(x), n)
     except:
         return 0
+
+# =========================================================
+# LOADING MESSAGE
+# =========================================================
+
+st.info("⚡ Running institutional analysis across full NSE universe...")
 
 # =========================================================
 # ANALYSIS ENGINE
@@ -374,7 +435,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 50
+    batch_size = 25
 
     status_placeholder = st.empty()
 
@@ -409,18 +470,13 @@ def run_analysis(stock_list):
                 if symbol not in data.columns.levels[0]:
 
                     failed_stocks.append(symbol)
-
                     continue
 
-                close = (
-                    data[symbol]["Close"]
-                    .dropna()
-                )
+                close = data[symbol]["Close"].dropna()
 
                 if len(close) < 40:
 
                     failed_stocks.append(symbol)
-
                     continue
 
                 momentum = (
@@ -440,14 +496,17 @@ def run_analysis(stock_list):
                     + sharpe * 0.4
                 )
 
-                if score >= 1.2:
+                if score >= 1.5:
                     signal = "STRONG_BUY"
 
-                elif score >= 0.8:
+                elif score >= 1.0:
                     signal = "BUY"
 
-                elif score >= 0.4:
+                elif score >= 0.6:
                     signal = "WATCH"
+
+                elif score >= 0.2:
+                    signal = "HOLD"
 
                 else:
                     signal = "AVOID"
@@ -462,6 +521,7 @@ def run_analysis(stock_list):
                 })
 
             except:
+
                 failed_stocks.append(symbol)
 
             progress_bar.progress(completed / total)
@@ -487,12 +547,12 @@ def run_analysis(stock_list):
                 status_html = f"""
                 <div class="processing-container" style="
                     background:white;
-                    border-radius:24px;
-                    padding:30px;
+                    border-radius:18px;
+                    padding:20px;
                     width:100%;
                     box-sizing:border-box;
-                    box-shadow:0 8px 28px rgba(0,0,0,0.08);
-                    margin-top:10px;
+                    box-shadow:0 6px 20px rgba(0,0,0,0.08);
+                    margin-top:2px;
                     font-family:Segoe UI;
                 ">
 
@@ -500,13 +560,13 @@ def run_analysis(stock_list):
                     display:flex;
                     justify-content:space-between;
                     align-items:center;
-                    margin-bottom:20px;
+                    margin-bottom:12px;
                 ">
 
                     <div>
 
                         <div style="
-                            font-size:42px;
+                            font-size:22px;
                             font-weight:900;
                             color:#111827;
                         ">
@@ -515,8 +575,8 @@ def run_analysis(stock_list):
 
                         <div style="
                             color:#6B7280;
-                            font-size:18px;
-                            margin-top:5px;
+                            font-size:13px;
+                            margin-top:2px;
                         ">
                         Real-Time Quant Processing
                         </div>
@@ -526,9 +586,10 @@ def run_analysis(stock_list):
                     <div style="
                         background:#DBEAFE;
                         color:#1D4ED8;
-                        padding:12px 20px;
-                        border-radius:12px;
+                        padding:6px 12px;
+                        border-radius:10px;
                         font-weight:800;
+                        font-size:11px;
                     ">
                     LIVE
                     </div>
@@ -537,23 +598,28 @@ def run_analysis(stock_list):
 
                 <div style="
                     display:grid;
-                    grid-template-columns:repeat(4,1fr);
-                    gap:18px;
+                    grid-template-columns:
+                    repeat(auto-fit,minmax(160px,1fr));
+                    gap:10px;
                 ">
 
                     <div style="
                         background:#ECFDF5;
-                        padding:22px;
-                        border-radius:18px;
-                        border-left:6px solid #10B981;
+                        padding:12px;
+                        border-radius:14px;
+                        border-left:5px solid #10B981;
                     ">
-                        <div style="color:#047857;font-size:14px;font-weight:700;">
+                        <div style="
+                            color:#047857;
+                            font-size:11px;
+                            font-weight:700;
+                        ">
                         COMPLETED
                         </div>
 
                         <div style="
-                            margin-top:10px;
-                            font-size:36px;
+                            margin-top:6px;
+                            font-size:22px;
                             font-weight:900;
                             color:#065F46;
                         ">
@@ -561,9 +627,9 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            margin-top:4px;
+                            margin-top:2px;
                             color:#10B981;
-                            font-size:14px;
+                            font-size:11px;
                         ">
                         out of {total}
                         </div>
@@ -571,17 +637,21 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#FEF2F2;
-                        padding:22px;
-                        border-radius:18px;
-                        border-left:6px solid #DC2626;
+                        padding:12px;
+                        border-radius:14px;
+                        border-left:5px solid #DC2626;
                     ">
-                        <div style="color:#B91C1C;font-size:14px;font-weight:700;">
+                        <div style="
+                            color:#B91C1C;
+                            font-size:11px;
+                            font-weight:700;
+                        ">
                         FAILED
                         </div>
 
                         <div style="
-                            margin-top:10px;
-                            font-size:36px;
+                            margin-top:6px;
+                            font-size:22px;
                             font-weight:900;
                             color:#991B1B;
                         ">
@@ -589,9 +659,9 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            margin-top:4px;
+                            margin-top:2px;
                             color:#DC2626;
-                            font-size:14px;
+                            font-size:11px;
                         ">
                         failed stocks
                         </div>
@@ -599,17 +669,21 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#EFF6FF;
-                        padding:22px;
-                        border-radius:18px;
-                        border-left:6px solid #2563EB;
+                        padding:12px;
+                        border-radius:14px;
+                        border-left:5px solid #2563EB;
                     ">
-                        <div style="color:#1D4ED8;font-size:14px;font-weight:700;">
+                        <div style="
+                            color:#1D4ED8;
+                            font-size:11px;
+                            font-weight:700;
+                        ">
                         UNIVERSE
                         </div>
 
                         <div style="
-                            margin-top:10px;
-                            font-size:36px;
+                            margin-top:6px;
+                            font-size:22px;
                             font-weight:900;
                             color:#1E3A8A;
                         ">
@@ -617,9 +691,9 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            margin-top:4px;
+                            margin-top:2px;
                             color:#2563EB;
-                            font-size:14px;
+                            font-size:11px;
                         ">
                         NSE Stocks
                         </div>
@@ -627,17 +701,21 @@ def run_analysis(stock_list):
 
                     <div style="
                         background:#FFF7ED;
-                        padding:22px;
-                        border-radius:18px;
-                        border-left:6px solid #F59E0B;
+                        padding:12px;
+                        border-radius:14px;
+                        border-left:5px solid #F59E0B;
                     ">
-                        <div style="color:#D97706;font-size:14px;font-weight:700;">
+                        <div style="
+                            color:#D97706;
+                            font-size:11px;
+                            font-weight:700;
+                        ">
                         ETA
                         </div>
 
                         <div style="
-                            margin-top:10px;
-                            font-size:36px;
+                            margin-top:6px;
+                            font-size:22px;
                             font-weight:900;
                             color:#92400E;
                         ">
@@ -645,9 +723,9 @@ def run_analysis(stock_list):
                         </div>
 
                         <div style="
-                            margin-top:4px;
+                            margin-top:2px;
                             color:#F59E0B;
-                            font-size:14px;
+                            font-size:11px;
                         ">
                         remaining
                         </div>
@@ -655,17 +733,18 @@ def run_analysis(stock_list):
 
                 </div>
 
-                <div style="margin-top:28px;">
+                <div style="margin-top:10px;">
 
                     <div style="
                         display:flex;
                         justify-content:space-between;
-                        margin-bottom:8px;
+                        margin-bottom:5px;
                     ">
 
                         <div style="
                             color:#374151;
                             font-weight:700;
+                            font-size:12px;
                         ">
                         Processing Progress
                         </div>
@@ -673,6 +752,7 @@ def run_analysis(stock_list):
                         <div style="
                             color:#2563EB;
                             font-weight:800;
+                            font-size:12px;
                         ">
                         {completion_pct}%
                         </div>
@@ -681,7 +761,7 @@ def run_analysis(stock_list):
 
                     <div style="
                         width:100%;
-                        height:18px;
+                        height:10px;
                         background:#E5E7EB;
                         border-radius:999px;
                         overflow:hidden;
@@ -690,7 +770,12 @@ def run_analysis(stock_list):
                         <div style="
                             width:{completion_pct}%;
                             height:100%;
-                            background:linear-gradient(90deg,#2563EB,#10B981);
+                            background:
+                            linear-gradient(
+                                90deg,
+                                #2563EB,
+                                #10B981
+                            );
                             border-radius:999px;
                         ">
                         </div>
@@ -699,52 +784,11 @@ def run_analysis(stock_list):
 
                 </div>
 
-                <div style="
-                    margin-top:28px;
-                    background:#111827;
-                    color:white;
-                    border-radius:18px;
-                    padding:20px;
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                ">
-
-                    <div>
-
-                        <div style="
-                            color:#9CA3AF;
-                            font-size:13px;
-                            margin-bottom:6px;
-                        ">
-                        CURRENTLY ANALYZING
-                        </div>
-
-                        <div style="
-                            font-size:26px;
-                            font-weight:900;
-                        ">
-                        {symbol}
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#10B981;
-                        padding:10px 18px;
-                        border-radius:12px;
-                        font-weight:800;
-                    ">
-                    ACTIVE
-                    </div>
-
-                </div>
-
                 </div>
                 """
 
                 with status_placeholder:
-                    st.html(status_html)
+                    st.html(status_html, height=330)
 
     progress_bar.empty()
 
@@ -776,17 +820,21 @@ results = results[
     results["Percentile"] >= min_score
 ]
 
-if signal_filter != "All":
+if signal_filter:
 
     results = results[
-        results["Classification"] == signal_filter
+        results["Classification"]
+        .isin(signal_filter)
     ]
 
 if search_stock:
 
     results = results[
         results["Symbol"]
-        .str.contains(search_stock.upper(), na=False)
+        .str.contains(
+            search_stock.upper(),
+            na=False
+        )
     ]
 
 # =========================================================
@@ -803,7 +851,7 @@ with k1:
 with k2:
     st.metric(
         "Processed Stocks",
-        len(results) + len(set(failed_stocks))
+        len(results)
     )
 
 with k3:
@@ -847,7 +895,10 @@ with left:
         title="Signal Distribution"
     )
 
-    fig1.update_layout(height=450)
+    fig1.update_layout(
+        height=320,
+        margin=dict(l=10,r=10,t=40,b=10)
+    )
 
     st.plotly_chart(
         fig1,
@@ -867,7 +918,10 @@ with right:
         title="Risk Reward Opportunity Matrix"
     )
 
-    fig2.update_layout(height=450)
+    fig2.update_layout(
+        height=320,
+        margin=dict(l=10,r=10,t=40,b=10)
+    )
 
     st.plotly_chart(
         fig2,
@@ -886,5 +940,5 @@ st.dataframe(
         ascending=False
     ),
     use_container_width=True,
-    height=700
+    height=480
 )
