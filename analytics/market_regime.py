@@ -4,10 +4,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from utils.data_io import (
-    save_parquet,
-    load_parquet
-)
 
 # =========================================================
 # CONFIG
@@ -328,9 +324,9 @@ output = pd.DataFrame({
 # SAVE
 # =========================================================
 
-save_parquet(
-    output,
-    OUTPUT_FILE
+output.to_csv(
+    OUTPUT_FILE,
+    index=False
 )
 
 # =========================================================
