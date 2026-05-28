@@ -4,10 +4,28 @@ on:
 
   schedule:
 
-    # Daily at 6:00 PM IST
-    - cron: '30 12 * * *'
+    # Runs at:
+    # 08:00 AM IST
+    # 02:00 PM IST
+    # 08:00 PM IST
+    # 02:00 AM IST
+
+    # UTC Conversion:
+    # IST = UTC + 5:30
+
+    - cron: '30 2,8,14,20 * * *'
 
   workflow_dispatch:
+
+# =====================================================
+# PREVENT OVERLAPPING RUNS
+# =====================================================
+
+concurrency:
+
+  group: institutional-quant-pipeline
+
+  cancel-in-progress: false
 
 jobs:
 
@@ -26,6 +44,10 @@ jobs:
       - name: Checkout Repository
 
         uses: actions/checkout@v4
+
+        with:
+
+          fetch-depth: 0
 
       # =====================================================
       # PYTHON
@@ -52,6 +74,21 @@ jobs:
           pip install pandas numpy yfinance scipy scikit-learn
 
           pip install streamlit plotly openpyxl
+
+      # =====================================================
+      # CLEAN OLD GENERATED DATA
+      # =====================================================
+
+      - name: Remove Old Generated Files
+
+        run: |
+
+          echo "Cleaning old generated data..."
+
+          rm -rf data/*.csv || true
+          rm -rf data/*.xlsx || true
+          rm -rf data/*.json || true
+          rm -rf data/*.parquet || true
 
       # =====================================================
       # CREATE DATA DIRECTORY
@@ -81,12 +118,22 @@ jobs:
 
         run: |
 
-          echo "Checking generated files..."
+          echo "Generated files:"
 
           ls -lah data/
 
       # =====================================================
-      # COMMIT OUTPUTS
+      # GIT STATUS
+      # =====================================================
+
+      - name: Check Git Status
+
+        run: |
+
+          git status
+
+      # =====================================================
+      # COMMIT UPDATED DATA
       # =====================================================
 
       - name: Commit Updated Data
@@ -101,7 +148,25 @@ jobs:
 
           git commit -m "Automated Institutional Pipeline Update" || echo "No changes to commit"
 
-          git push
+      # =====================================================
+      # PULL BEFORE PUSH
+      # =====================================================
+
+      - name: Pull Latest Changes
+
+        run: |
+
+          git pull --rebase origin main
+
+      # =====================================================
+      # PUSH
+      # =====================================================
+
+      - name: Push Changes
+
+        run: |
+
+          git push origin main
 
       # =====================================================
       # SUCCESS
@@ -111,4 +176,4 @@ jobs:
 
         run: |
 
-          echo "Institutional AI Quant Pipeline Completed"
+          echo "Institutional AI Quant Pipeline Completed Successfully"
