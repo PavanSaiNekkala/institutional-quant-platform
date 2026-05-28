@@ -1,0 +1,539 @@
+import pandas as pd
+import numpy as np
+import yfinance as yf
+
+from pathlib import Path
+
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
+
+# =========================================================
+# CONFIG
+# =========================================================
+
+BENCHMARK = "^NSEI"
+
+DOWNLOAD_PERIOD = "6mo"
+
+MAX_WORKERS = 5
+
+MIN_HISTORY = 70
+
+# =========================================================
+# RS WINDOWS
+# =========================================================
+
+RS_WINDOWS = {
+
+    "RS_5D": 5,
+
+    "RS_15D": 15,
+
+    "RS_30D": 30,
+
+    "RS_60D": 60
+}
+
+# =========================================================
+# PATHS
+# =========================================================
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+
+INPUT_FILE = (
+    ROOT_DIR
+    / "data"
+    / "valid_stocks.xlsx"
+)
+
+OUTPUT_FILE = (
+    ROOT_DIR
+    / "data"
+    / "relative_strength.csv"
+)
+
+# =========================================================
+# LOAD STOCKS
+# =========================================================
+
+df = pd.read_excel(INPUT_FILE)
+
+possible_cols = [
+    "Stock",
+    "Symbol",
+    "SYMBOL",
+    "symbol"
+]
+
+symbol_col = None
+
+for col in possible_cols:
+
+    if col in df.columns:
+
+        symbol_col = col
+        break
+
+if symbol_col is None:
+
+    raise Exception(
+        f"Symbol column not found.\n"
+        f"Available columns:\n"
+        f"{df.columns.tolist()}"
+    )
+
+symbols = (
+
+    df[symbol_col]
+
+    .dropna()
+
+    .astype(str)
+
+    .str.upper()
+
+    .str.strip()
+
+    .str.replace(".NS", "", regex=False)
+
+    .unique()
+
+    .tolist()
+)
+
+print(f"\n✅ Loaded {len(symbols)} symbols")
+
+# =========================================================
+# DOWNLOAD BENCHMARK
+# =========================================================
+
+print("\n📥 Downloading Benchmark...")
+
+benchmark_df = yf.download(
+    BENCHMARK,
+    period=DOWNLOAD_PERIOD,
+    auto_adjust=True,
+    progress=False,
+    threads=False
+)
+
+if benchmark_df.empty:
+
+    raise Exception(
+        "❌ Failed to download benchmark data"
+    )
+
+# =========================================================
+# FIX MULTIINDEX
+# =========================================================
+
+if isinstance(
+    benchmark_df.columns,
+    pd.MultiIndex
+):
+
+    benchmark_df.columns = (
+        benchmark_df.columns.get_level_values(0)
+    )
+
+benchmark_close = (
+    benchmark_df["Close"]
+    .dropna()
+)
+
+# =========================================================
+# BENCHMARK RETURNS
+# =========================================================
+
+benchmark_returns = (
+    benchmark_close
+    .pct_change()
+    .dropna()
+)
+
+print("\n✅ Benchmark Ready")
+
+# =========================================================
+# CALCULATE RS
+# =========================================================
+
+def calculate_rs(symbol):
+
+    try:
+
+        # =================================================
+        # SYMBOL NORMALIZATION
+        # =================================================
+
+        symbol = str(symbol).upper().strip()
+
+        if not symbol.endswith(".NS"):
+
+            symbol = f"{symbol}.NS"
+
+        # =================================================
+        # DOWNLOAD DATA
+        # =================================================
+
+        data = yf.download(
+            symbol,
+            period=DOWNLOAD_PERIOD,
+            auto_adjust=True,
+            progress=False,
+            threads=False
+        )
+
+        # =================================================
+        # EMPTY CHECK
+        # =================================================
+
+        if data.empty:
+
+            print(f"❌ {symbol} -> Empty Data")
+
+            return None
+
+        # =================================================
+        # FIX MULTIINDEX
+        # =================================================
+
+        if isinstance(
+            data.columns,
+            pd.MultiIndex
+        ):
+
+            data.columns = (
+                data.columns.get_level_values(0)
+            )
+
+        # =================================================
+        # CLOSE SERIES
+        # =================================================
+
+        if "Close" not in data.columns:
+
+            print(f"❌ {symbol} -> No Close Column")
+
+            return None
+
+        close = (
+            data["Close"]
+            .dropna()
+        )
+
+        # =================================================
+        # HISTORY CHECK
+        # =================================================
+
+        if len(close) < MIN_HISTORY:
+
+            print(
+                f"❌ {symbol} -> "
+                f"Insufficient History"
+            )
+
+            return None
+
+        # =================================================
+        # STOCK RETURNS
+        # =================================================
+
+        stock_returns = (
+            close
+            .pct_change()
+            .dropna()
+        )
+
+        # =================================================
+        # ALIGN DATES
+        # =================================================
+
+        combined = pd.concat(
+
+            [
+                stock_returns,
+                benchmark_returns
+            ],
+
+            axis=1,
+
+            join="inner"
+        )
+
+        combined.columns = [
+
+            "STOCK",
+
+            "BENCHMARK"
+        ]
+
+        combined = combined.dropna()
+
+        # =================================================
+        # MIN DATA CHECK
+        # =================================================
+
+        if len(combined) < MIN_HISTORY:
+
+            print(
+                f"❌ {symbol} -> "
+                f"Alignment Failed"
+            )
+
+            return None
+
+        # =================================================
+        # MULTI TIMEFRAME RS
+        # =================================================
+
+        rs_data = {}
+
+        for label, window in RS_WINDOWS.items():
+
+            if len(combined) < window:
+
+                rs_data[label] = None
+
+                continue
+
+            stock_perf = (
+
+                (
+                    1 + combined["STOCK"]
+                )
+
+                .tail(window)
+
+                .prod()
+            )
+
+            benchmark_perf = (
+
+                (
+                    1 + combined["BENCHMARK"]
+                )
+
+                .tail(window)
+
+                .prod()
+            )
+
+            rs_score = (
+
+                (
+                    stock_perf
+                    /
+                    benchmark_perf
+                )
+
+                - 1
+            )
+
+            rs_data[label] = round(
+
+                rs_score * 100,
+
+                2
+            )
+
+        # =================================================
+        # RS ACCELERATION
+        # =================================================
+
+        try:
+
+            rs_acceleration = (
+
+                rs_data["RS_5D"]
+
+                -
+
+                rs_data["RS_30D"]
+
+            )
+
+        except:
+
+            rs_acceleration = None
+
+        # =================================================
+        # VOLATILITY
+        # =================================================
+
+        volatility = (
+
+            combined["STOCK"]
+
+            .std()
+
+            * np.sqrt(252)
+        )
+
+        # =================================================
+        # VOL ADJUSTED RS
+        # =================================================
+
+        try:
+
+            vol_adj_rs = (
+
+                rs_data["RS_30D"]
+
+                / volatility
+            )
+
+            vol_adj_rs = round(
+                vol_adj_rs,
+                2
+            )
+
+        except:
+
+            vol_adj_rs = None
+
+        # =================================================
+        # RETURN OUTPUT
+        # =================================================
+
+        return {
+
+            "Symbol": symbol,
+
+            "RS_5D":
+                rs_data.get("RS_5D"),
+
+            "RS_15D":
+                rs_data.get("RS_15D"),
+
+            "RS_30D":
+                rs_data.get("RS_30D"),
+
+            "RS_60D":
+                rs_data.get("RS_60D"),
+
+            "RS_ACCELERATION":
+                rs_acceleration,
+
+            "VOL_ADJ_RS":
+                vol_adj_rs
+        }
+
+    except Exception as e:
+
+        print(f"❌ {symbol} -> {e}")
+
+        return None
+
+# =========================================================
+# MULTITHREADING
+# =========================================================
+
+print("\n🚀 Calculating Relative Strength...")
+
+results = []
+
+with ThreadPoolExecutor(
+    max_workers=MAX_WORKERS
+) as executor:
+
+    futures = {
+
+        executor.submit(
+            calculate_rs,
+            symbol
+        ): symbol
+
+        for symbol in symbols
+    }
+
+    total = len(futures)
+
+    for idx, future in enumerate(
+        as_completed(futures),
+        start=1
+    ):
+
+        result = future.result()
+
+        if result is not None:
+
+            results.append(result)
+
+            print(
+
+                f"{idx}/{total} | "
+
+                f"{result['Symbol']} | "
+
+                f"RS_30D: "
+
+                f"{result['RS_30D']}"
+
+            )
+
+# =========================================================
+# DATAFRAME
+# =========================================================
+
+rs_df = pd.DataFrame(results)
+
+# =========================================================
+# EMPTY CHECK
+# =========================================================
+
+if rs_df.empty:
+
+    raise Exception(
+        "❌ No valid stocks processed"
+    )
+
+# =========================================================
+# REMOVE DUPLICATES
+# =========================================================
+
+rs_df = rs_df.drop_duplicates(
+    subset=["Symbol"]
+)
+
+# =========================================================
+# SORT
+# =========================================================
+
+rs_df = rs_df.sort_values(
+
+    by=[
+
+        "RS_30D",
+
+        "RS_ACCELERATION"
+
+    ],
+
+    ascending=False
+)
+
+# =========================================================
+# SAVE
+# =========================================================
+
+rs_df.to_csv(
+    OUTPUT_FILE,
+    index=False
+)
+
+# =========================================================
+# OUTPUT
+# =========================================================
+
+print("\n✅ Relative Strength Generated")
+
+print(
+    f"\n📁 Saved to:\n"
+    f"{OUTPUT_FILE}"
+)
+
+print("\n🏆 Top Institutional RS Stocks:\n")
+
+print(rs_df.head(10))

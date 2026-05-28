@@ -76,17 +76,70 @@ df["Sector"] = df["Sector"].fillna("Unknown")
 df["Industry"] = df["Industry"].fillna("Unknown")
 
 # =========================================================
+# CREATE FINAL SCORE
+# =========================================================
+
+df["FINAL_SCORE"] = (
+
+        df["Institutional Score"]
+
+        * 20
+)
+
+# =========================================================
+# CLASSIFICATION ENGINE
+# =========================================================
+
+def classify(score):
+
+        if score >= 80:
+
+                return "STRONG_BUY"
+
+        elif score >= 60:
+
+                return "BUY"
+
+        elif score >= 40:
+
+                return "HOLD"
+
+        else:
+
+                return "SELL"
+
+df["Classification"] = (
+
+        df["FINAL_SCORE"]
+
+        .apply(classify)
+)
+
+# =========================================================
 # SIGNAL COUNTS
 # =========================================================
 
 df["BUY_COUNT"] = (
+
         df["Classification"]
-        .isin(["BUY", "STRONG_BUY"])
+
+        .isin(
+                [
+                        "BUY",
+                        "STRONG_BUY"
+                ]
+        )
+
         .astype(int)
 )
 
 df["STRONG_BUY_COUNT"] = (
-        (df["Classification"] == "STRONG_BUY")
+
+        (
+                df["Classification"]
+                == "STRONG_BUY"
+        )
+
         .astype(int)
 )
 
