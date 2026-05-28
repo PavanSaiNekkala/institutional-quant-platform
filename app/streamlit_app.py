@@ -1,18 +1,33 @@
 # =========================================================
 # FILE: app/streamlit_app.py
-# FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
+# EXECUTIVE POWERBI STYLE INSTITUTIONAL DASHBOARD
 # =========================================================
+
+import sys
+import time
+from pathlib import Path
+from datetime import datetime
+import pytz
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
-import pytz
-import time
 
-from pathlib import Path
-from datetime import datetime
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
+
+from core.live_regime import detect_market_regime
+from core.sector_models import (
+    detect_sector,
+    sector_factor_score
+)
 
 # =========================================================
 # PAGE CONFIG
@@ -26,86 +41,237 @@ st.set_page_config(
 )
 
 # =========================================================
-# GLOBAL CSS
+# POWERBI EXECUTIVE CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
-.stApp{
-    background:#F3F4F6;
-    font-family:"Segoe UI",sans-serif;
+/* =====================================================
+GLOBAL APP
+===================================================== */
+
+.stApp {
+
+    background-color: #F3F4F6;
+
+    color: #111827;
+
+    font-family: "Segoe UI", sans-serif;
 }
 
-.block-container{
-    padding-top:1rem;
-    padding-bottom:2rem;
-    max-width:100%;
+/* =====================================================
+REMOVE STREAMLIT HEADER SPACE
+===================================================== */
+
+.block-container {
+
+    padding-top: 1rem;
+
+    padding-bottom: 2rem;
+
+    max-width: 96%;
 }
 
-section[data-testid="stSidebar"]{
-    background:#111827;
-    border-right:1px solid #1F2937;
+/* =====================================================
+SIDEBAR
+===================================================== */
+
+section[data-testid="stSidebar"] {
+
+    background: #111827;
+
+    border-right: 1px solid #1F2937;
+
+    width: 320px !important;
 }
 
-section[data-testid="stSidebar"] *{
-    color:white !important;
+section[data-testid="stSidebar"] > div {
+
+    width: 320px !important;
+
+    padding-top: 1rem;
 }
 
-div[data-baseweb="base-input"]{
-    background:white !important;
-    border-radius:12px !important;
+/* =====================================================
+SIDEBAR TEXT
+===================================================== */
+
+section[data-testid="stSidebar"] * {
+
+    color: #F9FAFB !important;
 }
 
-div[data-baseweb="base-input"] > div{
-    background:white !important;
-    border:2px solid #2563EB !important;
-    border-radius:12px !important;
-    min-height:52px !important;
+/* =====================================================
+LABELS
+===================================================== */
+
+label {
+
+    color: #E5E7EB !important;
+
+    font-size: 15px !important;
+
+    font-weight: 600 !important;
 }
 
-input[type="text"]{
-    color:#111827 !important;
-    background:white !important;
-    font-size:18px !important;
-    font-weight:700 !important;
-    -webkit-text-fill-color:#111827 !important;
+/* =====================================================
+SELECT BOX
+===================================================== */
+
+div[data-baseweb="select"] > div {
+
+    background-color: #1F2937 !important;
+
+    border: 1px solid #374151 !important;
+
+    border-radius: 10px !important;
+
+    min-height: 48px !important;
+
+    color: white !important;
 }
 
-input[type="text"]::placeholder{
-    color:#6B7280 !important;
-    opacity:1 !important;
+/* =====================================================
+INPUT BOX
+===================================================== */
+
+div[data-baseweb="base-input"] > div {
+
+    background-color: #1F2937 !important;
+
+    border: 1px solid #374151 !important;
+
+    border-radius: 10px !important;
+
+    min-height: 48px !important;
+
+    color: white !important;
 }
 
-div[data-baseweb="select"] > div{
-    background:#1F2937 !important;
-    border-radius:12px !important;
+/* =====================================================
+SLIDER
+===================================================== */
+
+.stSlider {
+
+    padding-top: 10px;
 }
 
-[data-baseweb="tag"]{
-    background:#2563EB !important;
-    color:white !important;
+/* =====================================================
+MAIN TITLE
+===================================================== */
+
+.main-title {
+
+    font-size: 48px;
+
+    font-weight: 800;
+
+    color: #111827;
+
+    margin-bottom: -10px;
 }
 
-[data-testid="metric-container"]{
-    background:white;
-    border-radius:18px;
-    padding:18px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.08);
+.subtitle {
+
+    font-size: 18px;
+
+    color: #6B7280;
 }
 
-.element-container:has(.js-plotly-plot){
-    background:white;
-    border-radius:18px;
-    padding:12px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.08);
-    margin-bottom:18px;
+/* =====================================================
+KPI CARDS
+===================================================== */
+
+.kpi-card {
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 1.5rem;
+
+    border-left: 6px solid #2563EB;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.08);
+
+    transition: 0.2s;
 }
 
-[data-testid="stDataFrame"]{
-    background:white;
-    border-radius:18px;
-    padding:10px;
+.kpi-card:hover {
+
+    transform: translateY(-3px);
+}
+
+.kpi-title {
+
+    font-size: 15px;
+
+    color: #6B7280;
+
+    margin-bottom: 10px;
+}
+
+.kpi-value {
+
+    font-size: 40px;
+
+    font-weight: 800;
+
+    color: #111827;
+}
+
+/* =====================================================
+STATUS CARD
+===================================================== */
+
+.status-card {
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 1.5rem;
+
+    border-left: 6px solid #10B981;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* =====================================================
+TABLE
+===================================================== */
+
+.stDataFrame {
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    border: 1px solid #E5E7EB;
+
+    background: white;
+}
+
+/* =====================================================
+CHART CONTAINER
+===================================================== */
+
+.element-container:has(.js-plotly-plot) {
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 1rem;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,0.08);
+
+    margin-bottom: 1rem;
 }
 
 </style>
@@ -115,94 +281,74 @@ div[data-baseweb="select"] > div{
 # HEADER
 # =========================================================
 
-india = pytz.timezone("Asia/Kolkata")
+st.markdown("""
+<div class="main-title">
+📊 Institutional Quant Platform
+</div>
 
-st.markdown(f"""
-<div style="
-    background:
-    linear-gradient(
-        135deg,
-        #0F172A,
-        #111827
-    );
-    border-radius:24px;
-    padding:24px;
-    margin-bottom:18px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.18);
-">
-
-    <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        flex-wrap:wrap;
-    ">
-
-        <div>
-
-            <div style="
-                font-size:42px;
-                font-weight:900;
-                color:white;
-            ">
-                📊 Institutional Quant Platform
-            </div>
-
-            <div style="
-                color:#CBD5E1;
-                margin-top:6px;
-                font-size:16px;
-            ">
-                Enterprise Institutional Analytics Dashboard
-            </div>
-
-            <div style="
-                color:#94A3B8;
-                margin-top:10px;
-                font-size:12px;
-                font-weight:700;
-            ">
-                Updated:
-                {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
-            </div>
-
-        </div>
-
-        <div style="
-            background:#10B981;
-            color:white;
-            padding:10px 18px;
-            border-radius:12px;
-            font-weight:900;
-            font-size:13px;
-        ">
-            LIVE NSE ENGINE
-        </div>
-
-    </div>
-
+<div class="subtitle">
+Executive Institutional Analytics Dashboard
 </div>
 """, unsafe_allow_html=True)
+
+india_tz = pytz.timezone("Asia/Kolkata")
+
+current_time = datetime.now(india_tz)
+
+st.caption(
+    f"Updated: {current_time.strftime('%d-%m-%Y %I:%M:%S %p IST')}"
+)
+
+st.markdown("---")
+
+# =========================================================
+# MARKET REGIME
+# =========================================================
+
+@st.cache_data(ttl=1800)
+def cached_regime():
+
+    return detect_market_regime()
+
+regime = cached_regime()
+
+# =========================================================
+# INSTITUTIONAL COLOR MAP
+# =========================================================
+
+signal_colors = {
+
+    "STRONG_BUY": "#006400",
+    "BUY": "#32CD32",
+    "WATCH": "#FF8C00",
+    "AVOID": "#DC2626"
+}
 
 # =========================================================
 # LOAD STOCKS
 # =========================================================
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+universe_path = (
+    ROOT_DIR
+    / "data"
+    / "valid_stocks.xlsx"
+)
 
-excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
-
-universe_df = pd.read_excel(excel_path)
+universe_df = pd.read_excel(universe_path)
 
 stocks = (
     universe_df.iloc[:, 0]
     .dropna()
     .astype(str)
     .str.upper()
+    .unique()
     .tolist()
 )
 
-stocks = [s for s in stocks if ".NS" in s]
+stocks = [
+    s for s in stocks
+    if s.endswith(".NS")
+]
 
 stocks = list(dict.fromkeys(stocks))
 
@@ -212,495 +358,323 @@ stocks = list(dict.fromkeys(stocks))
 
 with st.sidebar:
 
-    st.markdown("""
-    <div style="
-        font-size:32px;
-        font-weight:900;
-        margin-bottom:12px;
-    ">
-        ⚙️ Dashboard Controls
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("## ⚙️ Dashboard Controls")
 
     st.markdown("---")
 
-    signal_filter = st.multiselect(
-        "📈 Trade Signal Filter",
-        [
-            "STRONG_BUY",
-            "BUY",
-            "WATCH",
-            "HOLD",
-            "AVOID"
-        ]
-    )
+    with st.form("control_form"):
 
-    min_score = st.slider(
-        "Minimum Institutional Score",
-        0,
-        100,
-        60
-    )
+        top_n = st.slider(
+            "Stocks To Analyze",
+            min_value=100,
+            max_value=min(len(stocks), 3000),
+            value=300,
+            step=25
+        )
 
-    search_stock = st.text_input(
-        "Search Stock",
-        placeholder="Type stock name..."
-    )
+        signal_filter = st.selectbox(
+            "Trade Signal",
+            [
+                "All",
+                "STRONG_BUY",
+                "BUY",
+                "WATCH",
+                "AVOID"
+            ]
+        )
 
-    if search_stock:
+        min_score = st.slider(
+            "Minimum Institutional Score",
+            min_value=0,
+            max_value=100,
+            value=60
+        )
 
-        matches = [
-            s for s in stocks
-            if search_stock.upper() in s.upper()
-        ][:10]
+        search_stock = st.text_input(
+            "Search Stock"
+        )
 
-        if matches:
-
-            st.markdown("### 🔍 Matching Stocks")
-
-            for m in matches:
-
-                st.markdown(
-                    f"""
-                    <div style="
-                        background:#1F2937;
-                        padding:10px;
-                        border-radius:10px;
-                        margin-bottom:8px;
-                        border-left:4px solid #10B981;
-                        font-weight:700;
-                    ">
-                    {m}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        submitted = st.form_submit_button(
+            "🚀 Apply Filters"
+        )
 
     st.markdown("---")
 
-    st.success(
-        f"✅ NSE Universe Loaded: {len(stocks)}"
-    )
-
-# =========================================================
-# COLORS
-# =========================================================
-
-signal_colors = {
-    "STRONG_BUY": "#006400",
-    "BUY": "#32CD32",
-    "WATCH": "#F59E0B",
-    "HOLD": "#3B82F6",
-    "AVOID": "#DC2626"
-}
+    st.success("AI Quant Engine Enabled")
+    st.info("Live Regime Detection Enabled")
+    st.info("Sector Rotation Enabled")
 
 # =========================================================
 # SAFE ROUND
 # =========================================================
 
-def safe_round(x, n=2):
+def safe_round(value, digits=2):
 
     try:
-        return round(float(x), n)
+
+        if value is None:
+            return 0
+
+        if pd.isna(value):
+            return 0
+
+        if np.isinf(value):
+            return 0
+
+        return round(float(value), digits)
+
     except:
         return 0
 
 # =========================================================
-# INFO
+# ANALYZE STOCK
 # =========================================================
 
-st.info(
-    "⚡ Running institutional analysis across full NSE universe..."
-)
+def analyze_stock(symbol, regime):
+
+    try:
+
+        data = yf.download(
+            symbol,
+            period="3mo",
+            interval="1d",
+            auto_adjust=True,
+            progress=False,
+            threads=False
+        )
+
+        if data.empty:
+            return None
+
+        close = data["Close"]
+
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+
+        close = close.dropna()
+
+        if len(close) < 40:
+            return None
+
+        returns = close.pct_change().dropna()
+
+        momentum = (
+            close.iloc[-1]
+            / close.iloc[-20]
+        ) - 1
+
+        volatility = (
+            returns.std()
+            * np.sqrt(252)
+        )
+
+        sharpe = (
+            returns.mean()
+            / max(returns.std(), 0.0001)
+        ) * np.sqrt(252)
+
+        total_return = (
+            close.iloc[-1]
+            / close.iloc[0]
+        ) - 1
+
+        sma20 = (
+            close.rolling(20)
+            .mean()
+            .iloc[-1]
+        )
+
+        sma50 = (
+            close.rolling(40)
+            .mean()
+            .iloc[-1]
+        )
+
+        trend_strength = sma20 / sma50
+
+        cmp = close.iloc[-1]
+
+        recent_volatility = (
+            close.pct_change()
+            .rolling(14)
+            .std()
+            .iloc[-1]
+        )
+
+        if pd.isna(recent_volatility):
+            recent_volatility = 0.02
+
+        stop_loss = cmp * (
+            1 - recent_volatility * 2
+        )
+
+        target_price = cmp * (
+            1 + recent_volatility * 4
+        )
+
+        risk_reward = (
+            (target_price - cmp)
+            / max(
+                cmp - stop_loss,
+                0.0001
+            )
+        )
+
+        sector = detect_sector(symbol)
+
+        final_score = sector_factor_score(
+            sector=sector,
+            momentum=momentum,
+            sharpe=sharpe,
+            trend_strength=trend_strength,
+            total_return=total_return,
+            volatility=volatility,
+            risk_reward=risk_reward,
+            regime=regime
+        )
+
+        if final_score >= 1.20:
+
+            classification = "STRONG_BUY"
+
+        elif final_score >= 0.80:
+
+            classification = "BUY"
+
+        elif final_score >= 0.50:
+
+            classification = "WATCH"
+
+        else:
+
+            classification = "AVOID"
+
+        return {
+
+            "Symbol": symbol,
+            "Sector": sector,
+            "CMP": safe_round(cmp),
+            "Momentum": safe_round(momentum * 100),
+            "Volatility": safe_round(volatility),
+            "Sharpe": safe_round(sharpe),
+            "Final Score": safe_round(final_score),
+            "Risk Reward": safe_round(risk_reward),
+            "Classification": classification
+        }
+
+    except:
+
+        return None
 
 # =========================================================
-# ANALYSIS ENGINE
+# CACHED ANALYSIS ENGINE
 # =========================================================
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def run_analysis(stock_list):
+@st.cache_data(show_spinner=False, ttl=3600)
+def run_analysis(stock_list, regime):
 
-    progress_bar = st.progress(0)
+    ranking_data = []
 
-    status_placeholder = st.empty()
+    processed = 0
 
-    results = []
+    success = 0
 
-    failed_stocks = []
-
-    total = len(stock_list)
-
-    completed = 0
+    failed = 0
 
     start_time = time.time()
 
-    batch_size = 25
+    progress_bar = st.progress(0)
 
-    for i in range(0, total, batch_size):
+    status_box = st.empty()
 
-        batch = stock_list[i:i + batch_size]
+    with ThreadPoolExecutor(max_workers=12) as executor:
 
-        try:
+        futures = {
 
-            data = yf.download(
-                tickers=batch,
-                period="6mo",
-                interval="1d",
-                auto_adjust=True,
-                progress=False,
-                threads=False,
-                group_by="ticker"
-            )
+            executor.submit(
+                analyze_stock,
+                symbol,
+                regime
+            ): symbol
 
-        except:
+            for symbol in stock_list
+        }
 
-            failed_stocks.extend(batch)
-            continue
+        for future in as_completed(futures):
 
-        for symbol in batch:
+            processed += 1
 
-            completed += 1
+            symbol = futures[future]
 
             try:
 
-                if symbol not in data.columns.levels[0]:
+                result = future.result()
 
-                    failed_stocks.append(symbol)
-                    continue
+                if result:
 
-                close = data[symbol]["Close"].dropna()
+                    ranking_data.append(result)
 
-                if len(close) < 40:
-
-                    failed_stocks.append(symbol)
-                    continue
-
-                momentum = (
-                    close.iloc[-1]
-                    / close.iloc[-20]
-                ) - 1
-
-                returns = close.pct_change().dropna()
-
-                sharpe = (
-                    returns.mean()
-                    / max(returns.std(), 0.0001)
-                ) * np.sqrt(252)
-
-                score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
-                )
-
-                # =====================================================
-                # SIGNAL CLASSIFICATION
-                # =====================================================
-
-                if score >= 1.5:
-                    signal = "STRONG_BUY"
-
-                elif score >= 1.0:
-                    signal = "BUY"
-
-                elif score >= 0.6:
-                    signal = "WATCH"
-
-                elif score >= 0.2:
-                    signal = "HOLD"
-
-                else:
-                    signal = "AVOID"
-
-                # =====================================================
-                # EXPECTED RETURNS MODEL
-                # =====================================================
-
-                volatility = returns.std() * np.sqrt(252)
-
-                base_strength = (
-                    momentum * 100
-                    + sharpe * 10
-                    + score * 15
-                )
-
-                expected_5d = max(
-                    min(base_strength * 0.12, 12),
-                    -8
-                )
-
-                expected_15d = max(
-                    min(base_strength * 0.22, 22),
-                    -15
-                )
-
-                expected_30d = max(
-                    min(base_strength * 0.35, 35),
-                    -25
-                )
-
-                if signal == "STRONG_BUY":
-
-                    hold_days = 30
-
-                elif signal == "BUY":
-
-                    hold_days = 20
-
-                elif signal == "WATCH":
-
-                    hold_days = 10
-
-                elif signal == "HOLD":
-
-                    hold_days = 5
+                    success += 1
 
                 else:
 
-                    hold_days = 2
-
-                if volatility > 0.60:
-
-                    expected_5d *= 0.7
-                    expected_15d *= 0.7
-                    expected_30d *= 0.7
-
-                # =====================================================
-                # APPEND
-                # =====================================================
-
-                results.append({
-
-                    "Symbol": symbol,
-
-                    "CMP": safe_round(close.iloc[-1]),
-
-                    "Momentum": safe_round(momentum * 100),
-
-                    "Sharpe": safe_round(sharpe),
-
-                    "Final Score": safe_round(score),
-
-                    "Classification": signal,
-
-                    "Expected Return 5D %":
-                    safe_round(expected_5d),
-
-                    "Expected Return 15D %":
-                    safe_round(expected_15d),
-
-                    "Expected Return 30D %":
-                    safe_round(expected_30d),
-
-                    "Suggested Hold Days":
-                    hold_days
-
-                })
+                    failed += 1
 
             except:
 
-                failed_stocks.append(symbol)
-
-            # =====================================================
-            # PROGRESS
-            # =====================================================
-
-            completion_pct = round(
-                (completed / total) * 100,
-                1
-            )
-
-            elapsed = (
-                time.time() - start_time
-            ) / 60
-
-            estimated_total = (
-                elapsed / max(completed, 1)
-            ) * total
-
-            remaining_minutes = round(
-                max(estimated_total - elapsed, 0),
-                1
-            )
+                failed += 1
 
             progress_bar.progress(
-                completed / total
+                processed / len(stock_list)
             )
 
-            if completed % 10 == 0:
+            remaining = (
+                (
+                    time.time()
+                    - start_time
+                ) / max(processed, 1)
+            ) * (
+                len(stock_list) - processed
+            )
 
-                status_html = f"""
-                <div style="
-                    background:white;
-                    border-radius:22px;
-                    padding:22px;
-                    margin-top:14px;
-                    box-shadow:0 10px 28px rgba(0,0,0,0.08);
-                ">
+            status_box.markdown(
+                f"""
+                <div class="status-card">
 
-                    <div style="
-                        display:grid;
-                        grid-template-columns:
-                        repeat(auto-fit,minmax(180px,1fr));
-                        gap:14px;
-                        margin-bottom:18px;
-                    ">
+                <b>Processing:</b> {symbol}<br><br>
 
-                        <div style="
-                            background:#ECFDF5;
-                            border-left:6px solid #10B981;
-                            border-radius:16px;
-                            padding:16px;
-                        ">
+                ✅ Success: {success}<br>
 
-                            <div style="
-                                color:#047857;
-                                font-size:12px;
-                                font-weight:800;
-                            ">
-                                COMPLETED
-                            </div>
+                ❌ Failed: {failed}<br>
 
-                            <div style="
-                                font-size:28px;
-                                font-weight:900;
-                                color:#065F46;
-                                margin-top:6px;
-                            ">
-                                {completed}
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#FEF2F2;
-                            border-left:6px solid #DC2626;
-                            border-radius:16px;
-                            padding:16px;
-                        ">
-
-                            <div style="
-                                color:#B91C1C;
-                                font-size:12px;
-                                font-weight:800;
-                            ">
-                                FAILED
-                            </div>
-
-                            <div style="
-                                font-size:28px;
-                                font-weight:900;
-                                color:#991B1B;
-                                margin-top:6px;
-                            ">
-                                {len(set(failed_stocks))}
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#EFF6FF;
-                            border-left:6px solid #2563EB;
-                            border-radius:16px;
-                            padding:16px;
-                        ">
-
-                            <div style="
-                                color:#1D4ED8;
-                                font-size:12px;
-                                font-weight:800;
-                            ">
-                                UNIVERSE
-                            </div>
-
-                            <div style="
-                                font-size:28px;
-                                font-weight:900;
-                                color:#1E3A8A;
-                                margin-top:6px;
-                            ">
-                                {total}
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#FFF7ED;
-                            border-left:6px solid #F59E0B;
-                            border-radius:16px;
-                            padding:16px;
-                        ">
-
-                            <div style="
-                                color:#D97706;
-                                font-size:12px;
-                                font-weight:800;
-                            ">
-                                ETA
-                            </div>
-
-                            <div style="
-                                font-size:28px;
-                                font-weight:900;
-                                color:#92400E;
-                                margin-top:6px;
-                            ">
-                                {remaining_minutes}m
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        width:100%;
-                        height:12px;
-                        background:#E5E7EB;
-                        border-radius:999px;
-                        overflow:hidden;
-                    ">
-
-                        <div style="
-                            width:{completion_pct}%;
-                            height:100%;
-                            background:
-                            linear-gradient(
-                                90deg,
-                                #2563EB,
-                                #10B981
-                            );
-                        ">
-                        </div>
-
-                    </div>
+                ⏳ Remaining: {int(remaining)} sec
 
                 </div>
-                """
-
-                status_placeholder.markdown(
-                    status_html,
-                    unsafe_allow_html=True
-                )
+                """,
+                unsafe_allow_html=True
+            )
 
     progress_bar.empty()
 
-    status_placeholder.empty()
+    status_box.empty()
 
-    return pd.DataFrame(results), failed_stocks
+    return pd.DataFrame(ranking_data)
 
 # =========================================================
-# RUN ANALYSIS
+# RESULTS
 # =========================================================
 
-results, failed_stocks = run_analysis(stocks)
+raw_results = run_analysis(
+    stocks[:top_n],
+    regime
+)
 
-if results.empty:
+if raw_results.empty:
 
-    st.error("No valid results generated.")
+    st.error("No valid stocks analyzed.")
     st.stop()
 
-# =========================================================
-# FILTERS
-# =========================================================
+results = raw_results.copy()
 
 results["Percentile"] = (
     results["Final Score"] * 100
@@ -710,11 +684,10 @@ results = results[
     results["Percentile"] >= min_score
 ]
 
-if signal_filter:
+if signal_filter != "All":
 
     results = results[
-        results["Classification"]
-        .isin(signal_filter)
+        results["Classification"] == signal_filter
     ]
 
 if search_stock:
@@ -727,141 +700,267 @@ if search_stock:
         )
     ]
 
+results = results.sort_values(
+    by="Final Score",
+    ascending=False
+)
+
 # =========================================================
 # KPI SECTION
 # =========================================================
 
-st.markdown("<br>", unsafe_allow_html=True)
-
 k1, k2, k3, k4 = st.columns(4)
 
 with k1:
-    st.metric("NSE Universe", len(stocks))
+
+    st.metric(
+        "Universe Size",
+        len(results)
+    )
 
 with k2:
-    st.metric("Processed Stocks", len(results))
+
+    st.metric(
+        "Avg Institutional Score",
+        safe_round(
+            results["Final Score"].mean() * 100
+        )
+    )
 
 with k3:
-    st.metric("Filtered Opportunities", len(results))
+
+    st.metric(
+        "Strong Buy Opportunities",
+        len(
+            results[
+                results["Classification"]
+                == "STRONG_BUY"
+            ]
+        )
+    )
 
 with k4:
-    st.metric("Failed Stocks", len(set(failed_stocks)))
+
+    st.metric(
+        "Market Regime",
+        regime
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================================================
-# CHARTS
+# CHARTS ROW
 # =========================================================
 
-left, right = st.columns(2)
+chart1, chart2 = st.columns(2)
 
-with left:
+# =========================================================
+# SIGNAL DISTRIBUTION
+# =========================================================
 
-    signal_data = (
+with chart1:
+
+    signal_counts = (
         results["Classification"]
         .value_counts()
         .reset_index()
     )
 
-    signal_data.columns = [
+    signal_counts.columns = [
         "Signal",
         "Count"
     ]
 
-    fig1 = px.pie(
-        signal_data,
+    pie_fig = px.pie(
+
+        signal_counts,
+
         names="Signal",
+
         values="Count",
-        hole=0.6,
+
+        hole=0.55,
+
+        title="Signal Distribution",
+
+        template="plotly_white",
+
         color="Signal",
-        color_discrete_map=signal_colors,
-        title="Signal Distribution"
+
+        color_discrete_map=signal_colors
     )
 
-    fig1.update_layout(height=420)
+    pie_fig.update_layout(
+        height=450
+    )
 
     st.plotly_chart(
-        fig1,
-        use_container_width=True
-    )
-
-with right:
-
-    fig2 = px.scatter(
-        results,
-        x="Momentum",
-        y="Sharpe",
-        color="Classification",
-        size="Final Score",
-        hover_name="Symbol",
-        color_discrete_map=signal_colors,
-        title="Risk Reward Opportunity Matrix"
-    )
-
-    fig2.update_layout(height=420)
-
-    st.plotly_chart(
-        fig2,
+        pie_fig,
         use_container_width=True
     )
 
 # =========================================================
-# TOP PICKS
+# SECTOR PERFORMANCE
 # =========================================================
 
-st.markdown("## 🚀 Top Institutional Opportunities")
+with chart2:
 
-top_picks = results.sort_values(
-    "Final Score",
-    ascending=False
-).head(10)
+    sector_perf = (
+        results
+        .groupby("Sector")["Final Score"]
+        .mean()
+        .sort_values(ascending=False)
+        .reset_index()
+    )
+
+    sector_fig = px.bar(
+
+        sector_perf.head(10),
+
+        x="Sector",
+
+        y="Final Score",
+
+        color="Final Score",
+
+        title="Top Sector Performance",
+
+        template="plotly_white",
+
+        color_continuous_scale=[
+            "#FF8C00",
+            "#32CD32",
+            "#006400"
+        ]
+    )
+
+    sector_fig.update_layout(
+        height=450
+    )
+
+    st.plotly_chart(
+        sector_fig,
+        use_container_width=True
+    )
+
+# =========================================================
+# TABLE
+# =========================================================
+
+st.markdown("## 🏦 Top Institutional Rankings")
 
 st.dataframe(
-
-    top_picks[[
-
-        "Symbol",
-        "Classification",
-        "Final Score",
-        "Expected Return 5D %",
-        "Expected Return 15D %",
-        "Expected Return 30D %",
-        "Suggested Hold Days"
-
-    ]],
-
+    results.head(100),
     use_container_width=True,
-    height=420
-
+    height=650
 )
 
 # =========================================================
-# FINAL TABLE
+# RISK REWARD MATRIX
 # =========================================================
 
-st.markdown("## 🏦 Institutional Rankings")
+st.markdown("## 📈 Risk Reward Opportunity Matrix")
 
-display_df = results.sort_values(
-    "Final Score",
-    ascending=False
+scatter_df = results.head(100).copy()
+
+scatter_df["Bubble Size"] = (
+    scatter_df["Momentum"]
+    .abs()
+    .fillna(0)
 )
 
-st.dataframe(
+scatter_df["Bubble Size"] = (
+    scatter_df["Bubble Size"] * 2
+) + 10
 
-    display_df[[
+scatter = px.scatter(
 
-        "Symbol",
-        "CMP",
-        "Classification",
+    scatter_df,
+
+    x="Risk Reward",
+
+    y="Final Score",
+
+    color="Classification",
+
+    size="Bubble Size",
+
+    hover_name="Symbol",
+
+    hover_data=[
+        "Sector",
         "Momentum",
-        "Sharpe",
-        "Final Score",
-        "Expected Return 5D %",
-        "Expected Return 15D %",
-        "Expected Return 30D %",
-        "Suggested Hold Days"
+        "Sharpe"
+    ],
 
-    ]],
+    template="plotly_white",
 
-    use_container_width=True,
+    color_discrete_map=signal_colors
+)
+
+scatter.update_layout(
     height=700
+)
 
+st.plotly_chart(
+    scatter,
+    use_container_width=True
+)
+
+# =========================================================
+# TOP STOCKS BAR CHART
+# =========================================================
+
+st.markdown("## 🚀 Top Stocks By Institutional Score")
+
+top_stocks = results.head(15)
+
+top_fig = px.bar(
+
+    top_stocks,
+
+    x="Symbol",
+
+    y="Final Score",
+
+    color="Classification",
+
+    template="plotly_white",
+
+    color_discrete_map=signal_colors
+)
+
+top_fig.update_layout(
+    height=550
+)
+
+st.plotly_chart(
+    top_fig,
+    use_container_width=True
+)
+
+# =========================================================
+# DOWNLOAD CSV
+# =========================================================
+
+csv = results.to_csv(index=False)
+
+st.download_button(
+    label="📥 Download Rankings CSV",
+    data=csv,
+    file_name="institutional_rankings.csv",
+    mime="text/csv"
+)
+
+# =========================================================
+# FOOTER
+# =========================================================
+
+st.markdown("---")
+
+st.caption(
+    """
+    Institutional Quantamental Intelligence Platform •
+    Executive Analytics Dashboard • Institutional Research Engine
+    """
 )
