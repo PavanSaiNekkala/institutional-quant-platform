@@ -1,6 +1,5 @@
 # =========================================================
-# FILE: app/streamlit_app.py
-# FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
+# ENTERPRISE INSTITUTIONAL QUANT PLATFORM
 # =========================================================
 
 import streamlit as st
@@ -8,6 +7,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import plotly.express as px
+import plotly.graph_objects as go
 import pytz
 
 from pathlib import Path
@@ -25,15 +25,15 @@ st.set_page_config(
 )
 
 # =========================================================
-# GLOBAL CSS
+# POWERBI + BLOOMBERG STYLE CSS
 # =========================================================
 
 st.markdown("""
 <style>
 
 .stApp{
-    background:#F3F4F6;
-    font-family:"Segoe UI",sans-serif;
+    background:#F4F7FB;
+    font-family:'Segoe UI',sans-serif;
 }
 
 .block-container{
@@ -43,33 +43,53 @@ st.markdown("""
 }
 
 section[data-testid="stSidebar"]{
-    background:#111827;
-    border-right:1px solid #1F2937;
+    background:#0F172A;
+    border-right:1px solid #1E293B;
 }
 
 section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-[data-testid="metric-container"]{
+.metric-card{
     background:white;
+    padding:22px;
     border-radius:18px;
-    padding:14px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    border-left:6px solid #2563EB;
 }
 
-.element-container:has(.js-plotly-plot){
+.metric-title{
+    font-size:15px;
+    color:#64748B;
+    font-weight:600;
+}
+
+.metric-value{
+    font-size:34px;
+    font-weight:800;
+    color:#111827;
+}
+
+.glass-card{
     background:white;
-    border-radius:18px;
-    padding:10px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.06);
     margin-bottom:16px;
 }
 
-[data-testid="stDataFrame"]{
-    background:white;
-    border-radius:18px;
-    padding:10px;
+.progress-container{
+    background:#E5E7EB;
+    border-radius:12px;
+    overflow:hidden;
+    height:20px;
+}
+
+.progress-bar{
+    height:20px;
+    border-radius:12px;
+    background:linear-gradient(90deg,#2563EB,#06B6D4);
 }
 
 </style>
@@ -81,9 +101,9 @@ section[data-testid="stSidebar"] *{
 
 st.markdown("""
 <div style="
-    font-size:42px;
-    font-weight:900;
-    color:#111827;
+font-size:48px;
+font-weight:900;
+color:#0F172A;
 ">
 📊 Institutional Quant Platform
 </div>
@@ -91,11 +111,10 @@ st.markdown("""
 
 st.markdown("""
 <div style="
-    font-size:16px;
-    color:#111827;
-    font-weight:700;
-    margin-top:6px;
-    margin-bottom:12px;
+font-size:18px;
+font-weight:600;
+color:#475569;
+margin-bottom:15px;
 ">
 Enterprise Institutional Analytics Dashboard
 </div>
@@ -110,7 +129,7 @@ st.caption(
 st.markdown("---")
 
 # =========================================================
-# LOAD STOCKS
+# LOAD STOCK UNIVERSE
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -141,13 +160,11 @@ stocks = list(dict.fromkeys(stocks))
 
 with st.sidebar:
 
-    st.markdown("## ⚙️ Dashboard Controls")
-
-    st.markdown("---")
+    st.markdown("## ⚙️ Institutional Controls")
 
     signal_filter = st.multiselect(
-        "📈 Trade Signal Filter",
-        options=[
+        "Trade Signal",
+        [
             "STRONG_BUY",
             "BUY",
             "WATCH",
@@ -157,46 +174,46 @@ with st.sidebar:
     )
 
     min_score = st.slider(
-        "Minimum Institutional Score",
+        "Minimum Score",
         0,
         100,
         60
     )
 
     search_stock = st.text_input(
-        "Search Stock",
-        placeholder="Type stock name..."
+        "Search Stock"
     )
 
     st.markdown("---")
 
     st.success(
-        f"✅ NSE Universe Loaded: {len(stocks)}"
+        f"Universe Loaded: {len(stocks)}"
     )
 
 # =========================================================
-# COLORS
+# SIGNAL COLORS
 # =========================================================
 
 signal_colors = {
-    "STRONG_BUY": "#006400",
-    "BUY": "#32CD32",
-    "WATCH": "#F59E0B",
-    "HOLD": "#3B82F6",
-    "AVOID": "#DC2626"
+
+    "STRONG_BUY":"#006400",
+
+    "BUY":"#32CD32",
+
+    "WATCH":"#F59E0B",
+
+    "HOLD":"#2563EB",
+
+    "AVOID":"#DC2626"
 }
 
 # =========================================================
-# SAFE ROUND
+# PROGRESS BAR
 # =========================================================
 
-def safe_round(x, n=2):
+progress_placeholder = st.empty()
 
-    try:
-        return round(float(x), n)
-
-    except:
-        return 0
+progress_bar = st.progress(0)
 
 # =========================================================
 # ANALYSIS ENGINE
@@ -207,64 +224,50 @@ def run_analysis(stock_list):
 
     results = []
 
-    failed_stocks = set()
-
     total = len(stock_list)
 
-    completed = 0
+    processed = 0
 
     batch_size = 50
 
-    status_placeholder = st.empty()
-
-    status_placeholder.info(
-        "⚡ Running institutional analysis..."
-    )
-
     for i in range(0, total, batch_size):
 
-        batch = stock_list[i:i + batch_size]
+        batch = stock_list[i:i+batch_size]
 
         try:
 
             data = yf.download(
+
                 tickers=batch,
+
                 period="6mo",
+
                 interval="1d",
+
                 auto_adjust=True,
+
                 progress=False,
+
                 threads=False,
+
                 group_by="ticker"
             )
 
-        except Exception:
-
-            failed_stocks.update(batch)
+        except:
 
             continue
 
-        for symbol in batch:
-
-            completed += 1
+        for stock in batch:
 
             try:
 
-                if symbol not in data.columns.levels[0]:
+                close = data[stock]["Close"].dropna()
 
-                    failed_stocks.add(symbol)
+                high = data[stock]["High"].dropna()
 
-                    continue
-
-                close = data[symbol]["Close"].dropna()
-
-                high = data[symbol]["High"].dropna()
-
-                low = data[symbol]["Low"].dropna()
+                low = data[stock]["Low"].dropna()
 
                 if len(close) < 40:
-
-                    failed_stocks.add(symbol)
-
                     continue
 
                 returns = close.pct_change().dropna()
@@ -278,37 +281,21 @@ def run_analysis(stock_list):
                 sharpe = (
                     returns.mean()
                     /
-                    max(returns.std(), 0.0001)
+                    max(returns.std(),0.0001)
                 ) * np.sqrt(252)
-
-                # =====================================================
-                # ATR
-                # =====================================================
 
                 tr1 = high - low
 
-                tr2 = abs(
-                    high - close.shift(1)
-                )
+                tr2 = abs(high - close.shift(1))
 
-                tr3 = abs(
-                    low - close.shift(1)
-                )
+                tr3 = abs(low - close.shift(1))
 
                 tr = pd.concat(
-                    [tr1, tr2, tr3],
+                    [tr1,tr2,tr3],
                     axis=1
                 ).max(axis=1)
 
                 atr = tr.rolling(14).mean().iloc[-1]
-
-                if pd.isna(atr) or atr <= 0:
-
-                    atr = close.iloc[-1] * 0.02
-
-                # =====================================================
-                # SCORE
-                # =====================================================
 
                 score = (
                     momentum * 0.6
@@ -316,225 +303,107 @@ def run_analysis(stock_list):
                     sharpe * 0.4
                 )
 
-                # =====================================================
-                # SIGNAL
-                # =====================================================
+                percentile = min(
+                    max(
+                        score * 100,
+                        0
+                    ),
+                    100
+                )
 
                 if score >= 1.5:
-
                     signal = "STRONG_BUY"
 
                 elif score >= 1.0:
-
                     signal = "BUY"
 
                 elif score >= 0.6:
-
                     signal = "WATCH"
 
                 elif score >= 0.2:
-
                     signal = "HOLD"
 
                 else:
-
                     signal = "AVOID"
 
-                # =====================================================
-                # PRICE
-                # =====================================================
-
                 cmp_price = close.iloc[-1]
-
-                # =====================================================
-                # STOPLOSS
-                # =====================================================
 
                 stop_loss = round(
                     cmp_price - (atr * 2),
                     2
                 )
 
-                # =====================================================
-                # TARGET
-                # =====================================================
-
                 target = round(
                     cmp_price + (atr * 3),
                     2
                 )
 
-                # =====================================================
-                # RR RATIO
-                # =====================================================
-
-                risk = max(
-                    cmp_price - stop_loss,
-                    1
-                )
-
-                reward = max(
-                    target - cmp_price,
-                    0
-                )
-
-                rr_ratio = round(
-                    reward / risk,
-                    2
-                )
-
-                # =====================================================
-                # ESTIMATED DAYS
-                # =====================================================
-
-                expected_daily_move = atr * 0.6
-
-                estimated_days = round(
-
-                    max(
-                        1,
-                        reward /
-                        max(expected_daily_move, 1)
+                rr = round(
+                    (
+                        target - cmp_price
                     )
-
-                )
-
-                # =====================================================
-                # UPSIDE / DOWNSIDE
-                # =====================================================
-
-                upside_pct = round(
-                    (
-                        (
-                            target - cmp_price
-                        )
-                        /
-                        cmp_price
-                    ) * 100,
+                    /
+                    max(
+                        cmp_price - stop_loss,
+                        1
+                    ),
                     2
                 )
-
-                downside_pct = round(
-                    (
-                        (
-                            cmp_price - stop_loss
-                        )
-                        /
-                        cmp_price
-                    ) * 100,
-                    2
-                )
-
-                # =====================================================
-                # TRADE QUALITY
-                # =====================================================
-
-                if rr_ratio >= 3:
-
-                    trade_quality = "EXCELLENT"
-
-                elif rr_ratio >= 2:
-
-                    trade_quality = "STRONG"
-
-                elif rr_ratio >= 1:
-
-                    trade_quality = "MODERATE"
-
-                else:
-
-                    trade_quality = "WEAK"
-
-                # =====================================================
-                # APPEND
-                # =====================================================
 
                 results.append({
 
-                    "Symbol": symbol,
+                    "Symbol": stock,
 
-                    "CMP": round(cmp_price, 2),
+                    "CMP": round(cmp_price,2),
 
-                    "Momentum": round(
-                        momentum * 100,
-                        2
-                    ),
+                    "Momentum": round(momentum*100,2),
 
-                    "Sharpe": round(
-                        sharpe,
-                        2
-                    ),
+                    "Sharpe": round(sharpe,2),
 
-                    "Final Score": round(
-                        score,
-                        2
-                    ),
+                    "Final Score": round(score,2),
+
+                    "Percentile": round(percentile,2),
 
                     "Classification": signal,
 
-                    "ATR": round(
-                        atr,
-                        2
-                    ),
-
-                    "STOP_LOSS": stop_loss,
+                    "ATR": round(atr,2),
 
                     "TARGET": target,
 
-                    "UPSIDE_%": upside_pct,
+                    "STOP_LOSS": stop_loss,
 
-                    "DOWNSIDE_%": downside_pct,
-
-                    "RR_RATIO": rr_ratio,
-
-                    "ESTIMATED_DAYS": estimated_days,
-
-                    "TRADE_QUALITY": trade_quality
+                    "RR_RATIO": rr
 
                 })
 
-            except Exception:
+            except:
+                pass
 
-                failed_stocks.add(symbol)
+            processed += 1
 
-        completion_pct = round(
-            (completed / total) * 100,
-            1
-        )
+            pct = int((processed/total)*100)
 
-        status_placeholder.caption(
-            f"Processed {completed}/{total} stocks "
-            f"({completion_pct}%)"
-        )
+            progress_bar.progress(pct)
 
-    status_placeholder.success(
-        "✅ Institutional analysis completed"
-    )
+            progress_placeholder.info(
+                f"Processing Institutional Universe: {pct}%"
+            )
 
-    return (
-        pd.DataFrame(results),
-        list(failed_stocks)
-    )
+    return pd.DataFrame(results)
 
 # =========================================================
 # RUN ANALYSIS
 # =========================================================
 
-results, failed_stocks = run_analysis(stocks)
+results = run_analysis(stocks)
 
-if results.empty:
-
-    st.error("No valid results.")
-
-    st.stop()
+progress_placeholder.success(
+    "Institutional Analysis Completed"
+)
 
 # =========================================================
 # FILTERS
 # =========================================================
-
-results["Percentile"] = (
-    results["Final Score"] * 100
-)
 
 results = results[
     results["Percentile"] >= min_score
@@ -558,72 +427,120 @@ if search_stock:
     ]
 
 # =========================================================
-# KPI CARDS
+# KPI DASHBOARD
 # =========================================================
+
+c1,c2,c3,c4 = st.columns(4)
+
+with c1:
+
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">
+        NSE Universe
+        </div>
+
+        <div class="metric-value">
+        {len(stocks)}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c2:
+
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">
+        Opportunities
+        </div>
+
+        <div class="metric-value">
+        {len(results)}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c3:
+
+    avg_score = round(
+        results["Percentile"].mean(),
+        2
+    )
+
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">
+        Avg Institutional Score
+        </div>
+
+        <div class="metric-value">
+        {avg_score}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c4:
+
+    elite = len(
+        results[
+            results["Classification"]
+            ==
+            "STRONG_BUY"
+        ]
+    )
+
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">
+        Elite Setups
+        </div>
+
+        <div class="metric-value">
+        {elite}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-k1,k2,k3,k4 = st.columns(4)
-
-with k1:
-
-    st.metric(
-        "NSE Universe",
-        len(stocks)
-    )
-
-with k2:
-
-    st.metric(
-        "Processed Stocks",
-        len(results)
-    )
-
-with k3:
-
-    st.metric(
-        "Filtered Opportunities",
-        len(results)
-    )
-
-with k4:
-
-    st.metric(
-        "Failed Stocks",
-        len(set(failed_stocks))
-    )
-
 # =========================================================
-# CHARTS
+# CHART SECTION
 # =========================================================
 
 left,right = st.columns(2)
 
 with left:
 
-    signal_data = (
+    signal_df = (
         results["Classification"]
         .value_counts()
         .reset_index()
     )
 
-    signal_data.columns = [
+    signal_df.columns = [
         "Signal",
         "Count"
     ]
 
     fig1 = px.pie(
-        signal_data,
+
+        signal_df,
+
         names="Signal",
+
         values="Count",
+
         hole=0.6,
+
         color="Signal",
+
         color_discrete_map=signal_colors,
-        title="Signal Distribution"
+
+        title="Institutional Signal Distribution"
     )
 
     fig1.update_layout(
-        height=400
+        height=450
     )
 
     st.plotly_chart(
@@ -634,18 +551,26 @@ with left:
 with right:
 
     fig2 = px.scatter(
+
         results,
+
         x="Momentum",
+
         y="Sharpe",
+
+        size="Percentile",
+
         color="Classification",
-        size="Final Score",
+
         hover_name="Symbol",
+
         color_discrete_map=signal_colors,
-        title="Risk Reward Opportunity Matrix"
+
+        title="Institutional Opportunity Matrix"
     )
 
     fig2.update_layout(
-        height=400
+        height=450
     )
 
     st.plotly_chart(
@@ -654,10 +579,73 @@ with right:
     )
 
 # =========================================================
+# TOP OPPORTUNITIES
+# =========================================================
+
+st.markdown("## 🏆 Top Institutional Opportunities")
+
+top_df = results.sort_values(
+    "Percentile",
+    ascending=False
+).head(15)
+
+bar_fig = px.bar(
+
+    top_df,
+
+    x="Symbol",
+
+    y="Percentile",
+
+    color="Classification",
+
+    color_discrete_map=signal_colors,
+
+    text="Percentile"
+)
+
+bar_fig.update_layout(
+    height=500
+)
+
+st.plotly_chart(
+    bar_fig,
+    use_container_width=True
+)
+
+# =========================================================
+# HEATMAP
+# =========================================================
+
+st.markdown("## 🔥 Institutional Heatmap")
+
+heatmap_fig = px.treemap(
+
+    top_df,
+
+    path=["Classification","Symbol"],
+
+    values="Percentile",
+
+    color="Percentile",
+
+    color_continuous_scale="RdYlGn"
+)
+
+heatmap_fig.update_layout(
+    height=600
+)
+
+st.plotly_chart(
+    heatmap_fig,
+    use_container_width=True
+)
+
+# =========================================================
 # TABLE
 # =========================================================
 
-st.markdown("## 🏦 Institutional Rankings")
+st.markdown("## 📋 Institutional Rankings")
 
 display_cols = [
 
@@ -671,45 +659,42 @@ display_cols = [
 
     "Sharpe",
 
-    "Final Score",
-
-    "ATR",
-
-    "STOP_LOSS",
+    "Percentile",
 
     "TARGET",
 
-    "UPSIDE_%",
+    "STOP_LOSS",
 
-    "DOWNSIDE_%",
-
-    "RR_RATIO",
-
-    "ESTIMATED_DAYS",
-
-    "TRADE_QUALITY"
-
-]
-
-available_cols = [
-
-    c for c in display_cols
-
-    if c in results.columns
-
+    "RR_RATIO"
 ]
 
 st.dataframe(
 
-    results[available_cols]
+    results[display_cols]
 
     .sort_values(
-        "Final Score",
+        "Percentile",
         ascending=False
     ),
 
     use_container_width=True,
 
-    height=650
+    height=700
+)
 
+# =========================================================
+# DOWNLOAD
+# =========================================================
+
+csv = results.to_csv(index=False)
+
+st.download_button(
+
+    "⬇ Download Institutional Dataset",
+
+    csv,
+
+    "institutional_quant.csv",
+
+    "text/csv"
 )
