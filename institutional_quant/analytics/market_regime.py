@@ -4,6 +4,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from institutional_quant.utils.data_io import (
+    save_parquet,
+    load_parquet
+)
 
 # =========================================================
 # CONFIG
@@ -38,7 +42,7 @@ OUTPUT_DIR.mkdir(
 
 OUTPUT_FILE = (
     OUTPUT_DIR
-    / "market_regime.csv"
+    / "market_regime.parquet"
 )
 
 # =========================================================
@@ -324,11 +328,9 @@ output = pd.DataFrame({
 # SAVE
 # =========================================================
 
-output.to_csv(
-
-    OUTPUT_FILE,
-
-    index=False
+save_parquet(
+    output,
+    OUTPUT_FILE
 )
 
 # =========================================================

@@ -5,7 +5,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.append(str(ROOT_DIR))
 
-from analytics.distributed_scan import (
+from institutional_quant.analytics.distributed_scan import (
     distributed_scan,
     institutional_distributed_pipeline
 )
