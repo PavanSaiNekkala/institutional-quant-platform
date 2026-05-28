@@ -1,32 +1,41 @@
-# ENV
-.env
-
-# PYTHON
+# Python
 __pycache__/
 *.pyc
-*.pyo
 
-# DATABASES
-*.db
-
-# LOGS
-logs/
-*.log
-
-# BACKUPS
-backups/
-
-# STREAMLIT
-.streamlit/
-
-# VENV
+# Virtual Environments
 venv/
-.env/
+.venv/
+env/
 
-# IDE
-.vscode/
-.idea/
+# Jupyter
+.ipynb_checkpoints/
 
-# OS
+# Streamlit
+.streamlit/cache/
+
+# Logs
+*.log
+logs/
+
+# OS Files
 .DS_Store
 Thumbs.db
+
+# Temporary Data
+tmp/
+temp/
+downloads/
+
+# Database
+*.db
+*.sqlite3
+
+# ML Models
+*.pkl
+*.joblib
+*.h5
+
+# Reports
+reports/
+outputs/
+exports/
