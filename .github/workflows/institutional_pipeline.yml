@@ -5,23 +5,23 @@ on:
   schedule:
 
     # =====================================================
-    # Runs Every 6 Hours Starting From 08:00 AM IST
+    # RUN EVERY 6 HOURS STARTING 08:00 AM IST
     #
     # IST = UTC + 5:30
     #
-    # 08:00 AM IST = 02:30 UTC
-    # 02:00 PM IST = 08:30 UTC
-    # 08:00 PM IST = 14:30 UTC
-    # 02:00 AM IST = 20:30 UTC
+    # 08:00 AM IST → 02:30 UTC
+    # 02:00 PM IST → 08:30 UTC
+    # 08:00 PM IST → 14:30 UTC
+    # 02:00 AM IST → 20:30 UTC
     # =====================================================
 
     - cron: '30 2,8,14,20 * * *'
 
   workflow_dispatch:
 
-# =====================================================
+# =========================================================
 # PREVENT OVERLAPPING RUNS
-# =====================================================
+# =========================================================
 
 concurrency:
 
@@ -43,7 +43,7 @@ jobs:
       # CHECKOUT
       # =====================================================
 
-      - name: Checkout Repository
+      - name: 📥 Checkout Repository
 
         uses: actions/checkout@v4
 
@@ -55,7 +55,7 @@ jobs:
       # PYTHON
       # =====================================================
 
-      - name: Setup Python
+      - name: 🐍 Setup Python
 
         uses: actions/setup-python@v5
 
@@ -64,12 +64,33 @@ jobs:
           python-version: "3.11"
 
       # =====================================================
+      # CACHE PIP
+      # =====================================================
+
+      - name: ⚡ Cache Pip Dependencies
+
+        uses: actions/cache@v4
+
+        with:
+
+          path: ~/.cache/pip
+
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # =====================================================
       # INSTALL DEPENDENCIES
       # =====================================================
 
-      - name: Install Dependencies
+      - name: 📦 Install Dependencies
 
         run: |
+
+          echo "=================================================="
+          echo "Installing Python Dependencies"
+          echo "=================================================="
 
           python -m pip install --upgrade pip
 
@@ -79,31 +100,74 @@ jobs:
       # ENSURE DATA DIRECTORY
       # =====================================================
 
-      - name: Ensure Data Directory Exists
+      - name: 📁 Ensure Data Directory Exists
 
         run: |
+
+          echo "=================================================="
+          echo "Ensuring Data Directory"
+          echo "=================================================="
 
           mkdir -p data
 
       # =====================================================
-      # VERIFY CRITICAL INPUT FILES
+      # VERIFY INPUT FILES
       # =====================================================
 
-      - name: Verify Required Input Files
+      - name: 🔎 Verify Required Input Files
 
         run: |
 
-          echo "Checking critical dependency files..."
+          echo "=================================================="
+          echo "Checking Critical Input Files"
+          echo "=================================================="
 
-          test -f data/valid_stocks.xlsx || (echo "Missing valid_stocks.xlsx" && exit 1)
+          REQUIRED_FILES=(
+            "data/valid_stocks.xlsx"
+          )
+
+          for file in "${REQUIRED_FILES[@]}"
+          do
+            if [ ! -f "$file" ]; then
+
+              echo ""
+              echo "❌ Missing Required File: $file"
+              echo ""
+
+              exit 1
+
+            else
+
+              echo "✅ Found: $file"
+
+            fi
+          done
 
       # =====================================================
-      # RUN FULL PIPELINE
+      # SHOW INITIAL DATA
       # =====================================================
 
-      - name: Run Institutional AI Pipeline
+      - name: 📊 Show Existing Data Files
 
         run: |
+
+          echo "=================================================="
+          echo "Existing Data Files"
+          echo "=================================================="
+
+          ls -lah data/ || true
+
+      # =====================================================
+      # RUN PIPELINE
+      # =====================================================
+
+      - name: 🚀 Run Institutional AI Pipeline
+
+        run: |
+
+          echo "=================================================="
+          echo "Starting Institutional Quant Pipeline"
+          echo "=================================================="
 
           python run_full_pipeline.py
 
@@ -111,11 +175,13 @@ jobs:
       # VERIFY OUTPUTS
       # =====================================================
 
-      - name: Verify Outputs
+      - name: ✅ Verify Outputs
 
         run: |
 
-          echo "Generated files:"
+          echo "=================================================="
+          echo "Generated Output Files"
+          echo "=================================================="
 
           ls -lah data/
 
@@ -123,19 +189,27 @@ jobs:
       # GIT STATUS
       # =====================================================
 
-      - name: Check Git Status
+      - name: 📌 Check Git Status
 
         run: |
+
+          echo "=================================================="
+          echo "Git Status"
+          echo "=================================================="
 
           git status
 
       # =====================================================
-      # COMMIT UPDATED FILES
+      # COMMIT CHANGES
       # =====================================================
 
-      - name: Commit Updated Data
+      - name: 💾 Commit Updated Data
 
         run: |
+
+          echo "=================================================="
+          echo "Committing Updated Files"
+          echo "=================================================="
 
           git config --global user.name "github-actions"
 
@@ -146,12 +220,16 @@ jobs:
           git diff --cached --quiet || git commit -m "Automated Institutional Pipeline Update"
 
       # =====================================================
-      # PULL LATEST CHANGES
+      # PULL LATEST
       # =====================================================
 
-      - name: Pull Latest Changes
+      - name: 🔄 Pull Latest Changes
 
         run: |
+
+          echo "=================================================="
+          echo "Pulling Latest Repository Changes"
+          echo "=================================================="
 
           git pull --rebase origin main
 
@@ -159,9 +237,13 @@ jobs:
       # PUSH
       # =====================================================
 
-      - name: Push Changes
+      - name: 🚀 Push Changes
 
         run: |
+
+          echo "=================================================="
+          echo "Pushing Changes To Repository"
+          echo "=================================================="
 
           git push origin main
 
@@ -169,8 +251,16 @@ jobs:
       # SUCCESS
       # =====================================================
 
-      - name: Pipeline Complete
+      - name: 🏆 Pipeline Complete
 
         run: |
 
-          echo "Institutional AI Quant Pipeline Completed Successfully"
+          echo ""
+          echo "=================================================="
+          echo "🏦 INSTITUTIONAL QUANT PIPELINE COMPLETE"
+          echo "=================================================="
+          echo ""
+
+          echo "✅ Workflow Executed Successfully"
+
+          echo ""
