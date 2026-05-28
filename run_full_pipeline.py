@@ -1,5 +1,6 @@
 import subprocess
 import time
+
 from pathlib import Path
 
 # =========================================================
@@ -10,93 +11,290 @@ ROOT_DIR = Path(__file__).resolve().parent
 
 ANALYTICS_DIR = ROOT_DIR / "analytics"
 
+DATA_DIR = ROOT_DIR / "data"
+
 # =========================================================
-# PIPELINE
+# PIPELINE ORDER
 # =========================================================
 
 PIPELINE = [
 
-    # ---------------------------------------------
-    # DATA + SIGNALS
-    # ---------------------------------------------
+    # =====================================================
+    # FOUNDATION
+    # =====================================================
 
-    "relative_strength.py",
+    {
+        "script": "relative_strength.py",
 
-    "sector_summary.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
 
-    "sector_relative_strength.py",
+        "produces": [
+            "institutional_rankings.csv"
+        ]
+    },
 
-    # ---------------------------------------------
-    # RANKING ENGINES
-    # ---------------------------------------------
+    # =====================================================
+    # SECTOR ENGINES
+    # =====================================================
 
-    "cross_sectional_ranker.py",
+    {
+        "script": "sector_relative_strength.py",
 
-    "risk_engine.py",
+        "requires": [
+            "stock_metadata.csv",
+            "institutional_rankings.csv"
+        ],
 
-    "factor_model.py",
+        "produces": [
+            "sector_relative_strength.csv"
+        ]
+    },
 
-    # ---------------------------------------------
-    # REGIME DETECTION
-    # ---------------------------------------------
+    {
+        "script": "sector_summary.py",
 
-    "market_regime.py",
+        "requires": [
+            "institutional_rankings.csv"
+        ],
 
-    # ---------------------------------------------
+        "produces": [
+            "sector_summary.csv"
+        ]
+    },
+
+    # =====================================================
+    # CROSS SECTIONAL
+    # =====================================================
+
+    {
+        "script": "cross_sectional_ranker.py",
+
+        "requires": [
+            "institutional_rankings.csv"
+        ],
+
+        "produces": [
+            "cross_sectional_rankings.csv"
+        ]
+    },
+
+    # =====================================================
+    # FACTOR MODEL
+    # =====================================================
+
+    {
+        "script": "factor_model.py",
+
+        "requires": [
+            "cross_sectional_rankings.csv"
+        ],
+
+        "produces": [
+            "factor_model_rankings.csv"
+        ]
+    },
+
+    # =====================================================
+    # MARKET REGIME
+    # =====================================================
+
+    {
+        "script": "market_regime.py",
+
+        "requires": [],
+
+        "produces": [
+            "market_regime.csv"
+        ]
+    },
+
+    # =====================================================
     # AI ENGINES
-    # ---------------------------------------------
+    # =====================================================
 
-    "ml_alpha_engine.py",
+    {
+        "script": "ml_alpha_engine.py",
 
-    "meta_strategy_engine.py",
+        "requires": [
+            "factor_model_rankings.csv"
+        ],
 
-    "reinforcement_allocator.py",
+        "produces": [
+            "ml_alpha_predictions.csv"
+        ]
+    },
 
-    # ---------------------------------------------
+    {
+        "script": "meta_strategy_engine.py",
+
+        "requires": [
+            "factor_model_rankings.csv"
+        ],
+
+        "produces": [
+            "meta_strategy_output.csv"
+        ]
+    },
+
+    {
+        "script": "reinforcement_allocator.py",
+
+        "requires": [
+            "ml_alpha_predictions.csv"
+        ],
+
+        "produces": [
+            "reinforcement_portfolio.csv"
+        ]
+    },
+
+    # =====================================================
     # PORTFOLIO
-    # ---------------------------------------------
+    # =====================================================
 
-    "portfolio_optimizer.py",
+    {
+        "script": "portfolio_optimizer.py",
 
-    "portfolio_intelligence.py",
+        "requires": [
+            "factor_model_rankings.csv"
+        ],
 
-    # ---------------------------------------------
+        "produces": [
+            "portfolio_allocation.csv"
+        ]
+    },
+
+    {
+        "script": "risk_engine.py",
+
+        "requires": [
+            "portfolio_allocation.csv"
+        ],
+
+        "produces": [
+            "risk_report.csv"
+        ]
+    },
+
+    {
+        "script": "portfolio_intelligence.py",
+
+        "requires": [
+            "cross_sectional_rankings.csv"
+        ],
+
+        "produces": [
+            "portfolio_intelligence.csv"
+        ]
+    },
+
+    # =====================================================
     # EXECUTION
-    # ---------------------------------------------
+    # =====================================================
 
-    "execution_engine.py",
+    {
+        "script": "execution_engine.py",
 
-    # ---------------------------------------------
-    # VALIDATION
-    # ---------------------------------------------
+        "requires": [
+            "reinforcement_portfolio.csv"
+        ],
 
-    "walk_forward_optimizer.py"
+        "produces": [
+            "execution_orders.csv"
+        ]
+    },
+
+    # =====================================================
+    # WALK FORWARD
+    # =====================================================
+
+    {
+        "script": "walk_forward_optimizer.py",
+
+        "requires": [
+            "cross_sectional_rankings.csv"
+        ],
+
+        "produces": [
+            "walk_forward_results.csv"
+        ]
+    }
 
 ]
 
 # =========================================================
-# RUNNER
+# VALIDATE FILES
 # =========================================================
 
-def run_script(script_name):
+def validate_required_files(files):
 
-    script_path = (
-        ANALYTICS_DIR
-        / script_name
-    )
+    missing = []
 
-    print(
-        "\n"
-        + "=" * 60
-    )
+    for file in files:
 
-    print(
-        f"🚀 Running: {script_name}"
-    )
+        path = DATA_DIR / file
 
-    print(
-        "=" * 60
-    )
+        if not path.exists():
+
+            missing.append(file)
+
+    return missing
+
+# =========================================================
+# VALIDATE OUTPUTS
+# =========================================================
+
+def validate_output_files(files):
+
+    missing = []
+
+    for file in files:
+
+        path = DATA_DIR / file
+
+        if not path.exists():
+
+            missing.append(file)
+
+    return missing
+
+# =========================================================
+# RUN SCRIPT
+# =========================================================
+
+def run_script(config):
+
+    script_name = config["script"]
+
+    requires = config["requires"]
+
+    produces = config["produces"]
+
+    script_path = ANALYTICS_DIR / script_name
+
+    print("\n" + "=" * 70)
+
+    print(f"🚀 Running: {script_name}")
+
+    print("=" * 70)
+
+    # =====================================================
+    # VALIDATE INPUTS
+    # =====================================================
+
+    missing_inputs = validate_required_files(requires)
+
+    if missing_inputs:
+
+        print("\n❌ MISSING DEPENDENCIES:\n")
+
+        for file in missing_inputs:
+
+            print(f"- {file}")
+
+        return False
 
     start = time.time()
 
@@ -111,14 +309,30 @@ def run_script(script_name):
             text=True
         )
 
-        end = time.time()
-
         duration = round(
-            end - start,
+            time.time() - start,
             2
         )
 
+        # =================================================
+        # SUCCESS
+        # =================================================
+
         if result.returncode == 0:
+
+            missing_outputs = validate_output_files(produces)
+
+            if missing_outputs:
+
+                print(
+                    "\n❌ OUTPUT VALIDATION FAILED\n"
+                )
+
+                for file in missing_outputs:
+
+                    print(f"- {file}")
+
+                return False
 
             print(
                 f"\n✅ SUCCESS: {script_name}"
@@ -130,13 +344,15 @@ def run_script(script_name):
 
             if result.stdout:
 
-                print(
-                    "\n📄 OUTPUT:\n"
-                )
+                print("\n📄 OUTPUT:\n")
 
-                print(
-                    result.stdout[-3000:]
-                )
+                print(result.stdout[-3000:])
+
+            return True
+
+        # =================================================
+        # FAILURE
+        # =================================================
 
         else:
 
@@ -144,13 +360,9 @@ def run_script(script_name):
                 f"\n❌ FAILED: {script_name}"
             )
 
-            print(
-                "\n⚠ ERROR:\n"
-            )
+            print("\n⚠ ERROR:\n")
 
-            print(
-                result.stderr
-            )
+            print(result.stderr)
 
             return False
 
@@ -164,19 +376,13 @@ def run_script(script_name):
 
         return False
 
-    return True
-
 # =========================================================
-# MAIN PIPELINE
+# MAIN
 # =========================================================
 
-print(
-    "\n🏦 INSTITUTIONAL QUANT PIPELINE"
-)
+print("\n🏦 INSTITUTIONAL QUANT PIPELINE")
 
-print(
-    "\n🚀 Starting Full AI Workflow..."
-)
+print("\n🚀 Starting Full AI Workflow...")
 
 pipeline_start = time.time()
 
@@ -184,9 +390,13 @@ success_count = 0
 
 failed_scripts = []
 
-for script in PIPELINE:
+# =========================================================
+# EXECUTION LOOP
+# =========================================================
 
-    success = run_script(script)
+for config in PIPELINE:
+
+    success = run_script(config)
 
     if success:
 
@@ -194,31 +404,26 @@ for script in PIPELINE:
 
     else:
 
-        failed_scripts.append(script)
+        failed_scripts.append(
+            config["script"]
+        )
 
-pipeline_end = time.time()
+# =========================================================
+# SUMMARY
+# =========================================================
 
 total_runtime = round(
-    pipeline_end - pipeline_start,
+
+    time.time() - pipeline_start,
+
     2
 )
 
-# =========================================================
-# FINAL SUMMARY
-# =========================================================
+print("\n" + "=" * 70)
 
-print(
-    "\n"
-    + "=" * 70
-)
+print("🏁 PIPELINE EXECUTION COMPLETE")
 
-print(
-    "🏁 PIPELINE EXECUTION COMPLETE"
-)
-
-print(
-    "=" * 70
-)
+print("=" * 70)
 
 print(
     f"\n✅ Successful Scripts: "
@@ -230,24 +435,16 @@ print(
     f"{total_runtime}s"
 )
 
-if len(failed_scripts) > 0:
+if failed_scripts:
 
-    print(
-        "\n❌ Failed Scripts:\n"
-    )
+    print("\n❌ Failed Scripts:\n")
 
     for script in failed_scripts:
 
-        print(
-            f"- {script}"
-        )
+        print(f"- {script}")
 
 else:
 
-    print(
-        "\n🏆 ALL SYSTEMS OPERATIONAL"
-    )
+    print("\n🏆 ALL SYSTEMS OPERATIONAL")
 
-print(
-    "\n🏦 Institutional Quant Platform Ready"
-)
+print("\n🏦 Institutional Quant Platform Ready")
