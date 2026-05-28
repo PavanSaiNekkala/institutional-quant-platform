@@ -577,16 +577,56 @@ rs_df = rs_df.drop_duplicates(
 )
 
 # =========================================================
+# INSTITUTIONAL SCORE
+# =========================================================
+
+rs_df["Institutional Score"] = (
+
+    (
+        rs_df["RS_30D"].rank(
+            pct=True
+        ) * 40
+    )
+
+    +
+
+    (
+        rs_df["RS_60D"].rank(
+            pct=True
+        ) * 30
+    )
+
+    +
+
+    (
+        rs_df["RS_ACCELERATION"].rank(
+            pct=True
+        ) * 20
+    )
+
+    +
+
+    (
+        rs_df["VOL_ADJ_RS"].rank(
+            pct=True
+        ) * 10
+    )
+)
+
+rs_df["Institutional Score"] = (
+
+    rs_df["Institutional Score"]
+
+    .round(2)
+)
+# =========================================================
 # SORT
 # =========================================================
 
 rs_df = rs_df.sort_values(
 
     by=[
-
-        "RS_30D",
-
-        "RS_ACCELERATION"
+        "Institutional Score"
     ],
 
     ascending=False
