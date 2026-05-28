@@ -4,7 +4,6 @@
 # =========================================================
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -49,21 +48,25 @@ MAIN CONTAINER
 .block-container{
     padding-top:1rem;
     padding-bottom:2rem;
-    max-width:96%;
+    max-width:100%;
 }
 
 /* =====================================================
-SIDEBAR
+RESPONSIVE SIDEBAR
 ===================================================== */
 
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
-    width:320px !important;
+    min-width:280px !important;
+    max-width:340px !important;
+    width:22vw !important;
 }
 
 section[data-testid="stSidebar"] > div{
-    width:320px !important;
+    min-width:280px !important;
+    max-width:340px !important;
+    width:22vw !important;
 }
 
 section[data-testid="stSidebar"] *{
@@ -71,17 +74,55 @@ section[data-testid="stSidebar"] *{
 }
 
 /* =====================================================
-SEARCH INPUT
+RESPONSIVE MAIN AREA
 ===================================================== */
+
+.main .block-container{
+    padding-top:1rem;
+    padding-bottom:2rem;
+    max-width:100% !important;
+    width:100% !important;
+}
+
+/* =====================================================
+AUTO FIT PROCESSING ENGINE
+===================================================== */
+
+.processing-container{
+    width:100% !important;
+    max-width:100% !important;
+    overflow:hidden !important;
+}
+
+/* =====================================================
+SEARCH INPUT FIX
+===================================================== */
+
+div[data-baseweb="base-input"]{
+    background:white !important;
+    border-radius:12px !important;
+}
 
 div[data-baseweb="base-input"] > div{
     background:white !important;
     border:2px solid #2563EB !important;
     border-radius:12px !important;
+    min-height:52px !important;
 }
 
-input{
+input[type="text"]{
     color:#111827 !important;
+    background:white !important;
+    font-size:20px !important;
+    font-weight:800 !important;
+    opacity:1 !important;
+    -webkit-text-fill-color:#111827 !important;
+    caret-color:#2563EB !important;
+}
+
+input[type="text"]::placeholder{
+    color:#6B7280 !important;
+    opacity:1 !important;
     font-weight:700 !important;
 }
 
@@ -126,6 +167,34 @@ TABLE
     background:white;
     border-radius:20px;
     padding:12px;
+}
+
+/* =====================================================
+MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 1200px){
+
+    section[data-testid="stSidebar"]{
+        width:280px !important;
+    }
+
+    section[data-testid="stSidebar"] > div{
+        width:280px !important;
+    }
+
+}
+
+@media (max-width: 768px){
+
+    section[data-testid="stSidebar"]{
+        width:100% !important;
+    }
+
+    section[data-testid="stSidebar"] > div{
+        width:100% !important;
+    }
+
 }
 
 </style>
@@ -257,6 +326,13 @@ with st.sidebar:
         f"✅ NSE Universe Loaded: {len(stocks)}"
     )
 
+    st.markdown("### 📈 Trade Signal Summary")
+
+    st.success("🟢 STRONG BUY")
+    st.info("🟩 BUY")
+    st.warning("🟠 WATCH")
+    st.error("🔴 AVOID")
+
 # =========================================================
 # COLORS
 # =========================================================
@@ -298,7 +374,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 75
+    batch_size = 50
 
     status_placeholder = st.empty()
 
@@ -386,26 +462,18 @@ def run_analysis(stock_list):
                 })
 
             except:
-
                 failed_stocks.append(symbol)
 
-            progress_bar.progress(
-                completed / total
-            )
+            progress_bar.progress(completed / total)
 
-            elapsed = (
-                time.time() - start_time
-            ) / 60
+            elapsed = (time.time() - start_time) / 60
 
             estimated_total = (
                 elapsed / max(completed,1)
             ) * total
 
             remaining_minutes = round(
-                max(
-                    estimated_total - elapsed,
-                    0
-                ),
+                max(estimated_total - elapsed, 0),
                 1
             )
 
@@ -417,293 +485,266 @@ def run_analysis(stock_list):
             if completed % 10 == 0:
 
                 status_html = f"""
-                <div style="
+                <div class="processing-container" style="
                     background:white;
                     border-radius:24px;
                     padding:30px;
+                    width:100%;
+                    box-sizing:border-box;
                     box-shadow:0 8px 28px rgba(0,0,0,0.08);
                     margin-top:10px;
                     font-family:Segoe UI;
                 ">
 
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:20px;
+                ">
+
+                    <div>
+
+                        <div style="
+                            font-size:42px;
+                            font-weight:900;
+                            color:#111827;
+                        ">
+                        📊 Institutional Processing Engine
+                        </div>
+
+                        <div style="
+                            color:#6B7280;
+                            font-size:18px;
+                            margin-top:5px;
+                        ">
+                        Real-Time Quant Processing
+                        </div>
+
+                    </div>
+
                     <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        margin-bottom:20px;
+                        background:#DBEAFE;
+                        color:#1D4ED8;
+                        padding:12px 20px;
+                        border-radius:12px;
+                        font-weight:800;
                     ">
-
-                        <div>
-
-                            <div style="
-                                font-size:36px;
-                                font-weight:900;
-                                color:#111827;
-                            ">
-                            📊 Institutional Processing Engine
-                            </div>
-
-                            <div style="
-                                color:#6B7280;
-                                font-size:15px;
-                                margin-top:4px;
-                            ">
-                            Real-Time Quant Processing
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#DBEAFE;
-                            color:#1D4ED8;
-                            padding:10px 18px;
-                            border-radius:12px;
-                            font-weight:800;
-                        ">
-                        LIVE
-                        </div>
-
+                    LIVE
                     </div>
+
+                </div>
+
+                <div style="
+                    display:grid;
+                    grid-template-columns:repeat(4,1fr);
+                    gap:18px;
+                ">
 
                     <div style="
-                        display:grid;
-                        grid-template-columns:repeat(4,1fr);
-                        gap:18px;
-                    ">
-
-                        <div style="
-                            background:#ECFDF5;
-                            padding:22px;
-                            border-radius:18px;
-                            border-left:6px solid #10B981;
-                        ">
-
-                            <div style="
-                                color:#047857;
-                                font-size:14px;
-                                font-weight:700;
-                            ">
-                            COMPLETED
-                            </div>
-
-                            <div style="
-                                margin-top:10px;
-                                font-size:36px;
-                                font-weight:900;
-                                color:#065F46;
-                            ">
-                            {completed}
-                            </div>
-
-                            <div style="
-                                margin-top:4px;
-                                color:#10B981;
-                                font-size:14px;
-                            ">
-                            out of {total}
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#FEF2F2;
-                            padding:22px;
-                            border-radius:18px;
-                            border-left:6px solid #DC2626;
-                        ">
-
-                            <div style="
-                                color:#B91C1C;
-                                font-size:14px;
-                                font-weight:700;
-                            ">
-                            FAILED
-                            </div>
-
-                            <div style="
-                                margin-top:10px;
-                                font-size:36px;
-                                font-weight:900;
-                                color:#991B1B;
-                            ">
-                            {len(set(failed_stocks))}
-                            </div>
-
-                            <div style="
-                                margin-top:4px;
-                                color:#DC2626;
-                                font-size:14px;
-                            ">
-                            failed stocks
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#EFF6FF;
-                            padding:22px;
-                            border-radius:18px;
-                            border-left:6px solid #2563EB;
-                        ">
-
-                            <div style="
-                                color:#1D4ED8;
-                                font-size:14px;
-                                font-weight:700;
-                            ">
-                            UNIVERSE
-                            </div>
-
-                            <div style="
-                                margin-top:10px;
-                                font-size:36px;
-                                font-weight:900;
-                                color:#1E3A8A;
-                            ">
-                            {total}
-                            </div>
-
-                            <div style="
-                                margin-top:4px;
-                                color:#2563EB;
-                                font-size:14px;
-                            ">
-                            NSE Stocks
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            background:#FFF7ED;
-                            padding:22px;
-                            border-radius:18px;
-                            border-left:6px solid #F59E0B;
-                        ">
-
-                            <div style="
-                                color:#D97706;
-                                font-size:14px;
-                                font-weight:700;
-                            ">
-                            ETA
-                            </div>
-
-                            <div style="
-                                margin-top:10px;
-                                font-size:36px;
-                                font-weight:900;
-                                color:#92400E;
-                            ">
-                            {remaining_minutes}m
-                            </div>
-
-                            <div style="
-                                margin-top:4px;
-                                color:#F59E0B;
-                                font-size:14px;
-                            ">
-                            remaining
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div style="margin-top:28px;">
-
-                        <div style="
-                            display:flex;
-                            justify-content:space-between;
-                            margin-bottom:8px;
-                        ">
-
-                            <div style="
-                                color:#374151;
-                                font-weight:700;
-                            ">
-                            Processing Progress
-                            </div>
-
-                            <div style="
-                                color:#2563EB;
-                                font-weight:800;
-                            ">
-                            {completion_pct}%
-                            </div>
-
-                        </div>
-
-                        <div style="
-                            width:100%;
-                            height:18px;
-                            background:#E5E7EB;
-                            border-radius:999px;
-                            overflow:hidden;
-                        ">
-
-                            <div style="
-                                width:{completion_pct}%;
-                                height:100%;
-                                background:linear-gradient(90deg,#2563EB,#10B981);
-                                border-radius:999px;
-                            ">
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        margin-top:28px;
-                        background:#111827;
-                        color:white;
+                        background:#ECFDF5;
+                        padding:22px;
                         border-radius:18px;
-                        padding:20px;
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
+                        border-left:6px solid #10B981;
                     ">
-
-                        <div>
-
-                            <div style="
-                                color:#9CA3AF;
-                                font-size:13px;
-                                margin-bottom:6px;
-                            ">
-                            CURRENTLY ANALYZING
-                            </div>
-
-                            <div style="
-                                font-size:26px;
-                                font-weight:900;
-                            ">
-                            {symbol}
-                            </div>
-
+                        <div style="color:#047857;font-size:14px;font-weight:700;">
+                        COMPLETED
                         </div>
 
                         <div style="
-                            background:#10B981;
-                            padding:10px 18px;
-                            border-radius:12px;
+                            margin-top:10px;
+                            font-size:36px;
+                            font-weight:900;
+                            color:#065F46;
+                        ">
+                        {completed}
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            color:#10B981;
+                            font-size:14px;
+                        ">
+                        out of {total}
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#FEF2F2;
+                        padding:22px;
+                        border-radius:18px;
+                        border-left:6px solid #DC2626;
+                    ">
+                        <div style="color:#B91C1C;font-size:14px;font-weight:700;">
+                        FAILED
+                        </div>
+
+                        <div style="
+                            margin-top:10px;
+                            font-size:36px;
+                            font-weight:900;
+                            color:#991B1B;
+                        ">
+                        {len(set(failed_stocks))}
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            color:#DC2626;
+                            font-size:14px;
+                        ">
+                        failed stocks
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#EFF6FF;
+                        padding:22px;
+                        border-radius:18px;
+                        border-left:6px solid #2563EB;
+                    ">
+                        <div style="color:#1D4ED8;font-size:14px;font-weight:700;">
+                        UNIVERSE
+                        </div>
+
+                        <div style="
+                            margin-top:10px;
+                            font-size:36px;
+                            font-weight:900;
+                            color:#1E3A8A;
+                        ">
+                        {total}
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            color:#2563EB;
+                            font-size:14px;
+                        ">
+                        NSE Stocks
+                        </div>
+                    </div>
+
+                    <div style="
+                        background:#FFF7ED;
+                        padding:22px;
+                        border-radius:18px;
+                        border-left:6px solid #F59E0B;
+                    ">
+                        <div style="color:#D97706;font-size:14px;font-weight:700;">
+                        ETA
+                        </div>
+
+                        <div style="
+                            margin-top:10px;
+                            font-size:36px;
+                            font-weight:900;
+                            color:#92400E;
+                        ">
+                        {remaining_minutes}m
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            color:#F59E0B;
+                            font-size:14px;
+                        ">
+                        remaining
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="margin-top:28px;">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        margin-bottom:8px;
+                    ">
+
+                        <div style="
+                            color:#374151;
+                            font-weight:700;
+                        ">
+                        Processing Progress
+                        </div>
+
+                        <div style="
+                            color:#2563EB;
                             font-weight:800;
                         ">
-                        ACTIVE
+                        {completion_pct}%
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        width:100%;
+                        height:18px;
+                        background:#E5E7EB;
+                        border-radius:999px;
+                        overflow:hidden;
+                    ">
+
+                        <div style="
+                            width:{completion_pct}%;
+                            height:100%;
+                            background:linear-gradient(90deg,#2563EB,#10B981);
+                            border-radius:999px;
+                        ">
                         </div>
 
                     </div>
 
                 </div>
+
+                <div style="
+                    margin-top:28px;
+                    background:#111827;
+                    color:white;
+                    border-radius:18px;
+                    padding:20px;
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                ">
+
+                    <div>
+
+                        <div style="
+                            color:#9CA3AF;
+                            font-size:13px;
+                            margin-bottom:6px;
+                        ">
+                        CURRENTLY ANALYZING
+                        </div>
+
+                        <div style="
+                            font-size:26px;
+                            font-weight:900;
+                        ">
+                        {symbol}
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        background:#10B981;
+                        padding:10px 18px;
+                        border-radius:12px;
+                        font-weight:800;
+                    ">
+                    ACTIVE
+                    </div>
+
+                </div>
+
+                </div>
                 """
 
                 with status_placeholder:
-
-                    components.html(
-                        status_html,
-                        height=720,
-                        scrolling=False
-                    )
+                    st.html(status_html)
 
     progress_bar.empty()
 
@@ -721,7 +762,6 @@ results, failed_stocks = run_analysis(stocks)
 if results.empty:
 
     st.error("No valid results.")
-
     st.stop()
 
 # =========================================================
@@ -739,18 +779,14 @@ results = results[
 if signal_filter != "All":
 
     results = results[
-        results["Classification"]
-        == signal_filter
+        results["Classification"] == signal_filter
     ]
 
 if search_stock:
 
     results = results[
         results["Symbol"]
-        .str.contains(
-            search_stock.upper(),
-            na=False
-        )
+        .str.contains(search_stock.upper(), na=False)
     ]
 
 # =========================================================
@@ -762,28 +798,18 @@ st.markdown("<br>", unsafe_allow_html=True)
 k1,k2,k3,k4 = st.columns(4)
 
 with k1:
-    st.metric(
-        "Universe Size",
-        len(results)
-    )
+    st.metric("NSE Universe", len(stocks))
 
 with k2:
     st.metric(
-        "Average Score",
-        safe_round(
-            results["Final Score"].mean() * 100
-        )
+        "Processed Stocks",
+        len(results) + len(set(failed_stocks))
     )
 
 with k3:
     st.metric(
-        "Strong Buy",
-        len(
-            results[
-                results["Classification"]
-                == "STRONG_BUY"
-            ]
-        )
+        "Filtered Opportunities",
+        len(results)
     )
 
 with k4:
