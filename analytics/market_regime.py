@@ -37,8 +37,9 @@ OUTPUT_DIR.mkdir(
 )
 
 OUTPUT_FILE = (
-    OUTPUT_DIR
-    / "market_regime.parquet"
+    ROOT_DIR
+    / "data"
+    / "market_regime_v2.csv"
 )
 
 # =========================================================
