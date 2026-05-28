@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from institutional_quant.utils.data_io import (
+from utils.data_io import (
     save_parquet,
     load_parquet
 )
