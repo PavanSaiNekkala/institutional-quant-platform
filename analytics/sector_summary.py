@@ -1,4 +1,5 @@
 import pandas as pd
+
 from pathlib import Path
 
 # =========================================================
@@ -8,26 +9,28 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
 RANKINGS_FILE = (
-        ROOT_DIR
-        / "data"
-        / "institutional_rankings.csv"
+    ROOT_DIR
+    / "data"
+    / "institutional_rankings.csv"
 )
 
 METADATA_FILE = (
-        ROOT_DIR
-        / "data"
-        / "stock_metadata.csv"
+    ROOT_DIR
+    / "data"
+    / "stock_metadata.csv"
 )
 
 OUTPUT_FILE = (
-        ROOT_DIR
-        / "data"
-        / "sector_summary.csv"
+    ROOT_DIR
+    / "data"
+    / "sector_summary.csv"
 )
 
 # =========================================================
 # LOAD DATA
 # =========================================================
+
+print("\n📥 Loading Data...")
 
 rank_df = pd.read_csv(RANKINGS_FILE)
 
@@ -38,15 +41,21 @@ meta_df = pd.read_csv(METADATA_FILE)
 # =========================================================
 
 rank_df["Symbol"] = (
-        rank_df["Symbol"]
-        .astype(str)
-        .str.replace(".NS", "", regex=False)
+
+    rank_df["Symbol"]
+
+    .astype(str)
+
+    .str.replace(".NS", "", regex=False)
 )
 
 meta_df["Symbol"] = (
-        meta_df["Symbol"]
-        .astype(str)
-        .str.replace(".NS", "", regex=False)
+
+    meta_df["Symbol"]
+
+    .astype(str)
+
+    .str.replace(".NS", "", regex=False)
 )
 
 # =========================================================
@@ -54,93 +63,136 @@ meta_df["Symbol"] = (
 # =========================================================
 
 df = pd.merge(
-        rank_df,
-        meta_df[
-                [
-                        "Symbol",
-                        "Sector",
-                        "Industry",
-                        "MarketCap"
-                ]
-        ],
-        on="Symbol",
-        how="left"
+
+    rank_df,
+
+    meta_df,
+
+    on="Symbol",
+
+    how="left"
 )
 
 # =========================================================
 # FILL MISSING
 # =========================================================
 
-df["Sector"] = df["Sector"].fillna("Unknown")
+df["Sector"] = (
+    df["Sector"]
+    .fillna("Unknown")
+)
 
-df["Industry"] = df["Industry"].fillna("Unknown")
+df["Industry"] = (
+    df["Industry"]
+    .fillna("Unknown")
+)
 
 # =========================================================
-# CREATE FINAL SCORE
+# CREATE MOMENTUM
+# =========================================================
+
+df["Momentum"] = (
+
+    (
+        df["RS_5D"]
+
+        +
+
+        df["RS_15D"]
+
+        +
+
+        df["RS_30D"]
+
+        +
+
+        df["RS_60D"]
+    )
+
+    / 4
+)
+
+# =========================================================
+# CREATE SHARPE PROXY
+# =========================================================
+
+df["Sharpe"] = (
+
+    df["VOL_ADJ_RS"]
+
+    / (
+
+        df["VOLATILITY"]
+
+        + 1e-9
+    )
+)
+
+# =========================================================
+# FINAL SCORE
 # =========================================================
 
 df["FINAL_SCORE"] = (
 
-        df["Institutional Score"]
+    df["Institutional Score"]
 
-        * 20
+    * 20
 )
 
 # =========================================================
-# CLASSIFICATION ENGINE
+# CLASSIFICATION
 # =========================================================
 
 def classify(score):
 
-        if score >= 80:
+    if score >= 80:
 
-                return "STRONG_BUY"
+        return "STRONG_BUY"
 
-        elif score >= 60:
+    elif score >= 60:
 
-                return "BUY"
+        return "BUY"
 
-        elif score >= 40:
+    elif score >= 40:
 
-                return "HOLD"
+        return "HOLD"
 
-        else:
+    else:
 
-                return "SELL"
+        return "SELL"
 
 df["Classification"] = (
 
-        df["FINAL_SCORE"]
+    df["FINAL_SCORE"]
 
-        .apply(classify)
+    .apply(classify)
 )
 
 # =========================================================
-# SIGNAL COUNTS
+# BUY COUNTS
 # =========================================================
 
 df["BUY_COUNT"] = (
 
-        df["Classification"]
+    df["Classification"]
 
-        .isin(
-                [
-                        "BUY",
-                        "STRONG_BUY"
-                ]
-        )
+    .isin([
+        "BUY",
+        "STRONG_BUY"
+    ])
 
-        .astype(int)
+    .astype(int)
 )
 
 df["STRONG_BUY_COUNT"] = (
 
-        (
-                df["Classification"]
-                == "STRONG_BUY"
-        )
+    (
+        df["Classification"]
 
-        .astype(int)
+        == "STRONG_BUY"
+    )
+
+    .astype(int)
 )
 
 # =========================================================
@@ -149,25 +201,24 @@ df["STRONG_BUY_COUNT"] = (
 
 sector_summary = (
 
-        df.groupby("Sector")
+    df.groupby("Sector")
 
-        .agg({
+    .agg({
 
-                "Momentum": "mean",
+        "Momentum": "mean",
 
-                "Sharpe": "mean",
+        "Sharpe": "mean",
 
-                "FINAL_SCORE": "mean",
+        "FINAL_SCORE": "mean",
 
-                "BUY_COUNT": "sum",
+        "BUY_COUNT": "sum",
 
-                "STRONG_BUY_COUNT": "sum",
+        "STRONG_BUY_COUNT": "sum",
 
-                "Symbol": "count"
+        "Symbol": "count"
+    })
 
-        })
-
-        .reset_index()
+    .reset_index()
 )
 
 # =========================================================
@@ -176,19 +227,19 @@ sector_summary = (
 
 sector_summary.columns = [
 
-        "Sector",
+    "Sector",
 
-        "AVG_MOMENTUM",
+    "AVG_MOMENTUM",
 
-        "AVG_SHARPE",
+    "AVG_SHARPE",
 
-        "AVG_INSTITUTIONAL_SCORE",
+    "AVG_INSTITUTIONAL_SCORE",
 
-        "BUY_COUNT",
+    "BUY_COUNT",
 
-        "STRONG_BUY_COUNT",
+    "STRONG_BUY_COUNT",
 
-        "TOTAL_STOCKS"
+    "TOTAL_STOCKS"
 ]
 
 # =========================================================
@@ -197,39 +248,41 @@ sector_summary.columns = [
 
 numeric_cols = [
 
-        "AVG_MOMENTUM",
+    "AVG_MOMENTUM",
 
-        "AVG_SHARPE",
+    "AVG_SHARPE",
 
-        "AVG_INSTITUTIONAL_SCORE"
+    "AVG_INSTITUTIONAL_SCORE"
 ]
 
 sector_summary[numeric_cols] = (
-        sector_summary[numeric_cols]
-        .round(2)
+
+    sector_summary[numeric_cols]
+
+    .round(2)
 )
 
 # =========================================================
-# SECTOR STRENGTH SCORE
+# SECTOR SCORE
 # =========================================================
 
 sector_summary["SECTOR_SCORE"] = (
 
-        (
-                sector_summary["AVG_MOMENTUM"] * 0.4
-        )
+    (
+        sector_summary["AVG_MOMENTUM"] * 0.4
+    )
 
-        +
+    +
 
-        (
-                sector_summary["AVG_SHARPE"] * 0.3
-        )
+    (
+        sector_summary["AVG_SHARPE"] * 0.3
+    )
 
-        +
+    +
 
-        (
-                sector_summary["AVG_INSTITUTIONAL_SCORE"] * 0.3
-        )
+    (
+        sector_summary["AVG_INSTITUTIONAL_SCORE"] * 0.3
+    )
 
 ).round(2)
 
@@ -239,9 +292,9 @@ sector_summary["SECTOR_SCORE"] = (
 
 sector_summary = sector_summary.sort_values(
 
-        by="SECTOR_SCORE",
+    by="SECTOR_SCORE",
 
-        ascending=False
+    ascending=False
 )
 
 # =========================================================
@@ -250,9 +303,9 @@ sector_summary = sector_summary.sort_values(
 
 sector_summary.to_csv(
 
-        OUTPUT_FILE,
+    OUTPUT_FILE,
 
-        index=False
+    index=False
 )
 
 # =========================================================
@@ -261,11 +314,13 @@ sector_summary.to_csv(
 
 print("\n✅ Sector Summary Generated")
 
-print(f"\n📁 Saved to:\n{OUTPUT_FILE}")
+print(
+    f"\n📁 Saved to:\n"
+    f"{OUTPUT_FILE}"
+)
 
-print("\nTop Sectors:\n")
+print("\n🏆 Top Sectors:\n")
 
 print(
-
-        sector_summary.head(10)
+    sector_summary.head(10)
 )
