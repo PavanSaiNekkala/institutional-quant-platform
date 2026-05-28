@@ -33,7 +33,7 @@ INPUT_FILE = (
 OUTPUT_FILE = (
     ROOT_DIR
     / "data"
-    / "optimized_portfolio.csv"
+    / "portfolio_allocation.csv"
 )
 
 # =========================================================
