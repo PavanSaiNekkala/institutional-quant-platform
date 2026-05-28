@@ -1,0 +1,114 @@
+name: Institutional Quant Pipeline
+
+on:
+
+  schedule:
+
+    # Daily at 6:00 PM IST
+    - cron: '30 12 * * *'
+
+  workflow_dispatch:
+
+jobs:
+
+  institutional-pipeline:
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 120
+
+    steps:
+
+      # =====================================================
+      # CHECKOUT
+      # =====================================================
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+      # =====================================================
+      # PYTHON
+      # =====================================================
+
+      - name: Setup Python
+
+        uses: actions/setup-python@v5
+
+        with:
+
+          python-version: "3.11"
+
+      # =====================================================
+      # INSTALL DEPENDENCIES
+      # =====================================================
+
+      - name: Install Dependencies
+
+        run: |
+
+          python -m pip install --upgrade pip
+
+          pip install pandas numpy yfinance scipy scikit-learn
+
+          pip install streamlit plotly openpyxl
+
+      # =====================================================
+      # CREATE DATA DIRECTORY
+      # =====================================================
+
+      - name: Ensure Data Directory Exists
+
+        run: |
+
+          mkdir -p data
+
+      # =====================================================
+      # RUN FULL PIPELINE
+      # =====================================================
+
+      - name: Run Institutional AI Pipeline
+
+        run: |
+
+          python run_full_pipeline.py
+
+      # =====================================================
+      # VERIFY OUTPUTS
+      # =====================================================
+
+      - name: Verify Outputs
+
+        run: |
+
+          echo "Checking generated files..."
+
+          ls -lah data/
+
+      # =====================================================
+      # COMMIT OUTPUTS
+      # =====================================================
+
+      - name: Commit Updated Data
+
+        run: |
+
+          git config --global user.name "github-actions"
+
+          git config --global user.email "actions@github.com"
+
+          git add data/
+
+          git commit -m "Automated Institutional Pipeline Update" || echo "No changes to commit"
+
+          git push
+
+      # =====================================================
+      # SUCCESS
+      # =====================================================
+
+      - name: Pipeline Complete
+
+        run: |
+
+          echo "Institutional AI Quant Pipeline Completed"

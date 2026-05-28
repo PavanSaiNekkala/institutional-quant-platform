@@ -1,179 +1,620 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+
+from pathlib import Path
 
 # =========================================================
-# MONTE CARLO SIMULATION
+# CONFIG
 # =========================================================
 
-def monte_carlo_simulation(
+MAX_POSITION_SIZE = 0.10
 
-    returns,
+MIN_POSITION_SIZE = 0.02
 
-    simulations=1000,
+MAX_SECTOR_EXPOSURE = 0.30
 
-    horizon=252
+TARGET_PORTFOLIO_VOL = 0.18
+
+TOP_N = 20
+
+# =========================================================
+# PATHS
+# =========================================================
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+
+RANKINGS_FILE = (
+    ROOT_DIR
+    / "data"
+    / "cross_sectional_rankings.csv"
+)
+
+SECTOR_FILE = (
+    ROOT_DIR
+    / "data"
+    / "sector_relative_strength.csv"
+)
+
+REGIME_FILE = (
+    ROOT_DIR
+    / "data"
+    / "market_regime.csv"
+)
+
+OUTPUT_FILE = (
+    ROOT_DIR
+    / "data"
+    / "portfolio_intelligence.csv"
+)
+
+# =========================================================
+# LOAD DATA
+# =========================================================
+
+print("\n📥 Loading Data...")
+
+rank_df = pd.read_csv(RANKINGS_FILE)
+
+sector_df = pd.read_csv(SECTOR_FILE)
+
+regime_df = pd.read_csv(REGIME_FILE)
+
+print("✅ Data Loaded")
+
+# =========================================================
+# CLEAN COLUMN NAMES
+# =========================================================
+
+rank_df.columns = rank_df.columns.str.strip()
+
+sector_df.columns = sector_df.columns.str.strip()
+
+regime_df.columns = regime_df.columns.str.strip()
+
+# =========================================================
+# DETECT SCORE COLUMN
+# =========================================================
+
+score_candidates = [
+
+    "ALPHA_SCORE",
+
+    "FINAL_SCORE",
+
+    "CROSS_SECTIONAL_SCORE",
+
+    "COMPOSITE_SCORE",
+
+    "RS_SCORE"
+
+]
+
+score_col = None
+
+for col in score_candidates:
+
+    if col in rank_df.columns:
+
+        score_col = col
+
+        break
+
+if score_col is None:
+
+    raise Exception(
+        f"\n❌ No valid score column found\n"
+        f"Available Columns:\n{rank_df.columns.tolist()}"
+    )
+
+print(f"\n✅ Using Score Column: {score_col}")
+
+# =========================================================
+# REQUIRED COLUMNS
+# =========================================================
+
+required_cols = [
+
+    "Symbol",
+
+    "Sector",
+
+    "Momentum",
+
+    "Sharpe"
+
+]
+
+for col in required_cols:
+
+    if col not in rank_df.columns:
+
+        raise Exception(
+            f"\n❌ Missing Required Column: {col}"
+        )
+
+# =========================================================
+# OPTIONAL LIQUIDITY COLUMN
+# =========================================================
+
+liquidity_col = None
+
+liquidity_candidates = [
+
+    "Avg Volume",
+
+    "AVG_VOLUME",
+
+    "Volume",
+
+    "VOL_ADJ_RS"
+
+]
+
+for col in liquidity_candidates:
+
+    if col in rank_df.columns:
+
+        liquidity_col = col
+
+        break
+
+if liquidity_col:
+
+    print(
+        f"\n✅ Using Liquidity Column: "
+        f"{liquidity_col}"
+    )
+
+else:
+
+    print(
+        "\n⚠️ No liquidity column found"
+    )
+
+# =========================================================
+# CLEAN DATA
+# =========================================================
+
+rank_df = rank_df.replace(
+    [np.inf, -np.inf],
+    np.nan
+)
+
+drop_cols = [
+
+    score_col,
+
+    "Momentum",
+
+    "Sharpe"
+
+]
+
+rank_df = rank_df.dropna(
+    subset=drop_cols
+)
+
+# =========================================================
+# EMPTY DATA CHECK
+# =========================================================
+
+if len(rank_df) == 0:
+
+    raise Exception(
+        "\n❌ No valid ranking data available"
+    )
+
+# =========================================================
+# LIQUIDITY FILTER
+# =========================================================
+
+if liquidity_col:
+
+    rank_df = rank_df[
+        rank_df[liquidity_col] > 0
+    ]
+
+    print(
+        f"\n✅ Stocks After Liquidity Filter: "
+        f"{len(rank_df)}"
+    )
+
+# =========================================================
+# MERGE SECTOR SCORES
+# =========================================================
+
+# Remove existing duplicate column first
+
+if "SECTOR_SCORE" in rank_df.columns:
+
+    rank_df = rank_df.drop(
+        columns=["SECTOR_SCORE"]
+    )
+
+# Merge fresh sector scores
+
+if (
+    "Sector" in sector_df.columns
+    and
+    "SECTOR_SCORE" in sector_df.columns
 ):
 
-    mean_return = returns.mean()
+    rank_df = pd.merge(
 
-    volatility = returns.std()
+        rank_df,
 
-    simulations_data = np.zeros(
+        sector_df[
+            [
+                "Sector",
+                "SECTOR_SCORE"
+            ]
+        ],
 
-        (horizon, simulations)
+        on="Sector",
+
+        how="left"
     )
 
-    for sim in range(simulations):
+else:
 
-        prices = [100]
+    rank_df["SECTOR_SCORE"] = 0
 
-        for _ in range(horizon):
+# Fill missing values
 
-            shock = np.random.normal(
+rank_df["SECTOR_SCORE"] = (
 
-                mean_return,
+    rank_df["SECTOR_SCORE"]
 
-                volatility
-            )
+    .fillna(0)
 
-            prices.append(
+    .astype(float)
+)
 
-                prices[-1]
+print(
+    "\n✅ Sector Scores Integrated"
+)
+# =========================================================
+# MARKET REGIME
+# =========================================================
 
-                * (1 + shock)
-            )
+market_regime = "SIDEWAYS"
 
-        simulations_data[:, sim] = prices[1:]
+if len(regime_df) > 0:
 
-    return pd.DataFrame(
+    if "MARKET_REGIME" in regime_df.columns:
 
-        simulations_data
+        market_regime = (
+            regime_df.iloc[-1]["MARKET_REGIME"]
+        )
+
+print(
+    f"\n🌍 Market Regime: "
+    f"{market_regime}"
+)
+
+# =========================================================
+# REGIME MULTIPLIER
+# =========================================================
+
+if market_regime == "BULL":
+
+    regime_multiplier = 1.20
+
+elif market_regime == "BEAR":
+
+    regime_multiplier = 0.70
+
+else:
+
+    regime_multiplier = 1.00
+
+# =========================================================
+# AI SCORE ENGINE
+# =========================================================
+
+rank_df["AI_SCORE"] = (
+
+    (
+        rank_df[score_col] * 0.35
+    )
+
+    +
+
+    (
+        rank_df["Momentum"] * 100 * 0.20
+    )
+
+    +
+
+    (
+        rank_df["Sharpe"] * 10 * 0.20
+    )
+
+    +
+
+    (
+        rank_df["SECTOR_SCORE"] * 0.15
+    )
+
+)
+
+# =========================================================
+# OPTIONAL RS ENHANCEMENT
+# =========================================================
+
+optional_rs_cols = [
+
+    "RS_30D",
+
+    "RS_60D",
+
+    "RS_ACCELERATION",
+
+    "VOL_ADJ_RS"
+
+]
+
+for col in optional_rs_cols:
+
+    if col in rank_df.columns:
+
+        rank_df["AI_SCORE"] += (
+
+            rank_df[col]
+            .fillna(0)
+            * 0.025
+        )
+
+# =========================================================
+# REGIME ADJUSTMENT
+# =========================================================
+
+rank_df["AI_SCORE"] *= regime_multiplier
+
+# =========================================================
+# REMOVE NEGATIVE SCORES
+# =========================================================
+
+rank_df = rank_df[
+    rank_df["AI_SCORE"] > 0
+]
+
+if len(rank_df) == 0:
+
+    raise Exception(
+        "\n❌ All AI scores invalid"
     )
 
 # =========================================================
-# VALUE AT RISK
+# SORT
 # =========================================================
 
-def value_at_risk(
+rank_df = rank_df.sort_values(
 
-    returns,
+    by="AI_SCORE",
 
-    confidence=0.95
+    ascending=False
+)
+
+# =========================================================
+# SELECT TOP STOCKS
+# =========================================================
+
+portfolio = rank_df.head(TOP_N).copy()
+
+# =========================================================
+# RAW WEIGHTS
+# =========================================================
+
+portfolio["RAW_WEIGHT"] = (
+
+    portfolio["AI_SCORE"]
+
+    / portfolio["AI_SCORE"].sum()
+)
+
+# =========================================================
+# POSITION CAPS
+# =========================================================
+
+portfolio["RAW_WEIGHT"] = np.clip(
+
+    portfolio["RAW_WEIGHT"],
+
+    MIN_POSITION_SIZE,
+
+    MAX_POSITION_SIZE
+)
+
+# =========================================================
+# SECTOR EXPOSURE CONTROL
+# =========================================================
+
+sector_exposure = (
+
+    portfolio
+
+    .groupby("Sector")["RAW_WEIGHT"]
+
+    .sum()
+)
+
+for sector, exposure in sector_exposure.items():
+
+    if exposure > MAX_SECTOR_EXPOSURE:
+
+        reduction_factor = (
+
+            MAX_SECTOR_EXPOSURE
+            /
+            exposure
+        )
+
+        mask = (
+            portfolio["Sector"]
+            == sector
+        )
+
+        portfolio.loc[
+            mask,
+            "RAW_WEIGHT"
+        ] *= reduction_factor
+
+# =========================================================
+# FINAL NORMALIZATION
+# =========================================================
+
+portfolio["FINAL_WEIGHT"] = (
+
+    portfolio["RAW_WEIGHT"]
+
+    / portfolio["RAW_WEIGHT"].sum()
+)
+
+# =========================================================
+# VOL TARGETING
+# =========================================================
+
+portfolio_vol = (
+
+    portfolio["Sharpe"].std()
+)
+
+if (
+    pd.notna(portfolio_vol)
+    and portfolio_vol > 0
 ):
 
-    percentile = (
+    vol_adjustment = (
 
-        1 - confidence
-    ) * 100
-
-    return np.percentile(
-
-        returns,
-
-        percentile
+        TARGET_PORTFOLIO_VOL
+        /
+        portfolio_vol
     )
+
+else:
+
+    vol_adjustment = 1
+
+portfolio["TARGET_WEIGHT"] = (
+
+    portfolio["FINAL_WEIGHT"]
+    * vol_adjustment
+)
+
+portfolio["TARGET_WEIGHT"] = (
+
+    portfolio["TARGET_WEIGHT"]
+
+    / portfolio["TARGET_WEIGHT"].sum()
+)
 
 # =========================================================
-# MAX DRAWDOWN
+# ROUNDING
 # =========================================================
 
-def max_drawdown(
+portfolio["TARGET_WEIGHT"] = (
+    portfolio["TARGET_WEIGHT"]
+    .round(4)
+)
 
-    equity_curve
-):
-
-    cumulative_max = (
-
-        equity_curve.cummax()
-    )
-
-    drawdown = (
-
-        equity_curve
-
-        - cumulative_max
-    ) / cumulative_max
-
-    return drawdown.min()
+portfolio["AI_SCORE"] = (
+    portfolio["AI_SCORE"]
+    .round(2)
+)
 
 # =========================================================
-# STRESS TEST
+# PORTFOLIO HEALTH
 # =========================================================
 
-def stress_test(
+portfolio_health = {
 
-    portfolio_value,
+    "TOTAL_STOCKS":
 
-    shock=-0.20
-):
+        len(portfolio),
 
-    stressed_value = (
+    "AVG_AI_SCORE":
 
-        portfolio_value
+        round(
+            portfolio["AI_SCORE"].mean(),
+            2
+        ),
 
-        * (1 + shock)
-    )
+    "AVG_SHARPE":
 
-    return stressed_value
+        round(
+            portfolio["Sharpe"].mean(),
+            2
+        ),
+
+    "AVG_MOMENTUM":
+
+        round(
+            portfolio["Momentum"].mean(),
+            4
+        ),
+
+    "TOP_SECTOR":
+
+        portfolio["Sector"]
+
+        .value_counts()
+
+        .idxmax(),
+
+    "MAX_WEIGHT":
+
+        round(
+            portfolio[
+                "TARGET_WEIGHT"
+            ].max()
+            * 100,
+            2
+        )
+}
 
 # =========================================================
-# PORTFOLIO REPORT
+# SAVE
 # =========================================================
 
-def portfolio_report(
+portfolio.to_csv(
 
-    returns
-):
+    OUTPUT_FILE,
 
-    mc = monte_carlo_simulation(
+    index=False
+)
 
-        returns
-    )
+# =========================================================
+# OUTPUT
+# =========================================================
 
-    var = value_at_risk(
+print(
+    "\n✅ Portfolio Intelligence Generated"
+)
 
-        returns
-    )
+print(
+    f"\n📁 Saved To:\n"
+    f"{OUTPUT_FILE}"
+)
 
-    equity_curve = (
+print("\n🏆 PORTFOLIO HEALTH:\n")
 
-        (1 + returns)
+for k, v in portfolio_health.items():
 
-        .cumprod()
-    )
+    print(f"{k}: {v}")
 
-    dd = max_drawdown(
+print("\n🏆 TOP HOLDINGS:\n")
 
-        equity_curve
-    )
+print(
 
-    stressed = stress_test(
+    portfolio[
 
-        1_000_000
-    )
+        [
+            "Symbol",
+            "Sector",
+            "AI_SCORE",
+            "TARGET_WEIGHT"
+        ]
 
-    report = {
-
-        "Value at Risk":
-
-            round(var, 4),
-
-        "Max Drawdown":
-
-            round(dd, 4),
-
-        "Stress Test Value":
-
-            round(stressed, 2),
-
-        "Monte Carlo Mean":
-
-            round(
-
-                mc.iloc[-1].mean(),
-
-                2
-            )
-    }
-
-    return report
+    ].head(15)
+)

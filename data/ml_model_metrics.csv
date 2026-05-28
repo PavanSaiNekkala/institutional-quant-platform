@@ -1,0 +1,5 @@
+Metric,Value
+Mean Absolute Error,0.11
+Training Samples,2062.0
+Testing Samples,516.0
+Feature Count,9.0
