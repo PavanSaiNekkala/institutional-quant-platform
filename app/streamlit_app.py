@@ -1,6 +1,6 @@
 # =========================================================
-# INSTITUTIONAL QUANT PLATFORM
-# FINAL ENTERPRISE STREAMLIT DASHBOARD
+# FILE: app/streamlit_app.py
+# FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
 # =========================================================
 
 import streamlit as st
@@ -32,62 +32,19 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* =====================================================
-GLOBAL
-===================================================== */
-
-html, body, [class*="css"]{
+.stApp{
+    background:#F3F4F6;
     font-family:"Segoe UI",sans-serif;
 }
 
-.stApp{
-    background:#F3F4F6;
-}
-
-/* =====================================================
-REMOVE SCROLL GLITCHES
-===================================================== */
-
-html{
-    scroll-behavior:smooth;
-}
-
-/* =====================================================
-HEADER
-===================================================== */
-
-header[data-testid="stHeader"]{
-    background:transparent;
-    height:0px;
-}
-
-div[data-testid="stToolbar"]{
-    right:1rem;
-}
-
-/* =====================================================
-MAIN LAYOUT
-===================================================== */
-
 .block-container{
-    padding-top:1rem !important;
-    padding-bottom:1rem !important;
-    padding-left:1rem !important;
-    padding-right:1rem !important;
-    max-width:100% !important;
+    padding-top:1rem;
+    padding-bottom:2rem;
+    max-width:100%;
 }
-
-/* =====================================================
-SIDEBAR
-===================================================== */
 
 section[data-testid="stSidebar"]{
-    background:
-    linear-gradient(
-        180deg,
-        #0F172A,
-        #111827
-    );
+    background:#111827;
     border-right:1px solid #1F2937;
 }
 
@@ -95,18 +52,16 @@ section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-/* =====================================================
-INPUTS
-===================================================== */
+div[data-baseweb="base-input"]{
+    background:white !important;
+    border-radius:12px !important;
+}
 
 div[data-baseweb="base-input"] > div{
     background:white !important;
     border:2px solid #2563EB !important;
     border-radius:12px !important;
-}
-
-div[data-baseweb="base-input"] > div:focus-within{
-    border:2px solid #10B981 !important;
+    min-height:52px !important;
 }
 
 input[type="text"]{
@@ -122,18 +77,15 @@ input[type="text"]::placeholder{
     opacity:1 !important;
 }
 
-/* =====================================================
-SELECT BOX
-===================================================== */
-
 div[data-baseweb="select"] > div{
     background:#1F2937 !important;
     border-radius:12px !important;
 }
 
-/* =====================================================
-METRIC CARDS
-===================================================== */
+[data-baseweb="tag"]{
+    background:#2563EB !important;
+    color:white !important;
+}
 
 [data-testid="metric-container"]{
     background:white;
@@ -141,10 +93,6 @@ METRIC CARDS
     padding:18px;
     box-shadow:0 6px 20px rgba(0,0,0,0.08);
 }
-
-/* =====================================================
-PLOTLY
-===================================================== */
 
 .element-container:has(.js-plotly-plot){
     background:white;
@@ -154,27 +102,10 @@ PLOTLY
     margin-bottom:18px;
 }
 
-/* =====================================================
-DATAFRAME
-===================================================== */
-
 [data-testid="stDataFrame"]{
     background:white;
     border-radius:18px;
     padding:10px;
-}
-
-/* =====================================================
-RESPONSIVE
-===================================================== */
-
-@media (max-width:1200px){
-
-    .block-container{
-        padding-left:0.5rem !important;
-        padding-right:0.5rem !important;
-    }
-
 }
 
 </style>
@@ -184,80 +115,74 @@ RESPONSIVE
 # HEADER
 # =========================================================
 
-st.markdown(
-    f"""
+india = pytz.timezone("Asia/Kolkata")
+
+st.markdown(f"""
+<div style="
+    background:
+    linear-gradient(
+        135deg,
+        #0F172A,
+        #111827
+    );
+    border-radius:24px;
+    padding:24px;
+    margin-bottom:18px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.18);
+">
+
     <div style="
-        background:
-        linear-gradient(
-            135deg,
-            #0F172A,
-            #111827
-        );
-        border-radius:24px;
-        padding:22px 28px;
-        box-shadow:0 10px 28px rgba(0,0,0,0.18);
-        margin-bottom:18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        flex-wrap:wrap;
     ">
 
-        <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:12px;
-        ">
+        <div>
 
-            <div>
-
-                <div style="
-                    font-size:42px;
-                    font-weight:900;
-                    color:white;
-                    line-height:1.1;
-                    letter-spacing:-1px;
-                ">
-                    📊 Institutional Quant Platform
-                </div>
-
-                <div style="
-                    color:#CBD5E1;
-                    margin-top:6px;
-                    font-size:15px;
-                    font-weight:500;
-                ">
-                    Enterprise Institutional Analytics Dashboard
-                </div>
-
-                <div style="
-                    color:#94A3B8;
-                    margin-top:8px;
-                    font-size:12px;
-                    font-weight:700;
-                ">
-                    Updated:
-                    {datetime.now(pytz.timezone("Asia/Kolkata")).strftime('%d-%m-%Y %I:%M:%S %p IST')}
-                </div>
-
+            <div style="
+                font-size:42px;
+                font-weight:900;
+                color:white;
+            ">
+                📊 Institutional Quant Platform
             </div>
 
             <div style="
-                background:#10B981;
-                color:white;
-                padding:10px 18px;
-                border-radius:14px;
-                font-size:13px;
-                font-weight:900;
-                letter-spacing:0.5px;
+                color:#CBD5E1;
+                margin-top:6px;
+                font-size:16px;
             ">
-                LIVE NSE ENGINE
+                Enterprise Institutional Analytics Dashboard
+            </div>
+
+            <div style="
+                color:#94A3B8;
+                margin-top:10px;
+                font-size:12px;
+                font-weight:700;
+            ">
+                Updated:
+                {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}
             </div>
 
         </div>
 
+        <div style="
+            background:#10B981;
+            color:white;
+            padding:10px 18px;
+            border-radius:12px;
+            font-weight:900;
+            font-size:13px;
+        ">
+            LIVE NSE ENGINE
+        </div>
+
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+</div>
+""", unsafe_allow_html=True)
 
 # =========================================================
 # LOAD STOCKS
@@ -291,7 +216,7 @@ with st.sidebar:
     <div style="
         font-size:32px;
         font-weight:900;
-        margin-bottom:14px;
+        margin-bottom:12px;
     ">
         ⚙️ Dashboard Controls
     </div>
@@ -322,6 +247,35 @@ with st.sidebar:
         placeholder="Type stock name..."
     )
 
+    if search_stock:
+
+        matches = [
+            s for s in stocks
+            if search_stock.upper() in s.upper()
+        ][:10]
+
+        if matches:
+
+            st.markdown("### 🔍 Matching Stocks")
+
+            for m in matches:
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        background:#1F2937;
+                        padding:10px;
+                        border-radius:10px;
+                        margin-bottom:8px;
+                        border-left:4px solid #10B981;
+                        font-weight:700;
+                    ">
+                    {m}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
     st.markdown("---")
 
     st.success(
@@ -341,7 +295,7 @@ signal_colors = {
 }
 
 # =========================================================
-# HELPERS
+# SAFE ROUND
 # =========================================================
 
 def safe_round(x, n=2):
@@ -371,6 +325,7 @@ def run_analysis(stock_list):
     status_placeholder = st.empty()
 
     results = []
+
     failed_stocks = []
 
     total = len(stock_list)
@@ -437,6 +392,10 @@ def run_analysis(stock_list):
                     + sharpe * 0.4
                 )
 
+                # =====================================================
+                # SIGNAL CLASSIFICATION
+                # =====================================================
+
                 if score >= 1.5:
                     signal = "STRONG_BUY"
 
@@ -452,25 +411,107 @@ def run_analysis(stock_list):
                 else:
                     signal = "AVOID"
 
+                # =====================================================
+                # EXPECTED RETURNS MODEL
+                # =====================================================
+
+                volatility = returns.std() * np.sqrt(252)
+
+                base_strength = (
+                    momentum * 100
+                    + sharpe * 10
+                    + score * 15
+                )
+
+                expected_5d = max(
+                    min(base_strength * 0.12, 12),
+                    -8
+                )
+
+                expected_15d = max(
+                    min(base_strength * 0.22, 22),
+                    -15
+                )
+
+                expected_30d = max(
+                    min(base_strength * 0.35, 35),
+                    -25
+                )
+
+                if signal == "STRONG_BUY":
+
+                    hold_days = 30
+
+                elif signal == "BUY":
+
+                    hold_days = 20
+
+                elif signal == "WATCH":
+
+                    hold_days = 10
+
+                elif signal == "HOLD":
+
+                    hold_days = 5
+
+                else:
+
+                    hold_days = 2
+
+                if volatility > 0.60:
+
+                    expected_5d *= 0.7
+                    expected_15d *= 0.7
+                    expected_30d *= 0.7
+
+                # =====================================================
+                # APPEND
+                # =====================================================
+
                 results.append({
+
                     "Symbol": symbol,
+
                     "CMP": safe_round(close.iloc[-1]),
+
                     "Momentum": safe_round(momentum * 100),
+
                     "Sharpe": safe_round(sharpe),
+
                     "Final Score": safe_round(score),
-                    "Classification": signal
+
+                    "Classification": signal,
+
+                    "Expected Return 5D %":
+                    safe_round(expected_5d),
+
+                    "Expected Return 15D %":
+                    safe_round(expected_15d),
+
+                    "Expected Return 30D %":
+                    safe_round(expected_30d),
+
+                    "Suggested Hold Days":
+                    hold_days
+
                 })
 
             except:
 
                 failed_stocks.append(symbol)
 
+            # =====================================================
+            # PROGRESS
+            # =====================================================
+
             completion_pct = round(
                 (completed / total) * 100,
                 1
             )
 
-            elapsed = (time.time() - start_time) / 60
+            elapsed = (
+                time.time() - start_time
+            ) / 60
 
             estimated_total = (
                 elapsed / max(completed, 1)
@@ -485,199 +526,157 @@ def run_analysis(stock_list):
                 completed / total
             )
 
-            status_html = f"""
-            <div style="
-                background:white;
-                border-radius:22px;
-                padding:20px;
-                margin-top:14px;
-                box-shadow:0 10px 28px rgba(0,0,0,0.08);
-            ">
+            if completed % 10 == 0:
 
+                status_html = f"""
                 <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    margin-bottom:18px;
-                    flex-wrap:wrap;
-                    gap:12px;
-                ">
-
-                    <div>
-
-                        <div style="
-                            font-size:30px;
-                            font-weight:900;
-                            color:#111827;
-                        ">
-                            📊 Institutional Processing Engine
-                        </div>
-
-                        <div style="
-                            color:#6B7280;
-                            font-size:14px;
-                            margin-top:4px;
-                        ">
-                            Real-Time Quant Processing
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#DBEAFE;
-                        color:#1D4ED8;
-                        padding:8px 16px;
-                        border-radius:12px;
-                        font-size:12px;
-                        font-weight:900;
-                    ">
-                        LIVE
-                    </div>
-
-                </div>
-
-                <div style="
-                    display:grid;
-                    grid-template-columns:
-                    repeat(auto-fit,minmax(180px,1fr));
-                    gap:14px;
-                    margin-bottom:18px;
+                    background:white;
+                    border-radius:22px;
+                    padding:22px;
+                    margin-top:14px;
+                    box-shadow:0 10px 28px rgba(0,0,0,0.08);
                 ">
 
                     <div style="
-                        background:#ECFDF5;
-                        border-left:6px solid #10B981;
-                        border-radius:16px;
-                        padding:16px;
+                        display:grid;
+                        grid-template-columns:
+                        repeat(auto-fit,minmax(180px,1fr));
+                        gap:14px;
+                        margin-bottom:18px;
                     ">
 
                         <div style="
-                            color:#047857;
-                            font-size:12px;
-                            font-weight:800;
+                            background:#ECFDF5;
+                            border-left:6px solid #10B981;
+                            border-radius:16px;
+                            padding:16px;
                         ">
-                            COMPLETED
+
+                            <div style="
+                                color:#047857;
+                                font-size:12px;
+                                font-weight:800;
+                            ">
+                                COMPLETED
+                            </div>
+
+                            <div style="
+                                font-size:28px;
+                                font-weight:900;
+                                color:#065F46;
+                                margin-top:6px;
+                            ">
+                                {completed}
+                            </div>
+
                         </div>
 
                         <div style="
-                            font-size:28px;
-                            font-weight:900;
-                            color:#065F46;
-                            margin-top:6px;
+                            background:#FEF2F2;
+                            border-left:6px solid #DC2626;
+                            border-radius:16px;
+                            padding:16px;
                         ">
-                            {completed}
+
+                            <div style="
+                                color:#B91C1C;
+                                font-size:12px;
+                                font-weight:800;
+                            ">
+                                FAILED
+                            </div>
+
+                            <div style="
+                                font-size:28px;
+                                font-weight:900;
+                                color:#991B1B;
+                                margin-top:6px;
+                            ">
+                                {len(set(failed_stocks))}
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#EFF6FF;
+                            border-left:6px solid #2563EB;
+                            border-radius:16px;
+                            padding:16px;
+                        ">
+
+                            <div style="
+                                color:#1D4ED8;
+                                font-size:12px;
+                                font-weight:800;
+                            ">
+                                UNIVERSE
+                            </div>
+
+                            <div style="
+                                font-size:28px;
+                                font-weight:900;
+                                color:#1E3A8A;
+                                margin-top:6px;
+                            ">
+                                {total}
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            background:#FFF7ED;
+                            border-left:6px solid #F59E0B;
+                            border-radius:16px;
+                            padding:16px;
+                        ">
+
+                            <div style="
+                                color:#D97706;
+                                font-size:12px;
+                                font-weight:800;
+                            ">
+                                ETA
+                            </div>
+
+                            <div style="
+                                font-size:28px;
+                                font-weight:900;
+                                color:#92400E;
+                                margin-top:6px;
+                            ">
+                                {remaining_minutes}m
+                            </div>
+
                         </div>
 
                     </div>
 
                     <div style="
-                        background:#FEF2F2;
-                        border-left:6px solid #DC2626;
-                        border-radius:16px;
-                        padding:16px;
+                        width:100%;
+                        height:12px;
+                        background:#E5E7EB;
+                        border-radius:999px;
+                        overflow:hidden;
                     ">
 
                         <div style="
-                            color:#B91C1C;
-                            font-size:12px;
-                            font-weight:800;
+                            width:{completion_pct}%;
+                            height:100%;
+                            background:
+                            linear-gradient(
+                                90deg,
+                                #2563EB,
+                                #10B981
+                            );
                         ">
-                            FAILED
-                        </div>
-
-                        <div style="
-                            font-size:28px;
-                            font-weight:900;
-                            color:#991B1B;
-                            margin-top:6px;
-                        ">
-                            {len(set(failed_stocks))}
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#EFF6FF;
-                        border-left:6px solid #2563EB;
-                        border-radius:16px;
-                        padding:16px;
-                    ">
-
-                        <div style="
-                            color:#1D4ED8;
-                            font-size:12px;
-                            font-weight:800;
-                        ">
-                            UNIVERSE
-                        </div>
-
-                        <div style="
-                            font-size:28px;
-                            font-weight:900;
-                            color:#1E3A8A;
-                            margin-top:6px;
-                        ">
-                            {total}
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#FFF7ED;
-                        border-left:6px solid #F59E0B;
-                        border-radius:16px;
-                        padding:16px;
-                    ">
-
-                        <div style="
-                            color:#D97706;
-                            font-size:12px;
-                            font-weight:800;
-                        ">
-                            ETA
-                        </div>
-
-                        <div style="
-                            font-size:28px;
-                            font-weight:900;
-                            color:#92400E;
-                            margin-top:6px;
-                        ">
-                            {remaining_minutes}m
                         </div>
 
                     </div>
 
                 </div>
+                """
 
-                <div style="
-                    width:100%;
-                    height:12px;
-                    background:#E5E7EB;
-                    border-radius:999px;
-                    overflow:hidden;
-                ">
-
-                    <div style="
-                        width:{completion_pct}%;
-                        height:100%;
-                        background:
-                        linear-gradient(
-                            90deg,
-                            #2563EB,
-                            #10B981
-                        );
-                    ">
-                    </div>
-
-                </div>
-
-            </div>
-            """
-
-            with status_placeholder.container():
-
-                st.markdown(
+                status_placeholder.markdown(
                     status_html,
                     unsafe_allow_html=True
                 )
@@ -777,9 +776,7 @@ with left:
         title="Signal Distribution"
     )
 
-    fig1.update_layout(
-        height=380
-    )
+    fig1.update_layout(height=420)
 
     st.plotly_chart(
         fig1,
@@ -799,9 +796,7 @@ with right:
         title="Risk Reward Opportunity Matrix"
     )
 
-    fig2.update_layout(
-        height=380
-    )
+    fig2.update_layout(height=420)
 
     st.plotly_chart(
         fig2,
@@ -809,16 +804,64 @@ with right:
     )
 
 # =========================================================
-# TABLE
+# TOP PICKS
+# =========================================================
+
+st.markdown("## 🚀 Top Institutional Opportunities")
+
+top_picks = results.sort_values(
+    "Final Score",
+    ascending=False
+).head(10)
+
+st.dataframe(
+
+    top_picks[[
+
+        "Symbol",
+        "Classification",
+        "Final Score",
+        "Expected Return 5D %",
+        "Expected Return 15D %",
+        "Expected Return 30D %",
+        "Suggested Hold Days"
+
+    ]],
+
+    use_container_width=True,
+    height=420
+
+)
+
+# =========================================================
+# FINAL TABLE
 # =========================================================
 
 st.markdown("## 🏦 Institutional Rankings")
 
+display_df = results.sort_values(
+    "Final Score",
+    ascending=False
+)
+
 st.dataframe(
-    results.sort_values(
+
+    display_df[[
+
+        "Symbol",
+        "CMP",
+        "Classification",
+        "Momentum",
+        "Sharpe",
         "Final Score",
-        ascending=False
-    ),
+        "Expected Return 5D %",
+        "Expected Return 15D %",
+        "Expected Return 30D %",
+        "Suggested Hold Days"
+
+    ]],
+
     use_container_width=True,
-    height=550
+    height=700
+
 )
