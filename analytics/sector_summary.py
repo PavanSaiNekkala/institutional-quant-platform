@@ -134,7 +134,7 @@ df["Sharpe"] = (
 
 df["FINAL_SCORE"] = (
 
-    df["Institutional Score"]
+    df["ALPHA_SCORE"]
 
     * 20
 )
