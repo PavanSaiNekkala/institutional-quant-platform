@@ -8,7 +8,7 @@ sys.path.append(str(ROOT_DIR))
 import numpy as np
 import pandas as pd
 
-from institutional_quant.analytics.portfolio_intelligence import (
+from analytics.portfolio_intelligence import (
     portfolio_report
 )
 

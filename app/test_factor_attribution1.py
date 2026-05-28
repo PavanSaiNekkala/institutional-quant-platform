@@ -8,7 +8,7 @@ sys.path.append(str(ROOT_DIR))
 import numpy as np
 import pandas as pd
 
-from institutional_quant.analytics.factor_attribution import (
+from analytics.factor_attribution import (
     attribution_report
 )
 

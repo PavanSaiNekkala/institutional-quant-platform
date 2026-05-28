@@ -8,7 +8,7 @@ sys.path.append(str(ROOT_DIR))
 import pandas as pd
 import numpy as np
 
-from institutional_quant.analytics.stress_scenarios import (
+from analytics.stress_scenarios import (
     stress_report
 )
 
