@@ -60,9 +60,19 @@ RESPONSIVE SIDEBAR
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
+
     min-width:240px !important;
     max-width:280px !important;
     width:18vw !important;
+
+    overflow:hidden !important;
+}
+
+section[data-testid="stSidebar"]{
+    position:fixed !important;
+    left:0;
+    top:0;
+    height:100vh !important;
 }
 
 section[data-testid="stSidebar"] > div{
@@ -307,7 +317,7 @@ with st.sidebar:
         matches = [
             s for s in stocks
             if search_stock.upper() in s.upper()
-        ][:15]
+        ][:5]
 
         if matches:
 
