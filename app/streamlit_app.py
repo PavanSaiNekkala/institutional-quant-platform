@@ -277,7 +277,7 @@ excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
 universe_df = pd.read_excel(excel_path)
 
 stocks = (
-    universe_df.iloc[:,0]
+    universe_df.iloc[:, 0]
     .dropna()
     .astype(str)
     .str.upper()
@@ -344,11 +344,11 @@ with st.sidebar:
 # =========================================================
 
 signal_colors = {
-    "STRONG_BUY":"#006400",
-    "BUY":"#32CD32",
-    "WATCH":"#F59E0B",
-    "HOLD":"#3B82F6",
-    "AVOID":"#DC2626"
+    "STRONG_BUY": "#006400",
+    "BUY": "#32CD32",
+    "WATCH": "#F59E0B",
+    "HOLD": "#3B82F6",
+    "AVOID": "#DC2626"
 }
 
 # =========================================================
@@ -395,7 +395,7 @@ def run_analysis(stock_list):
 
     for i in range(0, total, batch_size):
 
-        batch = stock_list[i:i+batch_size]
+        batch = stock_list[i:i + batch_size]
 
         try:
 
@@ -442,7 +442,7 @@ def run_analysis(stock_list):
 
                 sharpe = (
                     returns.mean()
-                    / max(returns.std(),0.0001)
+                    / max(returns.std(), 0.0001)
                 ) * np.sqrt(252)
 
                 score = (
@@ -466,15 +466,16 @@ def run_analysis(stock_list):
                     signal = "AVOID"
 
                 results.append({
-                    "Symbol":symbol,
-                    "CMP":safe_round(close.iloc[-1]),
-                    "Momentum":safe_round(momentum*100),
-                    "Sharpe":safe_round(sharpe),
-                    "Final Score":safe_round(score),
-                    "Classification":signal
+                    "Symbol": symbol,
+                    "CMP": safe_round(close.iloc[-1]),
+                    "Momentum": safe_round(momentum * 100),
+                    "Sharpe": safe_round(sharpe),
+                    "Final Score": safe_round(score),
+                    "Classification": signal
                 })
 
             except:
+
                 failed_stocks.append(symbol)
 
             progress_bar.progress(completed / total)
@@ -482,11 +483,11 @@ def run_analysis(stock_list):
             elapsed = (time.time() - start_time) / 60
 
             estimated_total = (
-                elapsed / max(completed,1)
+                elapsed / max(completed, 1)
             ) * total
 
             remaining_minutes = round(
-                max(estimated_total - elapsed,0),
+                max(estimated_total - elapsed, 0),
                 1
             )
 
@@ -571,13 +572,6 @@ def run_analysis(stock_list):
                                 {completed}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#10B981;
-                                    font-size:11px;
-                                ">
-                                out of {total}
-                                </div>
                             </div>
 
                             <div style="
@@ -603,13 +597,6 @@ def run_analysis(stock_list):
                                 {len(set(failed_stocks))}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#DC2626;
-                                    font-size:11px;
-                                ">
-                                failed stocks
-                                </div>
                             </div>
 
                             <div style="
@@ -635,13 +622,6 @@ def run_analysis(stock_list):
                                 {total}
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#2563EB;
-                                    font-size:11px;
-                                ">
-                                NSE Stocks
-                                </div>
                             </div>
 
                             <div style="
@@ -667,13 +647,6 @@ def run_analysis(stock_list):
                                 {remaining_minutes}m
                                 </div>
 
-                                <div style="
-                                    margin-top:2px;
-                                    color:#F59E0B;
-                                    font-size:11px;
-                                ">
-                                remaining
-                                </div>
                             </div>
 
                         </div>
@@ -784,7 +757,7 @@ if search_stock:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-k1,k2,k3,k4 = st.columns(4)
+k1, k2, k3, k4 = st.columns(4)
 
 with k1:
     st.metric("NSE Universe", len(stocks))
@@ -802,7 +775,7 @@ with k4:
 # CHARTS
 # =========================================================
 
-left,right = st.columns(2)
+left, right = st.columns(2)
 
 with left:
 
@@ -829,7 +802,7 @@ with left:
 
     fig1.update_layout(
         height=320,
-        margin=dict(l=10,r=10,t=40,b=10)
+        margin=dict(l=10, r=10, t=40, b=10)
     )
 
     st.plotly_chart(
@@ -852,7 +825,7 @@ with right:
 
     fig2.update_layout(
         height=320,
-        margin=dict(l=10,r=10,t=40,b=10)
+        margin=dict(l=10, r=10, t=40, b=10)
     )
 
     st.plotly_chart(
