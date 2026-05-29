@@ -369,11 +369,12 @@ def run_analysis(stock_list):
 
     results = []
 
-    failed_stocks = []
+    failed_stocks = set()
 
     total = len(stock_list)
 
-    completed = 0
+    processed = 0
+    successful = 0
 
     start_time = time.time()
 
@@ -402,20 +403,20 @@ def run_analysis(stock_list):
             for symbol in batch:
 
                 if symbol not in failed_stocks:
-                    failed_stocks.append(symbol)
+                    failed_stocks.add(symbol)
 
             continue
 
         for symbol in batch:
 
-            completed += 1
+            processed += 1
 
             try:
 
                 if symbol not in data.columns.levels[0]:
 
                     if symbol not in failed_stocks:
-                        failed_stocks.append(symbol)
+                        failed_stocks.add(symbol)
 
                     continue
 
@@ -424,7 +425,7 @@ def run_analysis(stock_list):
                 if len(close) < 40:
 
                     if symbol not in failed_stocks:
-                        failed_stocks.append(symbol)
+                        failed_stocks.add(symbol)
 
                     continue
 
@@ -472,11 +473,13 @@ def run_analysis(stock_list):
                     "Final Score": safe_round(score),
                     "Classification": signal
                 })
+                
+                successful += 1
 
             except:
 
                 if symbol not in failed_stocks:
-                    failed_stocks.append(symbol)
+                    failed_stocks.add(symbol)
 
 
             elapsed = (time.time() - start_time) / 60
@@ -491,7 +494,7 @@ def run_analysis(stock_list):
             )
 
             completion_pct = round(
-                (completed / total) * 100,
+                (processed / total) * 100,
                 1
             )
 
@@ -742,7 +745,9 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
                     st.html(status_html)
-
+                    
+    status_placeholder.empty()
+    
     return (
         pd.DataFrame(results),
         failed_stocks
