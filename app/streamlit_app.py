@@ -485,7 +485,7 @@ def run_analysis(stock_list):
             elapsed = (time.time() - start_time) / 60
 
             estimated_total = (
-                elapsed / max(completed,1)
+                elapsed / max(processed,1)
             ) * total
 
             remaining_minutes = round(
