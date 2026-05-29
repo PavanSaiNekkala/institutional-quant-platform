@@ -426,7 +426,157 @@ def run_analysis(stock_list):
         for symbol in batch:
 
             completed += 1
+            completion_pct = round(
+                (completed / total) * 100,
+                1
+            )
 
+            elapsed = (time.time() - start_time) / 60
+
+            estimated_total = (
+                elapsed / max(completed, 1)
+            ) * total
+
+            remaining_minutes = round(
+                max(estimated_total - elapsed, 0),
+                1
+            )
+            if completed % 10 == 0:
+
+                status_html = f"""
+                <div style="
+                background:white;
+                padding:20px;
+                border-radius:18px;
+                box-shadow:0 4px 15px rgba(0,0,0,.08);
+                margin-bottom:20px;
+                ">
+
+                    <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:15px;
+                    ">
+
+                        <div>
+
+                            <div style="
+                            font-size:28px;
+                            font-weight:800;
+                            color:#111827;
+                            ">
+                            📊 Institutional Processing Engine
+                            </div>
+
+                            <div style="
+                            font-size:14px;
+                            color:#6B7280;
+                            ">
+                            Real-Time Quant Processing
+                            </div>
+
+                        </div>
+
+                        <div style="
+                        background:#DBEAFE;
+                        color:#1D4ED8;
+                        padding:8px 14px;
+                        border-radius:10px;
+                        font-weight:700;
+                        ">
+                        LIVE
+                        </div>
+
+                    </div>
+
+                    <div style="
+                    display:grid;
+                    grid-template-columns:repeat(4,1fr);
+                    gap:12px;
+                    ">
+
+                        <div style="
+                        background:#ECFDF5;
+                        padding:15px;
+                        border-radius:12px;
+                        border-left:5px solid #10B981;
+                        ">
+                        <h3>{completed}</h3>
+                        Processed
+                        </div>
+
+                        <div style="
+                        background:#FEF2F2;
+                        padding:15px;
+                        border-radius:12px;
+                        border-left:5px solid #DC2626;
+                        ">
+                        <h3>{len(set(failed_stocks))}</h3>
+                        Failed
+                        </div>
+
+                        <div style="
+                        background:#EFF6FF;
+                        padding:15px;
+                        border-radius:12px;
+                        border-left:5px solid #2563EB;
+                        ">
+                        <h3>{total}</h3>
+                        Universe
+                        </div>
+
+                        <div style="
+                        background:#FFF7ED;
+                        padding:15px;
+                        border-radius:12px;
+                        border-left:5px solid #F59E0B;
+                        ">
+                        <h3>{remaining_minutes}m</h3>
+                        ETA
+                        </div>
+
+                    </div>
+
+                    <div style="
+                    margin-top:20px;
+                    width:100%;
+                    height:14px;
+                    background:#E5E7EB;
+                    border-radius:999px;
+                    overflow:hidden;
+                    ">
+
+                        <div style="
+                        width:{completion_pct}%;
+                        height:100%;
+                        background:linear-gradient(
+                        90deg,
+                        #2563EB,
+                        #10B981
+                        );
+                        ">
+                        </div>
+
+                    </div>
+
+                    <div style="
+                    text-align:right;
+                    margin-top:6px;
+                    font-weight:700;
+                    color:#2563EB;
+                    ">
+                    {completion_pct}%
+                    </div>
+
+                </div>
+                """
+
+                status_placeholder.markdown(
+                    status_html,
+                    unsafe_allow_html=True
+                )
+                
             try:
 
                 if symbol not in data.columns.levels[0]:
@@ -534,6 +684,8 @@ def run_analysis(stock_list):
 # =========================================================
 # RUN ANALYSIS
 # =========================================================
+
+status_placeholder = st.empty()
 
 filtered_df, failed_stocks = run_analysis(stocks)
 
