@@ -284,10 +284,6 @@ with st.sidebar:
             "WATCH",
             "HOLD",
             "AVOID"
-        ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
         ]
     )
 
@@ -366,7 +362,18 @@ def safe_round(x, n=2):
 # LOADING MESSAGE
 # =========================================================
 
-st.info("⚡ Running institutional analysis across full NSE universe...")
+st.markdown("""
+<div style="
+background:#EFF6FF;
+padding:18px;
+border-radius:14px;
+border-left:6px solid #2563EB;
+font-weight:700;
+color:#1E3A8A;
+">
+⚡ Running institutional analysis across full NSE universe...
+</div>
+""", unsafe_allow_html=True)
 
 # =========================================================
 # ANALYSIS ENGINE
@@ -374,8 +381,6 @@ st.info("⚡ Running institutional analysis across full NSE universe...")
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
-
-    progress_bar = st.progress(0)
 
     results = []
 
@@ -488,7 +493,6 @@ def run_analysis(stock_list):
                 if symbol not in failed_stocks:
                     failed_stocks.append(symbol)
 
-            progress_bar.progress(completed / total)
 
             elapsed = (time.time() - start_time) / 60
 
@@ -753,8 +757,6 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
                     st.html(status_html)
-
-    progress_bar.empty()
 
     return (
         pd.DataFrame(results),
