@@ -18,7 +18,7 @@ RANKINGS_FILE = (
 RS_FILE = (
     ROOT_DIR
     / "data"
-    / "relative_strength.csv"
+    / "institutional_rankings.csv"
 )
 
 SECTOR_RS_FILE = (

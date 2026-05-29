@@ -38,7 +38,7 @@ SECTOR_FILE = (
 REGIME_FILE = (
     ROOT_DIR
     / "data"
-    / "market_regime.csv"
+    / "market_regime_v2.csv"
 )
 
 OUTPUT_FILE = (
@@ -210,14 +210,37 @@ if len(rank_df) == 0:
 
 if liquidity_col:
 
-    rank_df = rank_df[
+    rank_df[liquidity_col] = pd.to_numeric(
+        rank_df[liquidity_col],
+        errors="coerce"
+    )
+
+    filtered_df = rank_df[
         rank_df[liquidity_col] > 0
     ]
 
-    print(
-        f"\n✅ Stocks After Liquidity Filter: "
-        f"{len(rank_df)}"
-    )
+    if len(filtered_df) > 0:
+
+        rank_df = filtered_df
+
+        print(
+            f"\n✅ Stocks After Liquidity Filter: "
+            f"{len(rank_df)}"
+        )
+
+    else:
+
+        print(
+            "\n⚠ Liquidity filter removed all stocks"
+        )
+
+        print(
+            "⚠ Continuing with original universe"
+        )
+
+        print(
+            f"⚠ Universe Size: {len(rank_df)}"
+        )
 
 # =========================================================
 # MERGE SECTOR SCORES

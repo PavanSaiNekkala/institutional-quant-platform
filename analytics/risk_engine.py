@@ -59,6 +59,77 @@ portfolio = pd.read_csv(PORTFOLIO_FILE)
 print("✅ Portfolio Loaded")
 
 # =========================================================
+# DETECT WEIGHT COLUMN
+# =========================================================
+
+portfolio.columns = (
+    portfolio.columns
+    .astype(str)
+    .str.strip()
+)
+
+weight_candidates = [
+
+    "FINAL_WEIGHT",
+
+    "WEIGHT",
+
+    "PORTFOLIO_WEIGHT",
+
+    "OPTIMAL_WEIGHT",
+
+    "ALLOC_WEIGHT"
+
+]
+
+weight_col = None
+
+for col in portfolio.columns:
+
+    if col.upper() in weight_candidates:
+
+        weight_col = col
+
+        break
+
+if weight_col is None:
+
+    raise Exception(
+
+        f"\n❌ Weight column not found.\n"
+        f"Available columns:\n"
+        f"{portfolio.columns.tolist()}"
+    )
+
+print(f"\n✅ Using Weight Column: {weight_col}")
+
+portfolio.columns = (
+    portfolio.columns
+    .astype(str)
+    .str.strip()
+)
+
+print("\n📊 Portfolio Columns:")
+print(portfolio.columns.tolist())
+
+if portfolio.empty:
+
+    raise Exception(
+        "\n❌ Portfolio file is empty"
+    )
+
+print("✅ Portfolio Loaded")
+
+if "Symbol" not in portfolio.columns:
+
+    raise Exception(
+
+        f"\n❌ Symbol column missing.\n"
+        f"Available columns:\n"
+        f"{portfolio.columns.tolist()}"
+    )
+
+# =========================================================
 # CLEAN SYMBOLS
 # =========================================================
 
@@ -81,10 +152,45 @@ portfolio["Symbol"] = (
 
 symbols = portfolio["Symbol"].tolist()
 
+portfolio.columns = [
+    str(c).strip()
+    for c in portfolio.columns
+]
+
+weight_col = None
+
+for col in portfolio.columns:
+
+    if col.upper() in [
+
+        "FINAL_WEIGHT",
+
+        "WEIGHT",
+
+        "PORTFOLIO_WEIGHT",
+
+        "OPTIMAL_WEIGHT",
+
+        "ALLOC_WEIGHT"
+
+    ]:
+
+        weight_col = col
+
+        break
+
+if weight_col is None:
+    raise Exception(
+        f"\n❌ Weight column not found.\n"
+        f"Available columns:\n"
+        f"{portfolio.columns.tolist()}"
+    )
+
+print(f"\n✅ Using Weight Column: {weight_col}")
+
 weights = (
-
-    portfolio["FINAL_WEIGHT"]
-
+    portfolio[weight_col]
+    .astype(float)
     / 100
 ).values
 
@@ -224,13 +330,18 @@ portfolio_cagr = (
 # SHARPE RATIO
 # =========================================================
 
-sharpe_ratio = (
+if portfolio_volatility > 0:
 
-    portfolio_cagr
+    sharpe_ratio = (
 
-    - RISK_FREE_RATE
+        portfolio_cagr
+        - RISK_FREE_RATE
 
-) / portfolio_volatility
+    ) / portfolio_volatility
+
+else:
+
+    sharpe_ratio = 0
 
 # =========================================================
 # MAX DRAWDOWN
@@ -285,12 +396,16 @@ benchmark_variance = np.var(
     benchmark_returns
 )
 
-beta = (
+if benchmark_variance > 0:
 
-    covariance
+    beta = (
+        covariance
+        / benchmark_variance
+    )
 
-    / benchmark_variance
-)
+else:
+
+    beta = 0
 
 # =========================================================
 # CORRELATION MATRIX
@@ -318,30 +433,38 @@ avg_correlation = (
 # SECTOR EXPOSURE
 # =========================================================
 
-sector_exposure = (
+if "Sector" in portfolio.columns:
 
-    portfolio
+    sector_exposure = (
 
-    .groupby("Sector")["FINAL_WEIGHT"]
+        portfolio
 
-    .sum()
+        .groupby("Sector")[weight_col]
 
-    .sort_values(
-        ascending=False
+        .sum()
+
+        .sort_values(
+            ascending=False
+        )
     )
-)
+
+else:
+
+    sector_exposure = pd.Series(
+        {"UNKNOWN": portfolio[weight_col].sum()}
+    )
 
 # =========================================================
 # POSITION CONCENTRATION
 # =========================================================
 
 max_position = (
-    portfolio["FINAL_WEIGHT"].max()
+    portfolio[weight_col].max()
 )
 
 top5_concentration = (
 
-    portfolio["FINAL_WEIGHT"]
+    portfolio[weight_col]
 
     .nlargest(5)
 
@@ -509,7 +632,7 @@ risk_report = portfolio.copy()
 
 risk_report["WEIGHT_RANK"] = (
 
-    risk_report["FINAL_WEIGHT"]
+    risk_report[weight_col]
 
     .rank(
         ascending=False

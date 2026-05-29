@@ -106,6 +106,12 @@ df = df.dropna(
     subset=required_cols
 )
 
+if len(df) == 0:
+
+    raise Exception(
+        "\n❌ No valid rows after cleaning"
+    )
+
 # =========================================================
 # CURRENT REGIME
 # =========================================================
@@ -124,11 +130,34 @@ print(
 # STATES & ACTIONS
 # =========================================================
 
-states = [
+REGIME_MAP = {
+
+    "NEUTRAL": "SIDEWAYS_LOW_VOL",
+
+    "SIDEWAYS": "SIDEWAYS_LOW_VOL",
+
+    "SIDEWAYS_LOW_VOL": "SIDEWAYS_LOW_VOL",
+
+    "SIDEWAYS_HIGH_VOL": "SIDEWAYS_HIGH_VOL",
+
+    "BULL": "BULL_EXPANSION",
+
+    "BULL_EXPANSION": "BULL_EXPANSION",
+
+    "BEAR": "BEAR_DISTRIBUTION",
+
+    "BEAR_CONTRACTION": "BEAR_DISTRIBUTION",
+
+    "BEAR_DISTRIBUTION": "BEAR_DISTRIBUTION",
+
+    "PANIC": "PANIC",
+
+    "RECOVERY": "RECOVERY"
+}
+
+STATES = [
 
     "BULL_EXPANSION",
-
-    "BULL_WEAKENING",
 
     "SIDEWAYS_LOW_VOL",
 
@@ -155,18 +184,29 @@ actions = [
 ]
 
 # =========================================================
+# NORMALIZE REGIME
+# =========================================================
+
+market_regime = REGIME_MAP.get(
+
+    str(market_regime)
+    .strip()
+    .upper(),
+
+    "SIDEWAYS_LOW_VOL"
+)
+
+# =========================================================
 # INITIALIZE Q TABLE
 # =========================================================
 
 q_table = pd.DataFrame(
 
-    0,
+    0.0,
 
-    index=states,
+    index=STATES,
 
-    columns=actions,
-
-    dtype=float
+    columns=actions
 )
 
 # =========================================================
@@ -249,9 +289,19 @@ print(
     "\n🧠 Training Reinforcement Allocation Agent..."
 )
 
+if len(df) == 0:
+
+    raise Exception(
+        "\n❌ No valid rows after cleaning data"
+    )
+
 for episode in range(EPISODES):
 
     current_state = market_regime
+
+    if current_state not in q_table.index:
+
+        current_state = "SIDEWAYS_LOW_VOL"
 
     sample_stock = df.sample(1).iloc[0]
 
@@ -320,13 +370,72 @@ for episode in range(EPISODES):
         action
     ] = new_q
 
+    # -----------------------------------------------------
+    # VALIDATE STATE
+    # -----------------------------------------------------
+
+    if current_state not in q_table.index:
+
+        print(
+            f"⚠ Unknown regime {current_state}"
+        )
+
+        current_state = q_table.index[0]
+
+    # -----------------------------------------------------
+    # NEXT MAX Q
+    # -----------------------------------------------------
+
+    next_max = (
+
+        q_table.loc[current_state]
+
+        .max()
+    )
+
+    new_q = (
+
+        old_q
+
+        +
+
+        LEARNING_RATE
+        *
+        (
+            reward
+            +
+            DISCOUNT_FACTOR
+            * next_max
+            -
+            old_q
+        )
+    )
+
+    q_table.loc[
+        current_state,
+        action
+    ] = new_q
+
 # =========================================================
 # BEST ACTIONS
 # =========================================================
 
+selected_state = REGIME_MAP.get(
+
+    str(market_regime)
+    .strip()
+    .upper(),
+
+    "SIDEWAYS_LOW_VOL"
+)
+
+if selected_state not in q_table.index:
+
+    selected_state = "SIDEWAYS_LOW_VOL"
+
 best_action = (
 
-    q_table.loc[market_regime]
+    q_table.loc[selected_state]
 
     .idxmax()
 )
@@ -446,19 +555,27 @@ df = df.sort_values(
 
 portfolio = df.head(TOP_N).copy()
 
-portfolio["WEIGHT"] = (
+total_score = portfolio[
+    "FINAL_RL_SCORE"
+].sum()
 
-    portfolio["FINAL_RL_SCORE"]
+if total_score == 0:
 
-    / portfolio["FINAL_RL_SCORE"].sum()
-)
+    portfolio["WEIGHT"] = (
 
-portfolio["WEIGHT"] = (
+        1.0
+        /
+        len(portfolio)
+    )
 
-    portfolio["WEIGHT"]
+else:
 
-    .round(4)
-)
+    portfolio["WEIGHT"] = (
+
+        portfolio["FINAL_RL_SCORE"]
+
+        / total_score
+    )
 
 portfolio["FINAL_RL_SCORE"] = (
 

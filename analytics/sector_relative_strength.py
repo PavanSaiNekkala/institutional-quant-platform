@@ -11,7 +11,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 RS_FILE = (
     ROOT_DIR
     / "data"
-    / "relative_strength.csv"
+    / "institutional_rankings.csv"
 )
 
 META_FILE = (

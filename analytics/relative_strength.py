@@ -194,12 +194,13 @@ if "Close" not in benchmark_df.columns:
         "\n❌ Benchmark Close column missing"
     )
 
-benchmark_close = (
+benchmark_close = benchmark_df["Close"]
 
-    benchmark_df["Close"]
+if isinstance(benchmark_close, pd.DataFrame):
 
-    .dropna()
-)
+    benchmark_close = benchmark_close.iloc[:, 0]
+
+benchmark_close = benchmark_close.dropna()
 
 # =========================================================
 # BENCHMARK RETURNS
@@ -286,12 +287,13 @@ def calculate_rs(symbol):
 
             return None
 
-        close = (
+        close = data["Close"]
 
-            data["Close"]
+        if isinstance(close, pd.DataFrame):
 
-            .dropna()
-        )
+            close = close.iloc[:, 0]
+
+        close = close.dropna()
 
         # =================================================
         # HISTORY CHECK
@@ -335,7 +337,7 @@ def calculate_rs(symbol):
 
             join="inner"
         )
-
+      
         combined.columns = [
 
             "STOCK",
@@ -453,21 +455,20 @@ def calculate_rs(symbol):
         # VOL ADJUSTED RS
         # =================================================
 
-        try:
+        if (
+            volatility is None
+            or pd.isna(volatility)
+            or volatility <= 0
+        ):
+
+            vol_adj_rs = 0
+
+        else:
 
             vol_adj_rs = round(
-
-                rs_data["RS_30D"]
-
-                / volatility,
-
+                rs_data["RS_30D"] / volatility,
                 2
             )
-
-        except:
-
-            vol_adj_rs = None
-
         # =================================================
         # RETURN OUTPUT
         # =================================================
@@ -558,6 +559,38 @@ with ThreadPoolExecutor(
 
 rs_df = pd.DataFrame(results)
 
+print(
+    "\n📊 Infinite VOL_ADJ_RS values:",
+    np.isinf(rs_df["VOL_ADJ_RS"]).sum()
+)
+
+numeric_cols = [
+
+    "RS_5D",
+    "RS_15D",
+    "RS_30D",
+    "RS_60D",
+    "RS_ACCELERATION",
+    "VOLATILITY",
+    "VOL_ADJ_RS"
+]
+
+for col in numeric_cols:
+
+    if col in rs_df.columns:
+
+        rs_df[col] = pd.to_numeric(
+            rs_df[col],
+            errors="coerce"
+        )
+
+        rs_df[col] = rs_df[col].replace(
+            [np.inf, -np.inf],
+            np.nan
+        )
+
+        rs_df[col] = rs_df[col].fillna(0)
+
 # =========================================================
 # EMPTY CHECK
 # =========================================================
@@ -619,6 +652,13 @@ rs_df["Institutional Score"] = (
 
     .round(2)
 )
+
+rs_df["Institutional Score"] = (
+    rs_df["Institutional Score"]
+    .fillna(0)
+    .round(2)
+)
+
 # =========================================================
 # SORT
 # =========================================================

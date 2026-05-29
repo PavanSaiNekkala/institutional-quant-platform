@@ -132,11 +132,14 @@ df["Sharpe"] = (
 # FINAL SCORE
 # =========================================================
 
+score_col = (
+    "ALPHA_SCORE"
+    if "ALPHA_SCORE" in df.columns
+    else "Institutional Score"
+)
+
 df["FINAL_SCORE"] = (
-
-    df["ALPHA_SCORE"]
-
-    * 20
+    df[score_col] * 20
 )
 
 # =========================================================
