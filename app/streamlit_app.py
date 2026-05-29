@@ -284,10 +284,6 @@ with st.sidebar:
             "WATCH",
             "HOLD",
             "AVOID"
-        ],
-        default=[
-            "STRONG_BUY",
-            "BUY"
         ]
     )
 
@@ -308,7 +304,7 @@ with st.sidebar:
         matches = [
             s for s in stocks
             if search_stock.upper() in s.upper()
-        ][:15]
+        ][:10]
 
         if matches:
 
@@ -387,7 +383,7 @@ def run_analysis(stock_list):
 
     start_time = time.time()
 
-    batch_size = 25
+    batch_size = 50
 
     status_placeholder = st.empty()
 
