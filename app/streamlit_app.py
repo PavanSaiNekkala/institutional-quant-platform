@@ -46,11 +46,10 @@ MAIN CONTAINER
 ===================================================== */
 
 .block-container{
-    padding-top:0.3rem !important;
-    padding-bottom:0.3rem !important;
+    padding-top:0.5rem !important;
+    padding-bottom:0.5rem !important;
     padding-left:1rem !important;
     padding-right:1rem !important;
-    max-width:100% !important;
 }
 
 /* =====================================================
@@ -61,29 +60,34 @@ section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
 
-    min-width:240px !important;
-    max-width:280px !important;
-    width:18vw !important;
+    min-width:260px !important;
+    max-width:260px !important;
+    width:260px !important;
 
     position:fixed !important;
     left:0;
     top:0;
 
     height:100vh !important;
-    overflow:hidden !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
 }
 
 section[data-testid="stSidebar"] > div{
     height:100vh !important;
-    overflow:hidden !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
 }
+
 /* =====================================================
 RESPONSIVE MAIN AREA
 ===================================================== */
 
-.main .block-container{
-    max-width:100% !important;
-    width:100% !important;
+@media (max-width:768px){
+
+    .main .block-container{
+        margin-left:0 !important;
+    }
 }
 
 /* =====================================================
@@ -188,11 +192,13 @@ MOBILE RESPONSIVE
 @media (max-width: 1200px){
 
     section[data-testid="stSidebar"]{
-        width:280px !important;
+        overflow-y:auto !important;
+        overflow-x:hidden !important;
     }
 
     section[data-testid="stSidebar"] > div{
-        width:280px !important;
+        overflow-y:auto !important;
+        overflow-x:hidden !important;
     }
 
 }
@@ -257,6 +263,14 @@ excel_path = (
     "valid_stocks.xlsx"
 )
 
+if not excel_path.exists():
+
+    st.error(
+        f"Dataset not found: {excel_path}"
+    )
+
+    st.stop()
+
 universe_df = pd.read_excel(excel_path)
 
 stocks = (
@@ -308,8 +322,10 @@ with st.sidebar:
 
         matches = [
             s for s in stocks
-            if search_stock.upper() in s.upper()
-        ][:5]
+            if s.upper().startswith(
+                search_stock.upper()
+            )
+        ][:10]
 
         if matches:
 
@@ -382,8 +398,6 @@ def run_analysis(stock_list):
 
     batch_size = 50
 
-    status_placeholder = st.empty()
-
     for i in range(0, total, batch_size):
 
         batch = stock_list[i:i+batch_size]
@@ -443,25 +457,39 @@ def run_analysis(stock_list):
                     / max(returns.std(), 0.0001)
                 ) * np.sqrt(252)
 
+                sharpe = np.clip(
+                    sharpe,
+                    -5,
+                    5
+                )
+
+                momentum_score = np.clip(
+                    momentum * 100,
+                    -100,
+                    100
+                )
+
+                sharpe_score = sharpe * 20
+
                 score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
+                    momentum_score * 0.5
+                    + sharpe_score * 0.5
                 )
 
                 # =====================================================
                 # SIGNAL CLASSIFICATION
                 # =====================================================
 
-                if score >= 1.5:
+                if score >= 40:
                     signal = "STRONG_BUY"
 
-                elif score >= 1.0:
+                elif score >= 20:
                     signal = "BUY"
 
-                elif score >= 0.6:
+                elif score >= 0:
                     signal = "WATCH"
 
-                elif score >= 0.2:
+                elif score >= -20:
                     signal = "HOLD"
 
                 else:
@@ -497,259 +525,7 @@ def run_analysis(stock_list):
                 (completed / total) * 100,
                 1
             )
-
-            if completed % 10 == 0:
-
-                status_html = f"""
-                <div class="processing-container" style="
-                    background:white;
-                    border-radius:18px;
-                    padding:12px;
-                    width:100%;
-                    box-sizing:border-box;
-                    box-shadow:0 6px 20px rgba(0,0,0,0.08);
-                    margin-top:8px;
-                    font-family:Segoe UI;
-                ">
-
-                <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    margin-bottom:14px;
-                ">
-
-                    <div>
-
-                        <div style="
-                            font-size:22px;
-                            font-weight:800;
-                            color:#111827;
-                        ">
-                        📊 Institutional Processing Engine
-                        </div>
-
-                        <div style="
-                            color:#6B7280;
-                            font-size:15px;
-                            margin-top:4px;
-                        ">
-                        Real-Time Quant Processing
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        background:#DBEAFE;
-                        color:#1D4ED8;
-                        padding:8px 14px;
-                        border-radius:10px;
-                        font-weight:800;
-                        font-size:12px;
-                    ">
-                    LIVE
-                    </div>
-
-                </div>
-
-                <div style="
-                    display:grid;
-                    grid-template-columns:
-                    repeat(auto-fit,minmax(180px,1fr));
-                    gap:12px;
-                ">
-
-                    <div style="
-                        background:#ECFDF5;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #10B981;
-                    ">
-                        <div style="
-                            color:#047857;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        COMPLETED
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:22px;
-                            font-weight:900;
-                            color:#065F46;
-                        ">
-                        {completed}
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#10B981;
-                            font-size:12px;
-                        ">
-                        out of {total}
-                        </div>
-                    </div>
-
-                    <div style="
-                        background:#FEF2F2;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #DC2626;
-                    ">
-                        <div style="
-                            color:#B91C1C;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        FAILED
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:22px;
-                            font-weight:900;
-                            color:#991B1B;
-                        ">
-                        {len(set(failed_stocks))}
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#DC2626;
-                            font-size:12px;
-                        ">
-                        failed stocks
-                        </div>
-                    </div>
-
-                    <div style="
-                        background:#EFF6FF;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #2563EB;
-                    ">
-                        <div style="
-                            color:#1D4ED8;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        UNIVERSE
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:22px;
-                            font-weight:900;
-                            color:#1E3A8A;
-                        ">
-                        {total}
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#2563EB;
-                            font-size:12px;
-                        ">
-                        NSE Stocks
-                        </div>
-                    </div>
-
-                    <div style="
-                        background:#FFF7ED;
-                        padding:16px;
-                        border-radius:14px;
-                        border-left:5px solid #F59E0B;
-                    ">
-                        <div style="
-                            color:#D97706;
-                            font-size:12px;
-                            font-weight:700;
-                        ">
-                        ETA
-                        </div>
-
-                        <div style="
-                            margin-top:8px;
-                            font-size:22px;
-                            font-weight:900;
-                            color:#92400E;
-                        ">
-                        {remaining_minutes}m
-                        </div>
-
-                        <div style="
-                            margin-top:2px;
-                            color:#F59E0B;
-                            font-size:12px;
-                        ">
-                        remaining
-                        </div>
-                    </div>
-
-                </div>
-
-                <div style="margin-top:18px;">
-
-                    <div style="
-                        display:flex;
-                        justify-content:space-between;
-                        margin-bottom:6px;
-                    ">
-
-                        <div style="
-                            color:#374151;
-                            font-weight:700;
-                            font-size:13px;
-                        ">
-                        Processing Progress
-                        </div>
-
-                        <div style="
-                            color:#2563EB;
-                            font-weight:800;
-                            font-size:13px;
-                        ">
-                        {completion_pct}%
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        width:100%;
-                        height:12px;
-                        background:#E5E7EB;
-                        border-radius:999px;
-                        overflow:hidden;
-                    ">
-
-                        <div style="
-                            width:{completion_pct}%;
-                            height:100%;
-                            background:
-                            linear-gradient(
-                                90deg,
-                                #2563EB,
-                                #10B981
-                            );
-                            border-radius:999px;
-                        ">
-                        </div>
-
-                    </div>
-
-                </div>
-
-                </div>
-                """
-
-                with status_placeholder:
-                    with st.expander(
-                        "⚙ Institutional Processing Details",
-                        expanded=False
-                    ):
-                        st.html(status_html)
-
+           
     return (
         pd.DataFrame(filtered_df),
         failed_stocks
@@ -892,7 +668,9 @@ unsafe_allow_html=True)
 filtered_df = filtered_df.copy()
 
 filtered_df["Percentile"] = (
-    filtered_df["Final Score"] * 100
+    filtered_df["Final Score"]
+    .rank(pct=True)
+    * 100
 )
 
 filtered_df = filtered_df[
@@ -917,11 +695,27 @@ if search_stock:
 if filtered_df.empty:
 
     st.warning(
-        "No stocks match filters. Showing full universe."
+        "No stocks match selected filters."
     )
 
-    filtered_df, _ = run_analysis(stocks)
+    st.stop()
+advancers = len(
+    filtered_df[
+        filtered_df["Momentum"] > 0
+    ]
+)
 
+decliners = len(
+    filtered_df[
+        filtered_df["Momentum"] <= 0
+    ]
+)
+
+breadth = round(
+    advancers /
+    max(decliners,1),
+    2
+)
 # =========================================================
 # KPI CARDS
 # =========================================================
@@ -950,7 +744,27 @@ with k4:
         "Failed Stocks",
         len(set(failed_stocks))
     )
+breadth_col1, breadth_col2, breadth_col3 = st.columns(3)
 
+with breadth_col1:
+    st.metric(
+        "📈 Advancers",
+        advancers
+    )
+
+with breadth_col2:
+    st.metric(
+        "📉 Decliners",
+        decliners
+    )
+
+with breadth_col3:
+    st.metric(
+        "⚖ A/D Ratio",
+        breadth
+    )
+
+st.markdown("---")
 # =========================================================
 # CHARTS
 # =========================================================
@@ -970,25 +784,26 @@ with left:
         "Count"
     ]
 
-    fig1 = px.pie(
-        signal_data,
-        names="Signal",
-        values="Count",
-        hole=0.6,
-        color="Signal",
-        color_discrete_map=signal_colors,
-        title="Signal Distribution"
-    )
+    if not signal_data.empty:
+        fig1 = px.pie(
+                signal_data,
+                names="Signal",
+                values="Count",
+                hole=0.6,
+                color="Signal",
+                color_discrete_map=signal_colors,
+                title="Signal Distribution"
+            )
 
-    fig1.update_layout(
-        height=300,
-        margin=dict(l=10,r=10,t=40,b=10)
-    )
+        fig1.update_layout(
+            height=300,
+            margin=dict(l=10,r=10,t=40,b=10)
+        )
 
-    st.plotly_chart(
-        fig1,
-        use_container_width=True
-    )
+        st.plotly_chart(
+            fig1,
+            use_container_width=True
+        )
 
 with right:
 
@@ -1001,6 +816,15 @@ with right:
         hover_name="Symbol",
         color_discrete_map=signal_colors,
         title="Risk Reward Opportunity Matrix"
+    )
+    fig2.add_hline(
+        y=0,
+        line_dash="dash"
+    )
+
+    fig2.add_vline(
+        x=0,
+        line_dash="dash"
     )
 
     fig2.update_layout(
@@ -1019,11 +843,20 @@ with right:
 
 st.markdown("## 🏦 Institutional Rankings")
 
-st.dataframe(
+csv = filtered_df.to_csv(index=False)
+
+st.download_button(
+    "📥 Download Rankings",
+    csv,
+    "institutional_rankings.csv",
+    "text/csv"
+)
+st.data_editor(
     filtered_df.sort_values(
         "Final Score",
         ascending=False
     ),
     use_container_width=True,
-    height=550
+    height=550,
+    disabled=filtered_df.columns.tolist()
 )
