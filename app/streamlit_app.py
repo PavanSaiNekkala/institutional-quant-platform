@@ -65,26 +65,18 @@ section[data-testid="stSidebar"]{
     max-width:280px !important;
     width:18vw !important;
 
-    overflow:hidden !important;
-}
-
-section[data-testid="stSidebar"]{
     position:fixed !important;
     left:0;
     top:0;
+
     height:100vh !important;
+    overflow:hidden !important;
 }
 
 section[data-testid="stSidebar"] > div{
-    min-width:240px !important;
-    max-width:280px !important;
-    width:18vw !important;
+    height:100vh !important;
+    overflow:hidden !important;
 }
-
-section[data-testid="stSidebar"] *{
-    color:white !important;
-}
-
 /* =====================================================
 RESPONSIVE MAIN AREA
 ===================================================== */
@@ -372,30 +364,13 @@ def safe_round(x, n=2):
         return 0
 
 # =========================================================
-# LOADING MESSAGE
-# =========================================================
-
-st.markdown("""
-<div style="
-background:#EFF6FF;
-padding:18px;
-border-radius:14px;
-border-left:6px solid #2563EB;
-font-weight:700;
-color:#1E3A8A;
-">
-⚡ Running institutional analysis across full NSE universe...
-</div>
-""", unsafe_allow_html=True)
-
-# =========================================================
 # ANALYSIS ENGINE
 # =========================================================
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
 
-    results = []
+    filtered_df = []
 
     failed_stocks = []
 
@@ -492,7 +467,7 @@ def run_analysis(stock_list):
                 else:
                     signal = "AVOID"
 
-                results.append({
+                filtered_df.append({
                     "Symbol": symbol,
                     "CMP": safe_round(close.iloc[-1]),
                     "Momentum": safe_round(momentum * 100),
@@ -776,7 +751,7 @@ def run_analysis(stock_list):
                         st.html(status_html)
 
     return (
-        pd.DataFrame(results),
+        pd.DataFrame(filtered_df),
         failed_stocks
     )
 
@@ -784,41 +759,168 @@ def run_analysis(stock_list):
 # RUN ANALYSIS
 # =========================================================
 
-results, failed_stocks = run_analysis(stocks)
+filtered_df, failed_stocks = run_analysis(stocks)
 
-if results.empty:
+if filtered_df.empty:
 
-    st.error("No valid results.")
+    st.error("No valid filtered_df.")
     st.stop()
+# =========================================================
+# FINAL PROCESSING SUMMARY
+# =========================================================
 
+st.markdown(f"""
+<div style="
+background:white;
+padding:20px;
+border-radius:18px;
+box-shadow:0 4px 15px rgba(0,0,0,.08);
+margin-bottom:20px;
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+">
+
+<div>
+
+<div style="
+font-size:28px;
+font-weight:800;
+color:#111827;
+">
+📊 Institutional Processing Engine
+</div>
+
+<div style="
+font-size:14px;
+color:#6B7280;
+">
+Real-Time Quant Processing Complete
+</div>
+
+</div>
+
+<div style="
+background:#DCFCE7;
+color:#166534;
+padding:8px 14px;
+border-radius:10px;
+font-weight:700;
+">
+COMPLETED
+</div>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+">
+
+<div style="
+background:#ECFDF5;
+padding:15px;
+border-radius:12px;
+">
+<h3>{len(filtered_df)}</h3>
+Processed
+</div>
+
+<div style="
+background:#FEF2F2;
+padding:15px;
+border-radius:12px;
+">
+<h3>{len(set(failed_stocks))}</h3>
+Failed
+</div>
+
+<div style="
+background:#EFF6FF;
+padding:15px;
+border-radius:12px;
+">
+<h3>{len(stocks)}</h3>
+Universe
+</div>
+
+<div style="
+background:#FFF7ED;
+padding:15px;
+border-radius:12px;
+">
+<h3>100%</h3>
+Completed
+</div>
+
+</div>
+
+<div style="
+margin-top:15px;
+width:100%;
+height:12px;
+background:#E5E7EB;
+border-radius:999px;
+overflow:hidden;
+">
+
+<div style="
+width:100%;
+height:100%;
+background:linear-gradient(
+90deg,
+#2563EB,
+#10B981
+);
+">
+</div>
+
+</div>
+
+</div>
+""",
+unsafe_allow_html=True)
 # =========================================================
 # FILTERS
 # =========================================================
 
-results["Percentile"] = (
-    results["Final Score"] * 100
+filtered_df = filtered_df.copy()
+
+filtered_df["Percentile"] = (
+    filtered_df["Final Score"] * 100
 )
 
-results = results[
-    results["Percentile"] >= min_score
+filtered_df = filtered_df[
+    filtered_df["Percentile"] >= min_score
 ]
 
 if signal_filter:
-
-    results = results[
-        results["Classification"]
+    filtered_df = filtered_df[
+        filtered_df["Classification"]
         .isin(signal_filter)
     ]
 
 if search_stock:
-
-    results = results[
-        results["Symbol"]
+    filtered_df = filtered_df[
+        filtered_df["Symbol"]
         .str.contains(
             search_stock.upper(),
             na=False
         )
     ]
+
+if filtered_df.empty:
+
+    st.warning(
+        "No stocks match filters. Showing full universe."
+    )
+
+    filtered_df, _ = run_analysis(stocks)
 
 # =========================================================
 # KPI CARDS
@@ -834,13 +936,13 @@ with k1:
 with k2:
     st.metric(
         "Processed Stocks",
-        len(results)
+        len(filtered_df)
     )
 
 with k3:
     st.metric(
         "Filtered Opportunities",
-        len(results)
+        len(filtered_df)
     )
 
 with k4:
@@ -858,7 +960,7 @@ left,right = st.columns(2)
 with left:
 
     signal_data = (
-        results["Classification"]
+        filtered_df["Classification"]
         .value_counts()
         .reset_index()
     )
@@ -891,7 +993,7 @@ with left:
 with right:
 
     fig2 = px.scatter(
-        results,
+        filtered_df,
         x="Momentum",
         y="Sharpe",
         color="Classification",
@@ -918,7 +1020,7 @@ with right:
 st.markdown("## 🏦 Institutional Rankings")
 
 st.dataframe(
-    results.sort_values(
+    filtered_df.sort_values(
         "Final Score",
         ascending=False
     ),
