@@ -498,7 +498,7 @@ def run_analysis(stock_list):
                 1
             )
 
-            if completed % 10 == 0:
+            if processed % 10 == 0:
 
                 status_html = f"""
                 <div class="processing-container" style="
@@ -570,7 +570,7 @@ def run_analysis(stock_list):
                             font-size:12px;
                             font-weight:700;
                         ">
-                        COMPLETED
+                        PROCESSED
                         </div>
 
                         <div style="
@@ -579,7 +579,7 @@ def run_analysis(stock_list):
                             font-weight:900;
                             color:#065F46;
                         ">
-                        {completed}
+                        {processed}
                         </div>
 
                         <div style="
