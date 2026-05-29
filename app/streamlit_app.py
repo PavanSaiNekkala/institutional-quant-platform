@@ -46,9 +46,11 @@ MAIN CONTAINER
 ===================================================== */
 
 .block-container{
-    padding-top:1rem;
-    padding-bottom:1rem;
-    max-width:100%;
+    padding-top:0.3rem !important;
+    padding-bottom:0.3rem !important;
+    padding-left:1rem !important;
+    padding-right:1rem !important;
+    max-width:100% !important;
 }
 
 /* =====================================================
@@ -58,15 +60,15 @@ RESPONSIVE SIDEBAR
 section[data-testid="stSidebar"]{
     background:#111827;
     border-right:1px solid #1F2937;
-    min-width:280px !important;
-    max-width:340px !important;
-    width:22vw !important;
+    min-width:240px !important;
+    max-width:280px !important;
+    width:18vw !important;
 }
 
 section[data-testid="stSidebar"] > div{
-    min-width:280px !important;
-    max-width:340px !important;
-    width:22vw !important;
+    min-width:240px !important;
+    max-width:280px !important;
+    width:18vw !important;
 }
 
 section[data-testid="stSidebar"] *{
@@ -151,7 +153,7 @@ METRICS
     background:white;
     border-radius:18px;
     padding:14px;
-    min-height:110px;
+    min-height:80px;
     box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
@@ -214,9 +216,11 @@ MOBILE RESPONSIVE
 
 st.markdown("""
 <div style="
-    font-size:42px;
-    font-weight:900;
-    color:#111827;
+font-size:22px;
+font-weight:800;
+color:#111827;
+margin-bottom:0;
+line-height:1;
 ">
 📊 Institutional Quant Platform
 </div>
@@ -224,9 +228,10 @@ st.markdown("""
 
 st.markdown("""
 <div style="
-    font-size:16px;
-    color:#6B7280;
-    margin-top:-6px;
+font-size:13px;
+color:#6B7280;
+margin-top:2px;
+margin-bottom:4px;
 ">
 Enterprise Institutional Analytics Dashboard
 </div>
@@ -237,8 +242,6 @@ india = pytz.timezone("Asia/Kolkata")
 st.caption(
     f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}"
 )
-
-st.markdown("---")
 
 # =========================================================
 # LOAD STOCKS
@@ -516,7 +519,7 @@ def run_analysis(stock_list):
                 <div class="processing-container" style="
                     background:white;
                     border-radius:18px;
-                    padding:20px;
+                    padding:12px;
                     width:100%;
                     box-sizing:border-box;
                     box-shadow:0 6px 20px rgba(0,0,0,0.08);
@@ -534,8 +537,8 @@ def run_analysis(stock_list):
                     <div>
 
                         <div style="
-                            font-size:30px;
-                            font-weight:900;
+                            font-size:22px;
+                            font-weight:800;
                             color:#111827;
                         ">
                         📊 Institutional Processing Engine
@@ -587,7 +590,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:8px;
-                            font-size:28px;
+                            font-size:22px;
                             font-weight:900;
                             color:#065F46;
                         ">
@@ -619,7 +622,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:8px;
-                            font-size:28px;
+                            font-size:22px;
                             font-weight:900;
                             color:#991B1B;
                         ">
@@ -651,7 +654,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:8px;
-                            font-size:28px;
+                            font-size:22px;
                             font-weight:900;
                             color:#1E3A8A;
                         ">
@@ -683,7 +686,7 @@ def run_analysis(stock_list):
 
                         <div style="
                             margin-top:8px;
-                            font-size:28px;
+                            font-size:22px;
                             font-weight:900;
                             color:#92400E;
                         ">
@@ -756,7 +759,11 @@ def run_analysis(stock_list):
                 """
 
                 with status_placeholder:
-                    st.html(status_html)
+                    with st.expander(
+                        "⚙ Institutional Processing Details",
+                        expanded=False
+                    ):
+                        st.html(status_html)
 
     return (
         pd.DataFrame(results),
@@ -862,7 +869,7 @@ with left:
     )
 
     fig1.update_layout(
-        height=380,
+        height=300,
         margin=dict(l=10,r=10,t=40,b=10)
     )
 
@@ -885,7 +892,7 @@ with right:
     )
 
     fig2.update_layout(
-        height=380,
+        height=300,
         margin=dict(l=10,r=10,t=40,b=10)
     )
 
