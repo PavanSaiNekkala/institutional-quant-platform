@@ -20,7 +20,11 @@ REGIME_FILE = (
     / "data"
     / "market_regime_v2.csv"
 )
-
+EXPECTED_FILE = (
+    ROOT_DIR
+    / "data"
+    / "expected_returns.csv"
+)
 OUTPUT_FILE = (
     ROOT_DIR
     / "data"
@@ -36,6 +40,8 @@ print("\n📥 Loading Data...")
 df = pd.read_csv(FACTOR_FILE)
 
 regime_df = pd.read_csv(REGIME_FILE)
+
+expected_df = pd.read_csv(EXPECTED_FILE)
 
 print("✅ Data Loaded")
 
@@ -372,6 +378,73 @@ portfolio["FINAL_WEIGHT"] = (
 )
 
 # =========================================================
+# EXPECTED RETURNS MERGE
+# =========================================================
+
+portfolio = pd.merge(
+
+    portfolio,
+
+    expected_df[
+        [
+            "Symbol",
+            "EXPECTED_RETURN_5D",
+            "EXPECTED_RETURN_15D",
+            "EXPECTED_RETURN_30D",
+            "EST_HOLD_DAYS",
+            "SIGNAL"
+        ]
+    ],
+
+    on="Symbol",
+
+    how="left"
+)
+# =========================================================
+# PORTFOLIO EXPECTED RETURN ANALYTICS
+# =========================================================
+
+portfolio_return_5d = round(
+
+    (
+        portfolio["FINAL_WEIGHT"]
+        *
+        portfolio["EXPECTED_RETURN_5D"]
+    ).sum(),
+
+    2
+)
+
+portfolio_return_15d = round(
+
+    (
+        portfolio["FINAL_WEIGHT"]
+        *
+        portfolio["EXPECTED_RETURN_15D"]
+    ).sum(),
+
+    2
+)
+
+portfolio_return_30d = round(
+
+    (
+        portfolio["FINAL_WEIGHT"]
+        *
+        portfolio["EXPECTED_RETURN_30D"]
+    ).sum(),
+
+    2
+)
+
+avg_hold_days = round(
+
+    portfolio["EST_HOLD_DAYS"].mean(),
+
+    0
+)
+
+# =========================================================
 # ROUNDING
 # =========================================================
 
@@ -447,6 +520,26 @@ print(
 print(
     f"Average Sharpe: "
     f"{avg_sharpe:.2f}"
+)
+
+print(
+    f"Expected 5D Return: "
+    f"{portfolio_return_5d}%"
+)
+
+print(
+    f"Expected 15D Return: "
+    f"{portfolio_return_15d}%"
+)
+
+print(
+    f"Expected 30D Return: "
+    f"{portfolio_return_30d}%"
+)
+
+print(
+    f"Average Hold Days: "
+    f"{avg_hold_days}"
 )
 
 print("\n🏆 TOP META STRATEGY HOLDINGS:\n")

@@ -44,6 +44,13 @@ def load_csv(file_name):
 factor_df = load_csv(
     "factor_model_rankings.csv"
 )
+if factor_df is None:
+
+    st.error(
+        "factor_model_rankings.csv missing"
+    )
+
+    st.stop()
 
 meta_df = load_csv(
     "meta_strategy_portfolio.csv"
@@ -64,7 +71,85 @@ execution_df = load_csv(
 ml_df = load_csv(
     "ml_alpha_predictions.csv"
 )
+expected_df = load_csv(
+    "expected_returns.csv"
+)
 
+required_files = {
+
+    "factor_model_rankings.csv": factor_df,
+
+    "meta_strategy_portfolio.csv": meta_df,
+
+    "reinforcement_portfolio.csv": rl_df,
+
+    "market_regime_v2.csv": regime_df,
+
+    "execution_simulation.csv": execution_df,
+
+    "ml_alpha_predictions.csv": ml_df,
+
+    "expected_returns.csv": expected_df
+}
+
+missing = [
+
+    name
+
+    for name, df in required_files.items()
+
+    if df is None
+]
+
+if missing:
+
+    st.error(
+
+        "Missing data files:\n\n"
+
+        + "\n".join(missing)
+    )
+
+    st.stop()
+
+ # =========================================================
+# DATA VALIDATION
+# =========================================================
+
+def validate_dataframe(
+    df,
+    name,
+    required_cols=None
+):
+
+    if df is None:
+
+        st.error(
+            f"❌ {name} file not found"
+        )
+
+        return False
+
+    if required_cols:
+
+        missing = [
+
+            c
+
+            for c in required_cols
+
+            if c not in df.columns
+        ]
+
+        if missing:
+
+            st.error(
+                f"❌ {name} missing columns: {missing}"
+            )
+
+            return False
+
+    return True   
 # =========================================================
 # SIDEBAR
 # =========================================================
@@ -80,6 +165,8 @@ page = st.sidebar.radio(
         "Dashboard",
 
         "Market Regime",
+
+        "Expected Returns",
 
         "Meta Strategy",
 
@@ -97,6 +184,17 @@ page = st.sidebar.radio(
 # =========================================================
 
 if page == "Dashboard":
+
+    if not validate_dataframe(
+        factor_df,
+        "Factor Rankings",
+        [
+            "MULTI_FACTOR_SCORE",
+            "Sharpe",
+            "Sector"
+        ]
+    ):
+        st.stop()
 
     st.title(
         "🏦 Institutional Quant Dashboard"
@@ -224,8 +322,17 @@ if page == "Dashboard":
 # =========================================================
 # MARKET REGIME
 # =========================================================
-
 elif page == "Market Regime":
+
+    if not validate_dataframe(
+        regime_df,
+        "Market Regime",
+        [
+            "MARKET_REGIME",
+            "MARKET_SCORE"
+        ]
+    ):
+        st.stop()
 
     st.title(
         "🌍 Institutional Regime Engine"
@@ -293,23 +400,159 @@ elif page == "Market Regime":
             )
 
 # =========================================================
+# EXPECTED RETURNS
+# =========================================================
+
+elif page == "Expected Returns":
+
+    if not validate_dataframe(
+        expected_df,
+        "Expected Returns",
+        [
+            "EXPECTED_RETURN_5D",
+            "EXPECTED_RETURN_15D",
+            "EXPECTED_RETURN_30D",
+            "EST_HOLD_DAYS",
+            "SIGNAL"
+        ]
+    ):
+        st.stop()
+
+    st.title(
+        "🎯 Expected Return Engine"
+    )
+
+    if expected_df is None:
+
+        st.error(
+            "expected_returns.csv not found"
+        )
+
+    else:
+
+        st.dataframe(
+            expected_df.sort_values(
+                "EXPECTED_RETURN_30D",
+                ascending=False
+            ),
+            use_container_width=True
+        )
+
+        st.subheader(
+            "Top 20 Expected Return Stocks"
+        )
+
+        top20 = expected_df.sort_values(
+            "EXPECTED_RETURN_30D",
+            ascending=False
+        ).head(20)
+
+        fig = px.bar(
+            top20,
+            x="Symbol",
+            y="EXPECTED_RETURN_30D",
+            hover_data=[
+                "EXPECTED_RETURN_5D",
+                "EXPECTED_RETURN_15D",
+                "EST_HOLD_DAYS"
+            ]
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+# =========================================================
 # META STRATEGY
 # =========================================================
 
 elif page == "Meta Strategy":
 
+    if not validate_dataframe(
+        meta_df,
+        "Meta Portfolio",
+        [
+            "FINAL_WEIGHT",
+            "EXPECTED_RETURN_30D",
+            "SIGNAL"
+        ]
+    ):
+        st.stop()
+
     st.title(
         "🧠 Meta Strategy Portfolio"
     )
 
-    st.dataframe(
-        meta_df,
-        use_container_width=True
+
+    # ==========================================
+    # PORTFOLIO KPIs
+    # ==========================================
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Expected 5D Return %",
+        round(
+            meta_df["EXPECTED_RETURN_5D"].mean(),
+            2
+        )
     )
 
-    # -----------------------------------------------------
-    # WEIGHT CHART
-    # -----------------------------------------------------
+    c2.metric(
+        "Expected 15D Return %",
+        round(
+            meta_df["EXPECTED_RETURN_15D"].mean(),
+            2
+        )
+    )
+
+    c3.metric(
+        "Expected 30D Return %",
+        round(
+            meta_df["EXPECTED_RETURN_30D"].mean(),
+            2
+        )
+    )
+
+    c4.metric(
+        "Avg Hold Days",
+        round(
+            meta_df["EST_HOLD_DAYS"].mean(),
+            0
+        )
+    )
+
+    st.divider()
+
+    display_cols = [
+
+        "Symbol",
+
+        "FINAL_WEIGHT",
+
+        "EXPECTED_RETURN_5D",
+
+        "EXPECTED_RETURN_15D",
+
+        "EXPECTED_RETURN_30D",
+
+        "EST_HOLD_DAYS",
+
+        "SIGNAL"
+    ]
+
+    st.dataframe(
+
+        meta_df[display_cols]
+
+        .sort_values(
+            "EXPECTED_RETURN_30D",
+            ascending=False
+        ),
+
+        use_container_width=True
+    )
 
     fig = px.pie(
 

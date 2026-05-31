@@ -38,6 +38,16 @@ PIPELINE = [
     },
 
     {
+        "script": "generate_metadata.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
+        "produces": [
+            "stock_metadata.csv"
+        ]
+    },
+
+    {
         "script": "sector_relative_strength.py",
         "requires": [
             "institutional_rankings.csv",
@@ -76,6 +86,16 @@ PIPELINE = [
         ],
         "produces": [
             "factor_model_rankings.csv"
+        ]
+    },
+
+    {
+        "script": "expected_return_engine.py",
+        "requires": [
+           "factor_model_rankings.csv"
+        ],
+        "produces": [
+            "expected_returns.csv"
         ]
     },
 
@@ -176,7 +196,10 @@ def validate_files(files):
 
         path = DATA_DIR / file
 
-        if not path.exists():
+        if (
+            not path.exists()
+            or path.stat().st_size == 0
+        ):
 
             missing.append(file)
 
@@ -253,7 +276,11 @@ def run_script(config):
         if result.stdout:
 
             print("\n📄 LOG:")
-            print(result.stdout[-4000:])
+            lines = result.stdout.splitlines()
+
+            print(
+                "\n".join(lines[-100:])
+            )
 
         return True
 
@@ -334,3 +361,12 @@ else:
 print(
     "\n🏦 Institutional Quant Platform Ready"
 )
+
+print("\nGenerated Files:")
+
+for file in DATA_DIR.glob("*.csv"):
+
+    print(
+        f"{file.name:<40}"
+        f"{round(file.stat().st_size/1024,2)} KB"
+    )

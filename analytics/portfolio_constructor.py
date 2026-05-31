@@ -15,7 +15,6 @@ MAX_SINGLE_WEIGHT = 0.10
 
 MIN_ALPHA_SCORE = 0
 
-TARGET_PORTFOLIO_VOL = 0.20
 
 # =========================================================
 # PATHS
@@ -29,10 +28,16 @@ RANKINGS_FILE = (
     / "cross_sectional_rankings.csv"
 )
 
+EXPECTED_RETURNS_FILE = (
+    ROOT_DIR
+    / "data"
+    / "expected_returns.csv"
+)
+
 REGIME_FILE = (
     ROOT_DIR
     / "data"
-    / "market_regime.csv"
+    / "market_regime_v2.csv"
 )
 
 OUTPUT_FILE = (
@@ -49,9 +54,46 @@ print("\n📥 Loading Data...")
 
 df = pd.read_csv(RANKINGS_FILE)
 
+expected_df = pd.read_csv(
+    EXPECTED_RETURNS_FILE
+)
+
 regime_df = pd.read_csv(REGIME_FILE)
 
 print("✅ Files Loaded")
+
+# =========================================================
+# MERGE EXPECTED RETURNS
+# =========================================================
+def clean_symbol(series):
+
+    return (
+        series.astype(str)
+        .str.replace(".NS", "", regex=False)
+        .str.upper()
+        .str.strip()
+    )
+
+df["Symbol"] = clean_symbol(
+    df["Symbol"]
+)
+
+expected_df["Symbol"] = clean_symbol(
+    expected_df["Symbol"]
+)
+
+if "Symbol" in expected_df.columns:
+
+    df = pd.merge(
+        df,
+        expected_df,
+        on="Symbol",
+        how="left"
+    )
+
+    print(
+        "✅ Expected Returns Merged"
+    )
 
 # =========================================================
 # MARKET REGIME
@@ -71,21 +113,25 @@ print(
 # REGIME EXPOSURE
 # =========================================================
 
-if market_regime == "RISK_ON":
+if market_regime == "TRENDING_BULL":
 
     gross_exposure = 1.00
 
-elif market_regime == "TRENDING_BULL":
+elif market_regime == "RANGE_BOUND":
 
-    gross_exposure = 0.80
+    gross_exposure = 0.70
 
-elif market_regime == "NEUTRAL":
+elif market_regime == "HIGH_VOLATILITY":
 
     gross_exposure = 0.50
 
-else:
+elif market_regime == "TRENDING_BEAR":
 
     gross_exposure = 0.25
+
+else:
+
+    gross_exposure = 0.50
 
 # =========================================================
 # FILTER STOCKS
@@ -301,10 +347,29 @@ final_cols = [
 
     "RS_60D",
 
+    "EXPECTED_RETURN_5D",
+
+    "EXPECTED_RETURN_15D",
+
+    "EXPECTED_RETURN_30D",
+
+    "EST_HOLD_DAYS",
+
+    "SIGNAL",
+
     "FINAL_WEIGHT"
 ]
 
-portfolio = portfolio[final_cols]
+available_cols = [
+
+    col
+    for col in final_cols
+    if col in portfolio.columns
+]
+
+portfolio = portfolio[
+    available_cols
+]
 
 # =========================================================
 # SAVE

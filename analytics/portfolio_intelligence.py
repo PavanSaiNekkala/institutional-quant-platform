@@ -47,6 +47,15 @@ OUTPUT_FILE = (
     / "portfolio_intelligence.csv"
 )
 
+EXPECTED_FILE = (
+    ROOT_DIR
+    / "data"
+    / "expected_returns.csv"
+)
+
+expected_df = pd.read_csv(
+    EXPECTED_FILE
+)
 # =========================================================
 # LOAD DATA
 # =========================================================
@@ -296,6 +305,7 @@ rank_df["SECTOR_SCORE"] = (
 print(
     "\n✅ Sector Scores Integrated"
 )
+
 # =========================================================
 # MARKET REGIME
 # =========================================================
@@ -495,6 +505,89 @@ portfolio["FINAL_WEIGHT"] = (
 )
 
 # =========================================================
+# EXPECTED RETURNS MERGE
+# =========================================================
+
+portfolio = pd.merge(
+
+    portfolio,
+
+    expected_df[
+        [
+            "Symbol",
+            "EXPECTED_RETURN_5D",
+            "EXPECTED_RETURN_15D",
+            "EXPECTED_RETURN_30D",
+            "EST_HOLD_DAYS",
+            "SIGNAL"
+        ]
+    ],
+
+    on="Symbol",
+
+    how="left"
+)
+
+# =========================================================
+# PORTFOLIO EXPECTED RETURNS
+# =========================================================
+
+portfolio["WEIGHTED_5D"] = (
+
+    portfolio["FINAL_WEIGHT"]
+
+    *
+
+    portfolio["EXPECTED_RETURN_5D"]
+)
+
+portfolio["WEIGHTED_15D"] = (
+
+    portfolio["FINAL_WEIGHT"]
+
+    *
+
+    portfolio["EXPECTED_RETURN_15D"]
+)
+
+portfolio["WEIGHTED_30D"] = (
+
+    portfolio["FINAL_WEIGHT"]
+
+    *
+
+    portfolio["EXPECTED_RETURN_30D"]
+)
+
+portfolio_return_5d = round(
+
+    portfolio["WEIGHTED_5D"].sum(),
+
+    2
+)
+
+portfolio_return_15d = round(
+
+    portfolio["WEIGHTED_15D"].sum(),
+
+    2
+)
+
+portfolio_return_30d = round(
+
+    portfolio["WEIGHTED_30D"].sum(),
+
+    2
+)
+
+avg_hold_days = round(
+
+    portfolio["EST_HOLD_DAYS"].mean(),
+
+    0
+)
+
+# =========================================================
 # VOL TARGETING
 # =========================================================
 
@@ -555,6 +648,22 @@ portfolio_health = {
     "TOTAL_STOCKS":
 
         len(portfolio),
+    
+        "EXPECTED_RETURN_5D":
+
+        portfolio_return_5d,
+
+    "EXPECTED_RETURN_15D":
+
+        portfolio_return_15d,
+
+    "EXPECTED_RETURN_30D":
+
+        portfolio_return_30d,
+
+    "AVG_HOLD_DAYS":
+
+        avg_hold_days,
 
     "AVG_AI_SCORE":
 
