@@ -1,5 +1,5 @@
 Metric,Value
-Mean Absolute Error,0.0098
-Training Samples,2057.0
-Testing Samples,515.0
+Mean Absolute Error,0.5229
+Training Samples,2044.0
+Testing Samples,512.0
 Feature Count,9.0
