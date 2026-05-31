@@ -370,24 +370,3 @@ for file in DATA_DIR.glob("*.csv"):
         f"{file.name:<40}"
         f"{round(file.stat().st_size/1024,2)} KB"
     )
-
-from datetime import datetime
-import pytz
-
-ist = pytz.timezone("Asia/Kolkata")
-now = datetime.now(ist)
-
-hour = now.hour
-
-# Market hours
-if 9 <= hour <= 15:
-    print("Market hours → Full pipeline")
-    run_full_pipeline()
-
-# After market
-elif hour in [0, 6, 12, 18]:
-    print("After market scheduled run → Full pipeline")
-    run_full_pipeline()
-
-else:
-    print("Skipping run")
