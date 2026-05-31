@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
+import sys
 
 from pathlib import Path
 
@@ -146,7 +147,19 @@ if isinstance(
     pd.MultiIndex
 ):
 
-    prices = prices["Close"]
+    if "Close" in prices.columns.levels[0]:
+
+        prices = prices["Close"]
+
+    elif "Adj Close" in prices.columns.levels[0]:
+
+        prices = prices["Adj Close"]
+
+    else:
+
+        raise Exception(
+            "Unable to locate Close prices."
+        )
 
 # =========================================================
 # CLEAN DATA
@@ -209,9 +222,15 @@ if BENCHMARK not in prices.columns:
             index=False
         )
 
-        exit()
+        sys.exit(0)
 
-    prices[BENCHMARK] = benchmark_df["Close"]
+    if "Close" in benchmark_df.columns:
+
+        prices[BENCHMARK] = benchmark_df["Close"]
+
+    else:
+
+        prices[BENCHMARK] = benchmark_df.iloc[:, 0]
 
 # =========================================================
 # RETURNS
@@ -468,18 +487,33 @@ if len(valid_stocks) < 20:
         "\nSkipping walk forward."
     )
 
-    exit()
+    sys.exit(0)
 if equity_curve.empty:
 
-    raise Exception(
-        "\n❌ Equity Curve Empty\n"
-        "No valid walk-forward windows generated.\n"
-        "Possible reasons:\n"
-        "- insufficient data\n"
-        "- invalid symbols\n"
-        "- benchmark mismatch\n"
-        "- no valid portfolio periods"
+    print(
+        "\n⚠ No valid walk-forward periods."
     )
+
+    pd.DataFrame({
+        "TOTAL_RETURN":[0],
+        "CAGR":[0],
+        "VOLATILITY":[0],
+        "SHARPE_RATIO":[0],
+        "MAX_DRAWDOWN":[0],
+        "WIN_RATE":[0],
+        "BENCHMARK_CAGR":[0],
+        "ALPHA":[0]
+    }).to_csv(
+        OUTPUT_FILE,
+        index=False
+    )
+
+    pd.DataFrame().to_csv(
+        EQUITY_CURVE_FILE,
+        index=False
+    )
+
+    sys.exit(0)
 
 # =========================================================
 # RETURNS
