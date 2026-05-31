@@ -2563,138 +2563,138 @@ ORTEL.NS,Communication Services,Entertainment,52763040
 JALAN.NS,Unknown,Unknown,45792244
 VASA.NS,Unknown,Unknown,38651952
 SANCO.NS,Industrials,Electrical Equipment & Parts,33525840
-PRADPME.NS,Unknown,Unknown,0
-ABGSEC.NS,Unknown,Unknown,0
-PML.NS,Unknown,Unknown,0
-ACSTECH.NS,Unknown,Unknown,0
-ABANSENT.NS,Unknown,Unknown,0
-PREMCO.NS,Unknown,Unknown,0
-ABMKNO.NS,Unknown,Unknown,0
-TATSILV.NS,Unknown,Unknown,0
-DEFENCE.NS,Unknown,Unknown,0
-SCANSTL.NS,Unknown,Unknown,0
-SAYAJIHOTL.NS,Consumer Cyclical,Lodging,0
-LICNFNHGP.NS,Unknown,Unknown,0
-TECH.NS,Unknown,Unknown,0
-TECHNVISN.NS,Unknown,Unknown,0
-TENNIND.NS,Consumer Cyclical,Auto Parts,0
-TCC.NS,Unknown,Unknown,0
-DAICHI.NS,Unknown,Unknown,0
-MMWL.NS,Communication Services,Entertainment,0
-BEEKAY.NS,Unknown,Unknown,0
-BENGALASM.NS,Unknown,Unknown,0
-MNC.NS,Unknown,Unknown,0
-MODEFENCE.NS,Unknown,Unknown,0
-MOCAPITAL.NS,Unknown,Unknown,0
-BFSI.NS,Unknown,Unknown,0
-BHARATCOAL.NS,Basic Materials,Coking Coal,0
-ULTRAMAR.NS,Basic Materials,Specialty Chemicals,0
 MERCANTILE.NS,Unknown,Unknown,0
-MENNPIS.NS,Unknown,Unknown,0
-CMPDI.NS,Basic Materials,Other Industrial Metals & Mining,0
-CONSUMER.NS,Unknown,Unknown,0
-BLIL.NS,Unknown,Unknown,0
-SAPPL.NS,Unknown,Unknown,0
-BLACKROSE.NS,Unknown,Unknown,0
-THACKER.NS,Unknown,Unknown,0
-CORONA.NS,Healthcare,Drug Manufacturers - General,0
-THAKDEV.NS,Unknown,Unknown,0
-BI.NS,Unknown,Unknown,0
-BIMETAL.NS,Consumer Cyclical,Auto Parts,0
-BIRLAPREC.NS,Unknown,Unknown,0
-COMFINTE.NS,Unknown,Unknown,0
-MAHKTECH.NS,Unknown,Unknown,0
-MADHAVIPL.NS,Unknown,Unknown,0
-MAFANG.NS,Unknown,Unknown,0
-CONS.NS,Unknown,Unknown,0
-RSDFIN.NS,Unknown,Unknown,0
-BNAGROCHEM.NS,Unknown,Unknown,0
-BNALTD.NS,Unknown,Unknown,0
-RRIL.NS,Unknown,Unknown,0
-MCCHRLS-B.NS,Unknown,Unknown,0
-COCKERILL.NS,Industrials,Metal Fabrication,0
-ZSARACOM.NS,Unknown,Unknown,0
-CHEMICAL.NS,Unknown,Unknown,0
-MAKEINDIA.NS,Unknown,Unknown,0
-MAJESAUT.NS,Real Estate,Real Estate Services,0
+INTERNET.NS,Unknown,Unknown,0
+INVPRECQ.NS,Unknown,Unknown,0
+TECH.NS,Unknown,Unknown,0
 MARC.NS,Unknown,Unknown,0
-PRAVEG.NS,Unknown,Unknown,0
-NEAGI.NS,Unknown,Unknown,0
-NPBET.NS,Unknown,Unknown,0
+TATSILV.NS,Unknown,Unknown,0
+TCC.NS,Unknown,Unknown,0
 NILE.NS,Unknown,Unknown,0
-VELJAN.NS,Unknown,Unknown,0
-MOSERVICE.NS,Unknown,Unknown,0
-MOREALTY.NS,Unknown,Unknown,0
 DISAQ.NS,Unknown,Unknown,0
-MOTOUR.NS,Unknown,Unknown,0
-KPL.NS,Unknown,Unknown,0
 DRAGARWQ.NS,Unknown,Unknown,0
-KOTIC.NS,Unknown,Unknown,0
-BAJAJST.NS,Unknown,Unknown,0
-MSCIINDIA.NS,Unknown,Unknown,0
-LAHOTIOV.NS,Unknown,Unknown,0
-MOIPO.NS,Unknown,Unknown,0
-QUINT.NS,Unknown,Unknown,0
-KANCHI.NS,Unknown,Unknown,0
-EMULTIMQ.NS,Unknown,Unknown,0
-KAMAHOLD.NS,Unknown,Unknown,0
-EMPOWER.NS,Unknown,Unknown,0
-SURYALA.NS,Unknown,Unknown,0
-EVINDIA.NS,Unknown,Unknown,0
-ESG.NS,Unknown,Unknown,0
-ARTEMISMED.NS,Unknown,Unknown,0
-FERMENTA.NS,Unknown,Unknown,0
-ASHIKA.NS,Unknown,Unknown,0
 ECAPINSURE.NS,Unknown,Unknown,0
-OMPOWER.NS,Industrials,Engineering & Construction,0
-RAJPALAYAM.NS,Unknown,Unknown,0
-NITTAGELA.NS,Basic Materials,Specialty Chemicals,0
-ASTAR.NS,Unknown,Unknown,0
+ELANTAS.NS,Basic Materials,Specialty Chemicals,0
+ELCIDIN.NS,Unknown,Unknown,0
 ELM250.NS,Unknown,Unknown,0
 ELITECON.NS,Unknown,Unknown,0
-ELCIDIN.NS,Unknown,Unknown,0
-ELANTAS.NS,Basic Materials,Specialty Chemicals,0
-SEIL.NS,Unknown,Unknown,0
-KLBRENG-B.NS,Unknown,Unknown,0
-NATIONSTD.NS,Unknown,Unknown,0
-AVAILFC.NS,Unknown,Unknown,0
-SELECTIPO.NS,Unknown,Unknown,0
-KIRANVYPAR.NS,Unknown,Unknown,0
-TAALTECH.NS,Unknown,Unknown,0
-TAMBOLIIN.NS,Unknown,Unknown,0
-SHRIKRISH.NS,Unknown,Unknown,0
-GNRL.NS,Unknown,Unknown,0
+ESG.NS,Unknown,Unknown,0
+EVINDIA.NS,Unknown,Unknown,0
+EMULTIMQ.NS,Unknown,Unknown,0
+EMPOWER.NS,Unknown,Unknown,0
+GUJRAFFIA.NS,Unknown,Unknown,0
+FRONTSP.NS,Unknown,Unknown,0
 FEDDERSHOL.NS,Unknown,Unknown,0
-SHINDL.NS,Unknown,Unknown,0
-GRAVISSHO.NS,Unknown,Unknown,0
+FERMENTA.NS,Unknown,Unknown,0
+MENNPIS.NS,Unknown,Unknown,0
 GRANDOAK.NS,Unknown,Unknown,0
-INTERNET.NS,Unknown,Unknown,0
+ULTRAMAR.NS,Basic Materials,Specialty Chemicals,0
+GNRL.NS,Unknown,Unknown,0
+GRAVISSHO.NS,Unknown,Unknown,0
+INDPRUD.NS,Unknown,Unknown,0
+HALDYNGL.NS,Unknown,Unknown,0
+KANCHI.NS,Unknown,Unknown,0
+KAMAHOLD.NS,Unknown,Unknown,0
+MOSERVICE.NS,Unknown,Unknown,0
+MOTOUR.NS,Unknown,Unknown,0
+MMWL.NS,Communication Services,Entertainment,0
+MNC.NS,Unknown,Unknown,0
+MOCAPITAL.NS,Unknown,Unknown,0
+MODEFENCE.NS,Unknown,Unknown,0
+MOIPO.NS,Unknown,Unknown,0
+HAWKINCOOK.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
+MOREALTY.NS,Unknown,Unknown,0
+KIRANVYPAR.NS,Unknown,Unknown,0
+HBESD.NS,Unknown,Unknown,0
+MCCHRLS-B.NS,Unknown,Unknown,0
+SHINDL.NS,Unknown,Unknown,0
+SONAL.NS,Unknown,Unknown,0
+SIKA.NS,Unknown,Unknown,0
+WELSPLSOL.NS,Unknown,Unknown,0
+AMIRCHAND.NS,Consumer Defensive,Farm Products,0
+3PLAND.NS,Unknown,Unknown,0
+ABMKNO.NS,Unknown,Unknown,0
+SINGERIND.NS,Unknown,Unknown,0
+ACSTECH.NS,Unknown,Unknown,0
+ABANSENT.NS,Unknown,Unknown,0
+ABGSEC.NS,Unknown,Unknown,0
+SHARDUL.NS,Financial Services,Capital Markets,0
+SHRIKRISH.NS,Unknown,Unknown,0
+ALPHA.NS,Unknown,Unknown,0
+SHBAJRG.NS,Unknown,Unknown,0
 IT.NS,Unknown,Unknown,0
 IWP.NS,Unknown,Unknown,0
-FRONTSP.NS,Unknown,Unknown,0
-AMBALALSA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,0
-GUJRAFFIA.NS,Unknown,Unknown,0
-AONETMMQ50.NS,Unknown,Unknown,0
-AONETOTAL.NS,Unknown,Unknown,0
-SHARDUL.NS,Financial Services,Capital Markets,0
-SHBAJRG.NS,Unknown,Unknown,0
-INVPRECQ.NS,Unknown,Unknown,0
-HALDYNGL.NS,Unknown,Unknown,0
+ZSARACOM.NS,Unknown,Unknown,0
+KPL.NS,Unknown,Unknown,0
+OMPOWER.NS,Industrials,Engineering & Construction,0
+TECHNVISN.NS,Unknown,Unknown,0
+DEFENCE.NS,Unknown,Unknown,0
+NEAGI.NS,Unknown,Unknown,0
+TAALTECH.NS,Unknown,Unknown,0
+DAICHI.NS,Unknown,Unknown,0
+MSCIINDIA.NS,Unknown,Unknown,0
+TAMBOLIIN.NS,Unknown,Unknown,0
+BIRLAPREC.NS,Unknown,Unknown,0
+BIMETAL.NS,Consumer Cyclical,Auto Parts,0
+BI.NS,Unknown,Unknown,0
+BLIL.NS,Unknown,Unknown,0
+BNALTD.NS,Unknown,Unknown,0
+BLACKROSE.NS,Unknown,Unknown,0
+CHEMICAL.NS,Unknown,Unknown,0
+BNAGROCHEM.NS,Unknown,Unknown,0
 PIONRINV.NS,Unknown,Unknown,0
-AMIRCHAND.NS,Consumer Defensive,Farm Products,0
-HBESD.NS,Unknown,Unknown,0
-SIKA.NS,Unknown,Unknown,0
-SINGERIND.NS,Unknown,Unknown,0
-INDPRUD.NS,Unknown,Unknown,0
-ALPHA.NS,Unknown,Unknown,0
-SONAL.NS,Unknown,Unknown,0
-AKCAPIT.NS,Unknown,Unknown,0
-HAWKINCOOK.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
-WELSPLSOL.NS,Unknown,Unknown,0
-WIMPLAST.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
-ZODIAC.NS,Unknown,Unknown,0
-WPIL.NS,Unknown,Unknown,0
-ZFSTEERING.NS,Consumer Cyclical,Auto Parts,0
-3PLAND.NS,Unknown,Unknown,0
+CMPDI.NS,Basic Materials,Other Industrial Metals & Mining,0
+SURYALA.NS,Unknown,Unknown,0
+CONSUMER.NS,Unknown,Unknown,0
+CONS.NS,Unknown,Unknown,0
+COMFINTE.NS,Unknown,Unknown,0
+PRADPME.NS,Unknown,Unknown,0
+PML.NS,Unknown,Unknown,0
+NITTAGELA.NS,Basic Materials,Specialty Chemicals,0
+NPBET.NS,Unknown,Unknown,0
+VELJAN.NS,Unknown,Unknown,0
+COCKERILL.NS,Industrials,Metal Fabrication,0
+CORONA.NS,Healthcare,Drug Manufacturers - General,0
+NATIONSTD.NS,Unknown,Unknown,0
+THACKER.NS,Unknown,Unknown,0
+TENNIND.NS,Consumer Cyclical,Auto Parts,0
+LAHOTIOV.NS,Unknown,Unknown,0
+MADHAVIPL.NS,Unknown,Unknown,0
+MAFANG.NS,Unknown,Unknown,0
+THAKDEV.NS,Unknown,Unknown,0
+KLBRENG-B.NS,Unknown,Unknown,0
+KOTIC.NS,Unknown,Unknown,0
+BFSI.NS,Unknown,Unknown,0
+QUINT.NS,Unknown,Unknown,0
 3BBLACKBIO.NS,Unknown,Unknown,0
+AONETOTAL.NS,Unknown,Unknown,0
+ASHIKA.NS,Unknown,Unknown,0
+ARTEMISMED.NS,Unknown,Unknown,0
+ASTAR.NS,Unknown,Unknown,0
+BENGALASM.NS,Unknown,Unknown,0
+BEEKAY.NS,Unknown,Unknown,0
+AVAILFC.NS,Unknown,Unknown,0
+BHARATCOAL.NS,Basic Materials,Coking Coal,0
+BAJAJST.NS,Unknown,Unknown,0
+RAJPALAYAM.NS,Unknown,Unknown,0
+PRAVEG.NS,Unknown,Unknown,0
+RRIL.NS,Unknown,Unknown,0
+PREMCO.NS,Unknown,Unknown,0
+RSDFIN.NS,Unknown,Unknown,0
+MAHKTECH.NS,Unknown,Unknown,0
+SCANSTL.NS,Unknown,Unknown,0
+SAYAJIHOTL.NS,Consumer Cyclical,Lodging,0
+SELECTIPO.NS,Unknown,Unknown,0
+SEIL.NS,Unknown,Unknown,0
+MAJESAUT.NS,Real Estate,Real Estate Services,0
+MAKEINDIA.NS,Unknown,Unknown,0
+LICNFNHGP.NS,Unknown,Unknown,0
+SAPPL.NS,Unknown,Unknown,0
+AMBALALSA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,0
+AONETMMQ50.NS,Unknown,Unknown,0
+AKCAPIT.NS,Unknown,Unknown,0
+ZODIAC.NS,Unknown,Unknown,0
+WIMPLAST.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
+ZFSTEERING.NS,Consumer Cyclical,Auto Parts,0
+WPIL.NS,Unknown,Unknown,0
 AARNAV.NS,Unknown,Unknown,0
