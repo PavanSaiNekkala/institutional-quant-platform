@@ -14,9 +14,9 @@ from concurrent.futures import (
 INPUT_FILE = "data/valid_stocks.xlsx"
 OUTPUT_FILE = "data/stock_metadata.csv"
 
-MAX_WORKERS = 3
-BATCH_SIZE = 20
-BATCH_DELAY = 10
+MAX_WORKERS = 5
+BATCH_SIZE = 25
+BATCH_DELAY = 5
 
 # =====================================================
 # LOAD STOCKS
@@ -50,11 +50,7 @@ symbols = (
 )
 
 symbols = [
-
-    s if s.endswith(".NS")
-
-    else f"{s}.NS"
-
+    str(s).upper().replace(".NS", "") + ".NS"
     for s in symbols
 ]
 
@@ -69,45 +65,63 @@ print(f"✅ Total Stocks: {TOTAL}")
 
 def fetch_metadata(symbol):
 
-    try:
+    for attempt in range(3):
 
-        ticker = yf.Ticker(symbol)
+        try:
 
-        info = ticker.info
+            ticker = yf.Ticker(symbol)
 
-        return {
+            info = ticker.info
 
-            "Symbol": symbol,
-
-            "Sector": info.get(
-                "sector",
-                "Unknown"
-            ),
-
-            "Industry": info.get(
-                "industry",
-                "Unknown"
-            ),
-
-            "MarketCap": info.get(
-                "marketCap",
-                0
+            sector = (
+                info.get("sector")
+                or info.get("sectorDisp")
+                or "Unknown"
             )
-        }
 
-    except Exception:
+            industry = (
+                info.get("industry")
+                or info.get("industryDisp")
+                or "Unknown"
+            )
 
-        return {
+            market_cap = (
+                info.get("marketCap")
+                or getattr(
+                    ticker,
+                    "fast_info",
+                    {}
+                ).get(
+                    "market_cap",
+                    0
+                )
+            )
 
-            "Symbol": symbol,
+            return {
 
-            "Sector": "Unknown",
+                "Symbol": symbol,
 
-            "Industry": "Unknown",
+                "Sector": sector,
 
-            "MarketCap": 0
-        }
+                "Industry": industry,
 
+                "MarketCap": market_cap
+            }
+
+        except Exception:
+
+            time.sleep(2)
+
+    return {
+
+        "Symbol": symbol,
+
+        "Sector": "Unknown",
+
+        "Industry": "Unknown",
+
+        "MarketCap": 0
+    }
 # =====================================================
 # PROCESS IN BATCHES
 # =====================================================
@@ -216,6 +230,20 @@ for batch_start in range(
 
 metadata = pd.DataFrame(results)
 
+metadata = metadata.drop_duplicates(
+    subset=["Symbol"]
+)
+
+metadata["MarketCap"] = pd.to_numeric(
+    metadata["MarketCap"],
+    errors="coerce"
+).fillna(0)
+
+metadata = metadata.sort_values(
+    "MarketCap",
+    ascending=False
+)
+
 metadata.to_csv(
     OUTPUT_FILE,
     index=False
@@ -228,8 +256,12 @@ metadata.to_csv(
 success = len(
 
     metadata[
-        metadata["Sector"]
-        != "Unknown"
+
+        (metadata["Sector"] != "Unknown")
+
+        &
+
+        (metadata["Industry"] != "Unknown")
     ]
 )
 

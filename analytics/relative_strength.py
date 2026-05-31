@@ -559,6 +559,11 @@ with ThreadPoolExecutor(
 
 rs_df = pd.DataFrame(results)
 
+rs_df["VOL_ADJ_RS"] = pd.to_numeric(
+    rs_df["VOL_ADJ_RS"],
+    errors="coerce"
+)
+
 print(
     "\n📊 Infinite VOL_ADJ_RS values:",
     np.isinf(rs_df["VOL_ADJ_RS"]).sum()
