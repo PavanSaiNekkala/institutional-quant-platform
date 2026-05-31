@@ -30,6 +30,28 @@ print("\n📥 Loading Ranking Data...")
 df = pd.read_csv(INPUT_FILE)
 
 print("✅ Ranking Data Loaded")
+print("\n===== FACTOR MODEL INPUT =====")
+
+print(
+    df[
+        [
+            "Symbol",
+            "Momentum",
+            "Sharpe"
+        ]
+    ].head(10)
+)
+
+print()
+
+print(
+    df[
+        [
+            "Momentum",
+            "Sharpe"
+        ]
+    ].describe()
+)
 
 # =========================================================
 # CLEAN COLUMNS

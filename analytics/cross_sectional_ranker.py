@@ -55,6 +55,19 @@ meta_df = pd.read_csv(META_FILE)
 
 print("✅ Files Loaded")
 
+print("\n===== RANK DF CHECK =====")
+print(
+    rank_df[
+        ["Symbol","Momentum","Sharpe"]
+    ].head(10)
+)
+
+print(
+    rank_df[
+        ["Momentum","Sharpe"]
+    ].describe()
+)
+
 # =========================================================
 # CLEAN SYMBOLS
 # =========================================================
@@ -94,6 +107,14 @@ print("\n🔄 Merging Data...")
 
 df = rank_df.copy()
 
+print("\n===== AFTER COPY =====")
+
+print(
+    df[
+        ["Symbol","Momentum","Sharpe"]
+    ].head(10)
+)
+
 df = pd.merge(
 
     df,
@@ -110,6 +131,27 @@ df = pd.merge(
     on="Symbol",
 
     how="left"
+)
+
+print("\n===== AFTER META MERGE =====")
+
+print(
+    df[
+        [
+            "Symbol",
+            "Momentum",
+            "Sharpe"
+        ]
+    ].head(10)
+)
+
+print(
+    df[
+        [
+            "Momentum",
+            "Sharpe"
+        ]
+    ].describe()
 )
 
 sector_cols = [
@@ -199,6 +241,13 @@ df[numeric_cols] = (
     .replace([np.inf, -np.inf], np.nan)
 
     .fillna(0)
+)
+print("\n===== AFTER NUMERIC CLEAN =====")
+
+print(
+    df[
+        ["Momentum","Sharpe"]
+    ].describe()
 )
 
 # =========================================================

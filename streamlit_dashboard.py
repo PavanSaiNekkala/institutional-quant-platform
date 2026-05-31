@@ -242,28 +242,66 @@ elif page == "Market Regime":
         "🌍 Institutional Regime Engine"
     )
 
-    st.dataframe(
-        regime_df,
-        use_container_width=True
-    )
+    if regime_df is None or len(regime_df) == 0:
 
-    regime = regime_df.iloc[0][
-        "MARKET_REGIME"
-    ]
+        st.error(
+            "market_regime_v2.csv not found or empty"
+        )
 
-    score = regime_df.iloc[0][
-        "REGIME_SCORE"
-    ]
+    else:
 
-    st.metric(
-        "Current Regime",
-        regime
-    )
+        st.dataframe(
+            regime_df,
+            use_container_width=True
+        )
 
-    st.metric(
-        "Regime Score",
-        score
-    )
+        # -----------------------------------------
+        # SAFE COLUMN ACCESS
+        # -----------------------------------------
+
+        regime = regime_df.iloc[0].get(
+            "MARKET_REGIME",
+            "UNKNOWN"
+        )
+
+        score = regime_df.iloc[0].get(
+            "MARKET_SCORE",
+            0
+        )
+
+        col1, col2 = st.columns(2)
+
+        col1.metric(
+            "Current Regime",
+            regime
+        )
+
+        col2.metric(
+            "Market Score",
+            score
+        )
+
+        # -----------------------------------------
+        # REGIME INTERPRETATION
+        # -----------------------------------------
+
+        if score >= 2:
+
+            st.success(
+                "Bullish Regime Detected"
+            )
+
+        elif score <= -2:
+
+            st.error(
+                "Bearish Regime Detected"
+            )
+
+        else:
+
+            st.warning(
+                "Neutral Market Regime"
+            )
 
 # =========================================================
 # META STRATEGY
