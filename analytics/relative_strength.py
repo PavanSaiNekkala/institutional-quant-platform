@@ -376,44 +376,50 @@ def calculate_rs(symbol):
                 continue
 
             stock_perf = (
-
-                (
-                    1 + combined["STOCK"]
-                )
-
+                (1 + combined["STOCK"])
                 .tail(window)
-
                 .prod()
             )
 
             benchmark_perf = (
-
-                (
-                    1 + combined["BENCHMARK"]
-                )
-
+                (1 + combined["BENCHMARK"])
                 .tail(window)
-
                 .prod()
             )
 
-            rs_score = (
+            # ==========================================
+            # SAFE RS CALCULATION
+            # ==========================================
 
-                (
+            if (
+                pd.isna(stock_perf)
+                or pd.isna(benchmark_perf)
+                or benchmark_perf <= 0
+            ):
+
+                rs_data[label] = 0
+
+            else:
+
+                rs_score = (
                     stock_perf
                     /
                     benchmark_perf
-                )
+                ) - 1
 
-                - 1
-            )
+                if (
+                    pd.isna(rs_score)
+                    or np.isinf(rs_score)
+                ):
 
-            rs_data[label] = round(
+                    rs_data[label] = 0
 
-                rs_score * 100,
+                else:
 
-                2
-            )
+                    rs_data[label] = round(
+                        rs_score * 100,
+                        2
+                    )
 
         # =================================================
         # RS ACCELERATION
@@ -559,6 +565,33 @@ with ThreadPoolExecutor(
 
 rs_df = pd.DataFrame(results)
 
+numeric_cols = [
+
+    "RS_5D",
+    "RS_15D",
+    "RS_30D",
+    "RS_60D",
+    "RS_ACCELERATION",
+    "VOLATILITY",
+    "VOL_ADJ_RS"
+]
+
+for col in numeric_cols:
+
+    if col in rs_df.columns:
+
+        rs_df[col] = pd.to_numeric(
+            rs_df[col],
+            errors="coerce"
+        )
+
+        rs_df[col] = rs_df[col].replace(
+            [np.inf, -np.inf],
+            np.nan
+        )
+
+        rs_df[col] = rs_df[col].fillna(0)
+
 rs_df["VOL_ADJ_RS"] = pd.to_numeric(
     rs_df["VOL_ADJ_RS"],
     errors="coerce"
@@ -615,40 +648,61 @@ rs_df = rs_df.drop_duplicates(
 )
 
 # =========================================================
+# MOMENTUM
+# =========================================================
+
+rs_df["Momentum"] = (
+
+    rs_df["RS_30D"] * 0.40 +
+
+    rs_df["RS_60D"] * 0.60
+)
+
+# =========================================================
+# SHARPE
+# =========================================================
+
+rs_df["Sharpe"] = np.where(
+
+    rs_df["VOLATILITY"] > 0,
+
+    rs_df["RS_60D"] /
+    rs_df["VOLATILITY"],
+
+    0
+)
+
+rs_df["Sharpe"] = (
+
+    rs_df["Sharpe"]
+
+    .replace(
+        [np.inf, -np.inf],
+        0
+    )
+
+    .fillna(0)
+
+    .round(2)
+)
+
+# =========================================================
 # INSTITUTIONAL SCORE
 # =========================================================
 
 rs_df["Institutional Score"] = (
 
-    (
-        rs_df["RS_30D"].rank(
-            pct=True
-        ) * 40
-    )
+    rs_df["Momentum"]
+    .rank(pct=True) * 35 +
 
-    +
+    rs_df["Sharpe"]
+    .rank(pct=True) * 25 +
 
-    (
-        rs_df["RS_60D"].rank(
-            pct=True
-        ) * 30
-    )
+    rs_df["RS_30D"]
+    .rank(pct=True) * 25 +
 
-    +
-
-    (
-        rs_df["RS_ACCELERATION"].rank(
-            pct=True
-        ) * 20
-    )
-
-    +
-
-    (
-        rs_df["VOL_ADJ_RS"].rank(
-            pct=True
-        ) * 10
-    )
+    rs_df["VOL_ADJ_RS"]
+    .rank(pct=True) * 15
 )
 
 rs_df["Institutional Score"] = (

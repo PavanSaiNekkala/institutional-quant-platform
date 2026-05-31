@@ -95,7 +95,7 @@ PIPELINE = [
             "ml_alpha_predictions.csv"
         ],
         "produces": [
-            "meta_strategy_output.csv"
+            "meta_strategy_portfolio.csv"
         ]
     },
 
@@ -103,7 +103,7 @@ PIPELINE = [
         "script": "reinforcement_allocator.py",
         "requires": [
             "ml_alpha_predictions.csv",
-            "market_regime.csv"
+            "market_regime_v2.csv"
         ],
         "produces": [
             "reinforcement_portfolio.csv"
@@ -126,7 +126,7 @@ PIPELINE = [
             "portfolio_allocation.csv"
         ],
         "produces": [
-            "risk_report.csv"
+            "portfolio_risk_report.csv"
         ]
     },
 
@@ -135,7 +135,7 @@ PIPELINE = [
         "requires": [
             "ml_alpha_predictions.csv",
             "sector_summary.csv",
-            "market_regime.csv"
+            "market_regime_v2.csv"
         ],
         "produces": [
             "portfolio_intelligence.csv"
@@ -146,10 +146,10 @@ PIPELINE = [
         "script": "execution_engine.py",
         "requires": [
             "portfolio_allocation.csv",
-            "risk_report.csv"
+            "portfolio_risk_report.csv"
         ],
         "produces": [
-            "execution_orders.csv"
+            "execution_simulation.csv"
         ]
     },
 
@@ -159,7 +159,7 @@ PIPELINE = [
             "cross_sectional_rankings.csv"
         ],
         "produces": [
-            "walk_forward_results.csv"
+            "walk_forward_equity_curve.csv"
         ]
     }
 ]
@@ -217,11 +217,8 @@ def run_script(config):
     try:
 
         result = subprocess.run(
-
             ["python", str(script_path)],
-
             capture_output=True,
-
             text=True
         )
 
@@ -262,10 +259,8 @@ def run_script(config):
 
     except Exception as e:
 
-        print(f"\n❌ EXCEPTION")
-
+        print("\n❌ EXCEPTION")
         print(str(e))
-
         return False
 
 # =========================================================
@@ -303,9 +298,7 @@ for config in PIPELINE:
 # =========================================================
 
 total_runtime = round(
-
     time.time() - pipeline_start,
-
     2
 )
 
