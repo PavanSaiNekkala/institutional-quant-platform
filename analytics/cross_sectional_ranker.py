@@ -92,16 +92,7 @@ meta_df["Symbol"] = clean_symbol(
 
 print("\n🔄 Merging Data...")
 
-df = pd.merge(
-
-    rank_df,
-
-    rs_df,
-
-    on="Symbol",
-
-    how="left"
-)
+df = rank_df.copy()
 
 df = pd.merge(
 
