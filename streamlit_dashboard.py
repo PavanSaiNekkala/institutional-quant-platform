@@ -108,34 +108,23 @@ if page == "Dashboard":
 
     col1, col2, col3, col4 = st.columns(4)
 
-    total_stocks = len(factor_df)
+    total_stocks = len(factor_df) if factor_df is not None else 0
 
     avg_score = round(
-
-        factor_df[
-            "MULTI_FACTOR_SCORE"
-        ].mean(),
-
+        factor_df["MULTI_FACTOR_SCORE"].mean(),
         2
-    )
+    ) if factor_df is not None else 0
 
     top_sector = (
-
         factor_df["Sector"]
-
         .value_counts()
-
         .idxmax()
-    )
+    ) if factor_df is not None and len(factor_df) else "N/A"
 
     avg_sharpe = round(
-
-        factor_df["Sharpe"]
-
-        .mean(),
-
+        factor_df["Sharpe"].mean(),
         2
-    )
+    ) if factor_df is not None else 0
 
     col1.metric(
         "Total Stocks",
