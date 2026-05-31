@@ -234,14 +234,31 @@ def run_script(config):
 
             print(f"   • {file}")
 
+        if config.get("optional", False):
+
+            print(
+                f"\n⚠ OPTIONAL MODULE SKIPPED: {script}"
+            )
+
+            return True
+    
         return False
 
     start = time.time()
+    
+    if not script_path.exists():
+
+        print(
+            f"\n❌ Script Not Found: "
+            f"{script}"
+        )
+
+        return False
 
     try:
 
         result = subprocess.run(
-            ["python", str(script_path)],
+            ["python", "-u", str(script_path)],
             capture_output=True,
             text=True
         )
@@ -277,6 +294,14 @@ def run_script(config):
 
                 print(f"   • {file}")
 
+            if config.get("optional", False):
+
+                print(
+                    f"\n⚠ OPTIONAL MODULE OUTPUT MISSING: {script}"
+                )
+
+                return True
+
             return False
 
         print(f"\n✅ SUCCESS")
@@ -296,9 +321,20 @@ def run_script(config):
     except Exception as e:
 
         print("\n❌ EXCEPTION")
-        print(str(e))
-        return False
 
+        print(
+            f"{type(e).__name__}: {e}"
+        )
+
+        if config.get("optional", False):
+
+            print(
+                f"\n⚠ OPTIONAL MODULE FAILED: {script}"
+            )
+
+            return True
+
+        return False
 # =========================================================
 # MAIN
 # =========================================================
