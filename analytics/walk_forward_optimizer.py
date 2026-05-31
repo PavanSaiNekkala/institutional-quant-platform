@@ -128,6 +128,15 @@ prices = yf.download(
     threads=True
 )
 
+print(
+    f"\nDownloaded Columns: "
+    f"{len(prices.columns)}"
+)
+
+print(
+    prices.columns[:20]
+)
+
 # =========================================================
 # FIX MULTIINDEX
 # =========================================================
@@ -160,9 +169,49 @@ prices = prices.dropna(
 
 if BENCHMARK not in prices.columns:
 
-    raise Exception(
-        "\n❌ Benchmark Data Missing"
+    print(
+        "\n⚠ Benchmark Missing."
+        "\nDownloading Benchmark Separately..."
     )
+
+    benchmark_df = yf.download(
+        BENCHMARK,
+        period=LOOKBACK_PERIOD,
+        auto_adjust=True,
+        progress=False
+    )
+
+    if benchmark_df.empty:
+
+        print(
+            "\n⚠ Unable to fetch benchmark."
+            "\nSkipping Walk Forward Optimizer."
+        )
+
+        empty = pd.DataFrame({
+            "TOTAL_RETURN":[0],
+            "CAGR":[0],
+            "VOLATILITY":[0],
+            "SHARPE_RATIO":[0],
+            "MAX_DRAWDOWN":[0],
+            "WIN_RATE":[0],
+            "BENCHMARK_CAGR":[0],
+            "ALPHA":[0]
+        })
+
+        empty.to_csv(
+            OUTPUT_FILE,
+            index=False
+        )
+
+        pd.DataFrame().to_csv(
+            EQUITY_CURVE_FILE,
+            index=False
+        )
+
+        exit()
+
+    prices[BENCHMARK] = benchmark_df["Close"]
 
 # =========================================================
 # RETURNS
@@ -404,7 +453,22 @@ equity_curve = pd.DataFrame({
 # =========================================================
 # VALIDATION
 # =========================================================
+valid_stocks = [
 
+    c
+
+    for c in prices.columns
+
+    if c != BENCHMARK
+]
+if len(valid_stocks) < 20:
+
+    print(
+        "\n⚠ Too few valid stocks."
+        "\nSkipping walk forward."
+    )
+
+    exit()
 if equity_curve.empty:
 
     raise Exception(
