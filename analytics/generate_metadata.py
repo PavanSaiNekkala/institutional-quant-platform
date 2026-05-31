@@ -15,8 +15,8 @@ INPUT_FILE = "data/valid_stocks.xlsx"
 OUTPUT_FILE = "data/stock_metadata.csv"
 
 MAX_WORKERS = 5
-BATCH_SIZE = 50
-BATCH_DELAY = 1
+BATCH_SIZE = 25
+BATCH_DELAY = 2
 
 # =====================================================
 # LOAD STOCKS
