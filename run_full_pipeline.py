@@ -180,7 +180,8 @@ PIPELINE = [
         ],
         "produces": [
             "walk_forward_equity_curve.csv"
-        ]
+        ],
+        "optional": True
     }
 ]
 
@@ -255,6 +256,14 @@ def run_script(config):
             print("\n❌ FAILED\n")
 
             print(result.stderr)
+
+            if config.get("optional", False):
+
+                print(
+                    f"\n⚠ OPTIONAL MODULE FAILED: {script}"
+                )
+
+                return True
 
             return False
 
