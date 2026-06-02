@@ -99,6 +99,47 @@ df = df.dropna(
 )
 
 # =========================================================
+# ENTRY QUALITY MERGE
+# =========================================================
+
+ENTRY_FILE = (
+    ROOT_DIR
+    / "data"
+    / "entry_quality_scores.csv"
+)
+
+if ENTRY_FILE.exists():
+
+    entry_df = pd.read_csv(
+        ENTRY_FILE
+    )
+
+    df = df.merge(
+
+        entry_df[
+            [
+                "Symbol",
+                "ENTRY_SCORE"
+            ]
+        ],
+
+        on="Symbol",
+
+        how="left"
+    )
+
+    df["ENTRY_SCORE"] = (
+
+        df["ENTRY_SCORE"]
+
+        .fillna(0)
+    )
+
+else:
+
+    df["ENTRY_SCORE"] = 0
+
+# =========================================================
 # FACTOR ENGINE
 # =========================================================
 
@@ -229,6 +270,19 @@ else:
 
     df["FACTOR_SECTOR"] = 50
 
+# ---------------------------------------------------------
+# ENTRY FACTOR
+# ---------------------------------------------------------
+
+df["FACTOR_ENTRY"] = (
+
+    df["ENTRY_SCORE"]
+
+    .rank(pct=True)
+
+    * 100
+)
+
 # =========================================================
 # FINAL FACTOR MODEL SCORE
 # =========================================================
@@ -236,13 +290,13 @@ else:
 df["MULTI_FACTOR_SCORE"] = (
 
     (
-        df["FACTOR_ALPHA"] * 0.25
+        df["FACTOR_ALPHA"] * 0.20
     )
 
     +
 
     (
-        df["FACTOR_MOMENTUM"] * 0.20
+        df["FACTOR_MOMENTUM"] * 0.15
     )
 
     +
@@ -254,7 +308,7 @@ df["MULTI_FACTOR_SCORE"] = (
     +
 
     (
-        df["FACTOR_SHARPE"] * 0.15
+        df["FACTOR_SHARPE"] * 0.10
     )
 
     +
@@ -267,6 +321,12 @@ df["MULTI_FACTOR_SCORE"] = (
 
     (
         df["FACTOR_SECTOR"] * 0.10
+    )
+
+    +
+
+    (
+        df["FACTOR_ENTRY"] * 0.15
     )
 
 )
@@ -306,6 +366,8 @@ score_cols = [
     "FACTOR_LOW_VOL",
 
     "FACTOR_SECTOR",
+    
+    "FACTOR_ENTRY",
 
     "MULTI_FACTOR_SCORE"
 
