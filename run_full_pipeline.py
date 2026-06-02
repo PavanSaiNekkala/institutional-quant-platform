@@ -50,7 +50,7 @@ PIPELINE = [
         "produces": [
             "entry_quality_scores.csv"
         ]
-    }
+    },
 
     {
         "script": "liquidity_engine.py",
