@@ -310,6 +310,50 @@ if page == "Dashboard":
         "Avg Sharpe",
         avg_sharpe
     )
+    
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+    with col1:
+        st.metric(
+            "Stocks Universe",
+            len(factor_df)
+        )
+
+    with col2:
+        st.metric(
+            "Avg Factor Score",
+            round(
+                factor_df["MULTI_FACTOR_SCORE"].mean(),
+                2
+            )
+        )
+
+    with col3:
+        st.metric(
+            "Avg Sharpe",
+            round(
+                factor_df["SHARPE"].mean(),
+                2
+            )
+        )
+
+    with col4:
+        st.metric(
+            "Expected Return (30D)",
+            f"{portfolio_df['EXPECTED_RETURN_30D'].mean():.2f}%"
+        )
+
+    with col5:
+        st.metric(
+            "Portfolio Volatility",
+            f"{portfolio_df['VOLATILITY'].mean():.2f}%"
+        )
+
+    with col6:
+        st.metric(
+            "Holdings",
+            len(portfolio_df)
+        )
 
     st.divider()
     # -----------------------------------------------------
