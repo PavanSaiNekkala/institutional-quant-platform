@@ -969,3 +969,89 @@ elif page == "Execution Analytics":
         fig,
         use_container_width=True
     )
+
+# =========================================================
+# PERFORMANCE ANALYTICS
+# =========================================================
+
+elif page == "Performance Analytics":
+
+    st.title("📊 Performance Analytics")
+
+    if equity_curve_df is None:
+
+        st.error(
+            "walk_forward_equity_curve.csv missing"
+        )
+
+    else:
+
+        initial = equity_curve_df[
+            "Portfolio_Value"
+        ].iloc[0]
+
+        final = equity_curve_df[
+            "Portfolio_Value"
+        ].iloc[-1]
+
+        total_return = (
+            (final / initial) - 1
+        ) * 100
+
+        c1, c2 = st.columns(2)
+
+        c1.metric(
+            "Starting Value",
+            f"${initial:,.0f}"
+        )
+
+        c2.metric(
+            "Total Return",
+            f"{total_return:.2f}%"
+        )
+
+        fig = px.line(
+            equity_curve_df,
+            x="Date",
+            y="Portfolio_Value",
+            title="Portfolio Growth"
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+# =========================================================
+# PIPELINE HEALTH
+# =========================================================
+
+elif page == "Pipeline Health":
+
+    st.title("🛠 Pipeline Health")
+
+    if health_df is None:
+
+        st.error("pipeline_health.csv not found")
+
+    else:
+
+        st.dataframe(
+            health_df,
+            use_container_width=True
+        )
+
+        if (
+            "Status" in health_df.columns
+            and "Component" in health_df.columns
+        ):
+
+            fig = px.pie(
+                health_df,
+                names="Status",
+                title="Pipeline Status Distribution"
+            )
+
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
