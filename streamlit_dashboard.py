@@ -1067,12 +1067,6 @@ elif page == "Pipeline Health":
             and "Component" in health_df.columns
         ):
 
-            fig = px.pie(
-                health_df,
-                names="Status",
-                title="Pipeline Status Distribution"
-            )
-
             fig = px.line(
                 health_df,
                 x="TIMESTAMP",
