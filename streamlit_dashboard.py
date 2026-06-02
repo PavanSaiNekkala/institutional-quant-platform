@@ -1029,53 +1029,42 @@ elif page == "Pipeline Health":
 
     st.title("🛠 Pipeline Health")
 
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric(
-        "Pipeline Runs",
-        len(health_df)
-    )
-
-    c2.metric(
-        "Success Rate",
-        f"{health_df['SUCCESS'].mean()*100:.1f}%"
-    )
-
-    c3.metric(
-        "Avg Runtime",
-        f"{health_df['RUNTIME_SEC'].mean():.0f}s"
-    )
-
-    st.dataframe(
-        health_df,
-        use_container_width=True
-    )
-
     if health_df is None:
 
         st.error("pipeline_health.csv not found")
 
     else:
 
+        c1, c2, c3 = st.columns(3)
+
+        c1.metric(
+            "Pipeline Runs",
+            len(health_df)
+        )
+
+        c2.metric(
+            "Success Rate",
+            f"{health_df['SUCCESS'].mean()*100:.1f}%"
+        )
+
+        c3.metric(
+            "Avg Runtime",
+            f"{health_df['RUNTIME_SEC'].mean():.0f}s"
+        )
+
+        fig = px.line(
+            health_df,
+            x="TIMESTAMP",
+            y="RUNTIME_SEC",
+            title="Pipeline Runtime Trend"
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
         st.dataframe(
             health_df,
             use_container_width=True
         )
-
-        if (
-            "Status" in health_df.columns
-            and "Component" in health_df.columns
-        ):
-
-            fig = px.line(
-                health_df,
-                x="TIMESTAMP",
-                y="RUNTIME_SEC",
-                title="Pipeline Runtime Trend"
-            )
-
-            st.plotly_chart(
-                fig,
-                use_container_width=True
-            )
-
