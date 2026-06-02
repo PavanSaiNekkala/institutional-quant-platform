@@ -332,7 +332,7 @@ if page == "Dashboard":
         st.metric(
             "Avg Sharpe",
             round(
-                factor_df["SHARPE"].mean(),
+                factor_df["Sharpe"].mean(),
                 2
             )
         )
