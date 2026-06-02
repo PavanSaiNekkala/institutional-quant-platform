@@ -164,6 +164,17 @@ PIPELINE = [
             "strategy_versions.csv"
         ],
         "optional": True
+    },
+    
+    {
+        "script": "capacity_analysis_engine.py",
+        "requires": [
+            "optimised_portfolio.csv",
+            "factor_model_rankings.csv"
+        ],
+        "produces": [
+            "capacity_report.csv"
+        ]
     }
 ]
 
