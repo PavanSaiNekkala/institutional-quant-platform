@@ -163,7 +163,33 @@ def validate_dataframe(
 
             return False
 
-    return True   
+    return True
+
+# ---------------------------
+# Sidebar Page Visibility
+# ---------------------------
+
+ALL_PAGES = [
+    "Dashboard",
+    "Market Regime",
+    "Expected Returns",
+    "Live Signals",
+    "Portfolio Intelligence",
+    "Portfolio Performance",
+    "Meta Strategy",
+    "Reinforcement Learning",
+    "ML Alpha",
+    "Execution Analytics",
+    "Performance Analytics",
+    "Pipeline Health"
+]
+
+with st.sidebar.expander("⚙️ Customize Sidebar", expanded=False):
+    visible_pages = st.multiselect(
+        "Show Pages",
+        ALL_PAGES,
+        default=ALL_PAGES
+    )
 # =========================================================
 # SIDEBAR
 # =========================================================
@@ -226,36 +252,8 @@ signals_df = signals_df.sort_values(
 )
 
 page = st.sidebar.radio(
-
     "Navigation",
-
-    [
-
-        "Dashboard",
-
-        "Market Regime",
-
-        "Expected Returns",
-
-        "Live Signals",
-                 
-        "Portfolio Intelligence",
-        
-        "Portfolio Performance",
-
-        "Meta Strategy",
-
-        "Reinforcement Learning",
-
-        "ML Alpha",
-
-        "Execution Analytics",
-        
-        "Performance Analytics",
-        
-        "Pipeline Health"
-
-    ]
+    visible_pages
 )
 
 # =========================================================
