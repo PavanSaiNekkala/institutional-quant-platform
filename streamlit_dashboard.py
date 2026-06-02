@@ -766,7 +766,7 @@ elif page == "Top Decile Stocks":
 
     top_decile_df = factor_df[
         factor_df["MULTI_FACTOR_SCORE"]
-        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.98)
+        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.99)
     ]
 
     st.dataframe(
