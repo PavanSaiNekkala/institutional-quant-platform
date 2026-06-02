@@ -1,0 +1,453 @@
+import pandas as pd
+from pathlib import Path
+from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font
+
+# =========================================================
+# PATHS
+# =========================================================
+
+ROOT = Path(__file__).resolve().parent.parent
+
+DATA_DIR = ROOT / "data"
+
+REPORT_DIR = ROOT / "reports"
+
+REPORT_DIR.mkdir(
+    exist_ok=True
+)
+
+OUTPUT_FILE = (
+    REPORT_DIR
+    / "monthly_factsheet.xlsx"
+)
+
+# =========================================================
+# HELPER
+# =========================================================
+
+def safe_load(file_name):
+
+    file_path = DATA_DIR / file_name
+
+    if not file_path.exists():
+
+        print(
+            f"⚠ Missing: {file_name}"
+        )
+
+        return None
+
+    try:
+
+        return pd.read_csv(
+            file_path
+        )
+
+    except Exception as e:
+
+        print(
+            f"⚠ Failed loading {file_name}: {e}"
+        )
+
+        return None
+
+
+# =========================================================
+# LOAD FILES
+# =========================================================
+
+print(
+    "\n📥 Loading Factsheet Inputs..."
+)
+
+regime_df = safe_load(
+    "market_regime.csv"
+)
+
+portfolio_df = safe_load(
+    "optimised_portfolio.csv"
+)
+
+risk_df = safe_load(
+    "portfolio_risk_report.csv"
+)
+
+factor_df = safe_load(
+    "factor_attribution.csv"
+)
+
+rebalance_df = safe_load(
+    "rebalance_plan.csv"
+)
+
+stoploss_df = safe_load(
+    "stoploss_signals.csv"
+)
+
+stats_df = safe_load(
+    "walk_forward_stats.csv"
+)
+
+# =========================================================
+# WORKBOOK
+# =========================================================
+
+wb = Workbook()
+
+cover = wb.active
+
+cover.title = "Factsheet"
+
+# =========================================================
+# COVER
+# =========================================================
+
+cover["A1"] = (
+    "Institutional Quant Alpha"
+)
+
+cover["A1"].font = Font(
+    size=18,
+    bold=True
+)
+
+cover["A3"] = (
+    f"Generated: "
+    f"{datetime.now():%Y-%m-%d %H:%M}"
+)
+
+# =========================================================
+# REGIME
+# =========================================================
+
+regime = "UNKNOWN"
+
+if (
+    regime_df is not None
+    and "REGIME" in regime_df.columns
+    and len(regime_df) > 0
+):
+
+    regime = str(
+        regime_df["REGIME"].iloc[0]
+    )
+
+cover["A5"] = (
+    f"Current Regime: {regime}"
+)
+
+# =========================================================
+# PERFORMANCE
+# =========================================================
+
+perf_sheet = wb.create_sheet(
+    "Performance"
+)
+
+perf_sheet["A1"] = (
+    "Performance Metrics"
+)
+
+perf_sheet["A1"].font = Font(
+    bold=True
+)
+
+if stats_df is not None:
+
+    for r, row in enumerate(
+
+        stats_df.values,
+
+        start=3
+
+    ):
+
+        perf_sheet.cell(
+            r,
+            1,
+            row[0]
+        )
+
+        perf_sheet.cell(
+            r,
+            2,
+            row[1]
+        )
+
+# =========================================================
+# PORTFOLIO
+# =========================================================
+
+portfolio_sheet = wb.create_sheet(
+    "Portfolio"
+)
+
+portfolio_sheet["A1"] = (
+    "Top Holdings"
+)
+
+portfolio_sheet["A1"].font = Font(
+    bold=True
+)
+
+if portfolio_df is not None:
+
+    cols = [
+
+        c for c in
+        [
+            "Symbol",
+            "FINAL_WEIGHT",
+            "EXPECTED_RETURN_30D",
+            "CONVICTION_SCORE"
+        ]
+
+        if c in portfolio_df.columns
+    ]
+
+    if cols:
+
+        subset = portfolio_df[
+            cols
+        ].head(20)
+
+        for col_num, col in enumerate(
+            subset.columns,
+            start=1
+        ):
+
+            portfolio_sheet.cell(
+                3,
+                col_num,
+                col
+            )
+
+        for row_num, row in enumerate(
+            subset.values,
+            start=4
+        ):
+
+            for col_num, value in enumerate(
+                row,
+                start=1
+            ):
+
+                portfolio_sheet.cell(
+                    row_num,
+                    col_num,
+                    value
+                )
+
+# =========================================================
+# RISK
+# =========================================================
+
+risk_sheet = wb.create_sheet(
+    "Risk"
+)
+
+risk_sheet["A1"] = (
+    "Portfolio Risk"
+)
+
+risk_sheet["A1"].font = Font(
+    bold=True
+)
+
+if risk_df is not None:
+
+    for r, row in enumerate(
+        risk_df.values,
+        start=3
+    ):
+
+        for c, value in enumerate(
+            row,
+            start=1
+        ):
+
+            risk_sheet.cell(
+                r,
+                c,
+                value
+            )
+
+# =========================================================
+# FACTOR ATTRIBUTION
+# =========================================================
+
+factor_sheet = wb.create_sheet(
+    "Attribution"
+)
+
+factor_sheet["A1"] = (
+    "Factor Attribution"
+)
+
+factor_sheet["A1"].font = Font(
+    bold=True
+)
+
+if factor_df is not None:
+
+    for r, row in enumerate(
+        factor_df.values,
+        start=3
+    ):
+
+        for c, value in enumerate(
+            row,
+            start=1
+        ):
+
+            factor_sheet.cell(
+                r,
+                c,
+                value
+            )
+
+# =========================================================
+# REBALANCE
+# =========================================================
+
+rebalance_sheet = wb.create_sheet(
+    "Rebalance"
+)
+
+rebalance_sheet["A1"] = (
+    "Rebalance Actions"
+)
+
+rebalance_sheet["A1"].font = Font(
+    bold=True
+)
+
+if rebalance_df is not None:
+
+    cols = [
+
+        c for c in
+        rebalance_df.columns
+
+    ]
+
+    for c, col in enumerate(
+        cols,
+        start=1
+    ):
+
+        rebalance_sheet.cell(
+            3,
+            c,
+            col
+        )
+
+    for r, row in enumerate(
+        rebalance_df.values,
+        start=4
+    ):
+
+        for c, value in enumerate(
+            row,
+            start=1
+        ):
+
+            rebalance_sheet.cell(
+                r,
+                c,
+                value
+            )
+
+# =========================================================
+# STOP LOSS
+# =========================================================
+
+stop_sheet = wb.create_sheet(
+    "StopLoss"
+)
+
+stop_sheet["A1"] = (
+    "Stop Loss Signals"
+)
+
+stop_sheet["A1"].font = Font(
+    bold=True
+)
+
+if stoploss_df is not None:
+
+    cols = stoploss_df.columns
+
+    for c, col in enumerate(
+        cols,
+        start=1
+    ):
+
+        stop_sheet.cell(
+            3,
+            c,
+            col
+        )
+
+    for r, row in enumerate(
+        stoploss_df.values,
+        start=4
+    ):
+
+        for c, value in enumerate(
+            row,
+            start=1
+        ):
+
+            stop_sheet.cell(
+                r,
+                c,
+                value
+            )
+
+# =========================================================
+# AUTO WIDTH
+# =========================================================
+
+for sheet in wb.worksheets:
+
+    for col in sheet.columns:
+
+        width = max(
+
+            len(str(cell.value))
+            if cell.value is not None
+            else 0
+
+            for cell in col
+
+        )
+
+        sheet.column_dimensions[
+            col[0].column_letter
+        ].width = min(
+            width + 4,
+            40
+        )
+
+# =========================================================
+# SAVE
+# =========================================================
+
+wb.save(
+    OUTPUT_FILE
+)
+
+print(
+    "\n✅ Monthly Factsheet Generated"
+)
+
+print(
+    "\n📁 Saved:"
+)
+
+print(
+    OUTPUT_FILE
+)
