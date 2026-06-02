@@ -84,6 +84,10 @@ equity_curve_df = load_csv(
     "walk_forward_equity_curve.csv"
 )
 
+health_df = load_csv(
+    "pipeline_health.csv"
+)
+
 required_files = {
 
     "factor_model_rankings.csv": factor_df,
@@ -159,6 +163,38 @@ def validate_dataframe(
 # SIDEBAR
 # =========================================================
 
+import subprocess
+import sys
+
+if st.sidebar.button(
+    "🚀 Run Pipeline"
+):
+
+    with st.spinner(
+        "Running Pipeline..."
+    ):
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "run_full_pipeline.py"
+            ]
+        )
+
+    if result.returncode == 0:
+
+        st.success(
+            "Pipeline Completed"
+        )
+
+        st.rerun()
+
+    else:
+
+        st.error(
+            "Pipeline Failed"
+        )
+        
 st.sidebar.title("🏦 Institutional Quant Platform")
 
 page = st.sidebar.radio(
@@ -183,7 +219,11 @@ page = st.sidebar.radio(
 
         "ML Alpha",
 
-        "Execution Analytics"
+        "Execution Analytics",
+        
+        "Performance Analytics",
+        
+        "Pipeline Health"
 
     ]
 )
