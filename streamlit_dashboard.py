@@ -710,7 +710,7 @@ elif page == "Meta Strategy":
     
     top_decile_df = factor_df[
         factor_df["MULTI_FACTOR_SCORE"]
-        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.90)
+        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.95)
     ]
 
     st.subheader(
