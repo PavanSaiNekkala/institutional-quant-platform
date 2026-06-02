@@ -309,30 +309,30 @@ if page == "Dashboard":
             "🏆 Top 25 Institutional Picks"
         )
 
-        top_df = (
-            factor_df
-            .sort_values(
-                "MULTI_FACTOR_SCORE",
-                ascending=False
-            )
-            .head(25)
-        )
-
-        display_cols = [
-
-            "Symbol",
-
-            "Sector",
-
+    top_df = (
+        factor_df
+        .sort_values(
             "MULTI_FACTOR_SCORE",
-
-            "Sharpe"
-        ]
-
-        st.dataframe(
-            top_df[display_cols],
-            use_container_width=True
+            ascending=False
         )
+        .head(25)
+    )
+
+    display_cols = [
+
+        "Symbol",
+
+        "Sector",
+
+        "MULTI_FACTOR_SCORE",
+
+        "Sharpe"
+    ]
+
+    st.dataframe(
+        top_df[display_cols],
+        use_container_width=True
+    )
 
     # -----------------------------------------------------
     # SCORE DISTRIBUTION
