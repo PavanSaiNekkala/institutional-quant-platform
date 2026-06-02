@@ -1,7 +1,12 @@
 import subprocess
 import time
+import os
+import pandas as pd
 
 from pathlib import Path
+
+PIPELINE_VERSION = "2.0"
+STALE_FILE_THRESHOLD_HOURS = 24
 
 # =========================================================
 # PATHS
@@ -185,6 +190,8 @@ PIPELINE = [
     }
 ]
 
+from datetime import datetime
+
 # =========================================================
 # VALIDATION
 # =========================================================
@@ -204,8 +211,21 @@ def validate_files(files):
 
             missing.append(file)
 
-    return missing
+        else:
 
+            age_hours = (
+                datetime.now().timestamp()
+                - path.stat().st_mtime
+            ) / 3600
+
+            if age_hours > STALE_FILE_THRESHOLD_HOURS:
+
+                print(
+                    f"⚠ WARNING: {file} is "
+                    f"{round(age_hours,1)} hours old"
+                )
+
+    return missing
 # =========================================================
 # EXECUTE SCRIPT
 # =========================================================
@@ -260,9 +280,10 @@ def run_script(config):
         result = subprocess.run(
             ["python", "-u", str(script_path)],
             capture_output=True,
-            text=True
+            text=True,
+            timeout=3600
         )
-
+        
         runtime = round(
             time.time() - start,
             2
@@ -270,9 +291,34 @@ def run_script(config):
 
         if result.returncode != 0:
 
+            runtime = round(
+                time.time() - start,
+                2
+            )
+
             print("\n❌ FAILED\n")
 
+            print(
+                f"⏱ Runtime Before Failure: {runtime}s"
+            )
+
             print(result.stderr)
+
+            # ==========================================
+            # SAVE FAILURE LOG
+            # ==========================================
+
+            with open(
+                DATA_DIR / "pipeline_failure.log",
+                "w",
+                encoding="utf-8"
+            ) as f:
+
+                f.write(
+                    f"SCRIPT: {script}\n\n"
+                )
+
+                f.write(result.stderr)
 
             if config.get("optional", False):
 
@@ -317,15 +363,46 @@ def run_script(config):
             )
 
         return True
+        
+    except subprocess.TimeoutExpired:
+
+        with open(
+            DATA_DIR / "pipeline_failure.log",
+            "w",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                f"SCRIPT: {script}\n\n"
+                f"TIMEOUT AFTER 3600 SECONDS"
+            )
+
+        print(
+            f"\n⏰ TIMEOUT: {script}"
+        )
+
+        return False
 
     except Exception as e:
+
+        with open(
+            DATA_DIR / "pipeline_failure.log",
+            "w",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                f"SCRIPT: {script}\n\n"
+            )
+
+            f.write(str(e))
 
         print("\n❌ EXCEPTION")
 
         print(
             f"{type(e).__name__}: {e}"
         )
-
+        
         if config.get("optional", False):
 
             print(
@@ -335,10 +412,15 @@ def run_script(config):
             return True
 
         return False
+        
 # =========================================================
 # MAIN
 # =========================================================
 
+failure_log = DATA_DIR / "pipeline_failure.log"
+
+if failure_log.exists():
+    failure_log.unlink()
 print("\n🏦 INSTITUTIONAL QUANT PIPELINE")
 print("\n🚀 Starting End-to-End Workflow")
 
@@ -409,9 +491,46 @@ print(
 
 print("\nGenerated Files:")
 
-for file in DATA_DIR.glob("*.csv"):
+for file in sorted(
+    DATA_DIR.glob("*.csv")
+):
 
     print(
         f"{file.name:<40}"
         f"{round(file.stat().st_size/1024,2)} KB"
     )
+    
+health_file = DATA_DIR / "pipeline_health.csv"
+
+pd.DataFrame({
+
+    "TIMESTAMP":[pd.Timestamp.now()],
+
+    "PIPELINE_VERSION":[PIPELINE_VERSION],
+
+    "SUCCESS":[failed_script is None],
+
+    "RUNTIME_SEC":[total_runtime],
+
+    "MODULES_COMPLETED":[success_count],
+    
+    "GIT_SHA": [
+        os.getenv(
+            "GITHUB_SHA",
+            "LOCAL"
+        )
+    ],
+
+    "MODULES_TOTAL":[len(PIPELINE)]
+
+}).to_csv(
+
+    health_file,
+
+    mode="a",
+
+    header=not health_file.exists(),
+
+    index=False
+
+)
