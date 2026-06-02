@@ -485,7 +485,7 @@ elif page == "Market Regime":
     else:
 
         st.dataframe(
-            df,
+            regime_df,
             use_container_width=True,
             hide_index=True
         )
@@ -632,7 +632,7 @@ elif page == "Live Signals":
     st.title("📡 Live Trading Signals")
 
     st.dataframe(
-        df,
+        signals_df,
         use_container_width=True,
         hide_index=True
     )
@@ -708,7 +708,7 @@ elif page == "Portfolio Intelligence":
     )
 
     st.dataframe(
-        df,
+        portfolio_df,
         use_container_width=True,
         hide_index=True
     )
