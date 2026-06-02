@@ -71,6 +71,7 @@ execution_df = load_csv(
 ml_df = load_csv(
     "ml_alpha_predictions.csv"
 )
+
 expected_df = load_csv(
     "expected_returns.csv"
 )
@@ -79,23 +80,21 @@ portfolio_df = load_csv(
     "portfolio_intelligence.csv"
 )
 
+equity_curve_df = load_csv(
+    "walk_forward_equity_curve.csv"
+)
+
 required_files = {
 
     "factor_model_rankings.csv": factor_df,
-
+    "expected_returns.csv": expected_df,
+    "walk_forward_equity_curve.csv": equity_curve_df,
     "portfolio_intelligence.csv": portfolio_df,
-
     "meta_strategy_portfolio.csv": meta_df,
-
     "reinforcement_portfolio.csv": rl_df,
-
     "market_regime_v2.csv": regime_df,
-
     "execution_simulation.csv": execution_df,
-
-    "ml_alpha_predictions.csv": ml_df,
-    
-    "expected_returns.csv": expected_df
+    "ml_alpha_predictions.csv": ml_df 
 }
 
 missing = [
@@ -173,8 +172,10 @@ page = st.sidebar.radio(
         "Market Regime",
 
         "Expected Returns",
-        
+               
         "Portfolio Intelligence",
+        
+        "Portfolio Performance",
 
         "Meta Strategy",
 
@@ -286,7 +287,7 @@ if page == "Dashboard":
     # PORTFOLIO VISUALS
     # -----------------------------------------------------
 
-    chart_col1 = st.columns(1)
+    chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
 
@@ -308,7 +309,23 @@ if page == "Dashboard":
             fig,
             use_container_width=True
         )
+        
+    with chart_col2:
 
+        st.subheader(
+            "📈 Factor Score Distribution"
+        )
+
+        fig = px.histogram(
+            factor_df,
+            x="MULTI_FACTOR_SCORE",
+            nbins=40
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
     # -----------------------------------------------------
     # TOP STOCKS
     # -----------------------------------------------------
@@ -339,28 +356,6 @@ if page == "Dashboard":
 
     st.dataframe(
         top_df[display_cols],
-        use_container_width=True
-    )
-
-    # -----------------------------------------------------
-    # SCORE DISTRIBUTION
-    # -----------------------------------------------------
-
-    st.subheader(
-        "📊 Factor Score Distribution"
-    )
-
-    fig = px.histogram(
-
-        factor_df,
-
-        x="MULTI_FACTOR_SCORE",
-
-        nbins=40
-    )
-
-    st.plotly_chart(
-        fig,
         use_container_width=True
     )
 
@@ -499,57 +494,56 @@ elif page == "Expected Returns":
         )
     )
 
-    if expected_df is None:
-
-        st.error(
-            "expected_returns.csv not found"
-        )
-
-    else:
-
-        st.dataframe(
-            expected_df.sort_values(
-                "EXPECTED_RETURN_30D",
-                ascending=False
-            ),
-            use_container_width=True
-        )
-
-        st.subheader(
-            "Top 20 Expected Return Stocks"
-        )
-
-        top20 = expected_df.sort_values(
+    st.dataframe(
+        expected_df.sort_values(
             "EXPECTED_RETURN_30D",
             ascending=False
-        ).head(20)
+        ),
+        use_container_width=True
+    )
 
-        fig = px.bar(
-            top20,
-            x="Symbol",
-            y="EXPECTED_RETURN_30D",
-            hover_data=[
-                "EXPECTED_RETURN_5D",
-                "EXPECTED_RETURN_15D",
-                "EST_HOLD_DAYS"
-            ]
-        )
+    st.subheader(
+        "Top 20 Expected Return Stocks"
+    )
 
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+    top20 = expected_df.sort_values(
+        "EXPECTED_RETURN_30D",
+        ascending=False
+    ).head(20)
+
+    fig = px.bar(
+        top20,
+        x="Symbol",
+        y="EXPECTED_RETURN_30D",
+        hover_data=[
+            "EXPECTED_RETURN_5D",
+            "EXPECTED_RETURN_15D",
+            "EST_HOLD_DAYS"
+        ]
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 # =========================================================
 # PORTFOLIO INTELLIGENCE
 # =========================================================
 
 elif page == "Portfolio Intelligence":
-    if not validate_dataframe(
-            portfolio_df,
-            'Portfolio Intelligence'
-        ):
-            st.stop()
 
+    if not validate_dataframe(
+        portfolio_df,
+        "Portfolio Intelligence",
+        [
+            "WEIGHTED_5D",
+            "WEIGHTED_15D",
+            "WEIGHTED_30D",
+            "EST_HOLD_DAYS"
+        ]
+    ):
+        st.stop()
+        
     st.title(
         "🧠 Portfolio Intelligence"
     )
@@ -592,6 +586,63 @@ elif page == "Portfolio Intelligence":
         portfolio_df,
         use_container_width=True
     )
+
+# =========================================================
+# PORTFOLIO PERFORMANCE
+# =========================================================
+
+elif page == "Portfolio Performance":
+
+    if not validate_dataframe(
+        equity_curve_df,
+        "Portfolio Performance",
+        [
+            "Date",
+            "Portfolio_Value"
+        ]
+    ):
+        st.stop()
+
+    st.title(
+        "📈 Portfolio Performance"
+    )
+
+    fig_equity = px.line(
+        equity_curve_df,
+        x="Date",
+        y="Portfolio_Value",
+        title="Portfolio Equity Curve"
+    )
+
+    st.plotly_chart(
+        fig_equity,
+        use_container_width=True
+    )
+
+    equity_curve_df["Peak"] = (
+        equity_curve_df["Portfolio_Value"]
+        .cummax()
+    )
+
+    equity_curve_df["Drawdown"] = (
+        equity_curve_df["Portfolio_Value"]
+        /
+        equity_curve_df["Peak"]
+        - 1
+    ) * 100
+
+    fig_dd = px.area(
+        equity_curve_df,
+        x="Date",
+        y="Drawdown",
+        title="Portfolio Drawdown (%)"
+    )
+
+    st.plotly_chart(
+        fig_dd,
+        use_container_width=True
+    )
+    
 # =========================================================
 # META STRATEGY
 # =========================================================
@@ -602,8 +653,12 @@ elif page == "Meta Strategy":
         meta_df,
         "Meta Portfolio",
         [
+            "Symbol",
             "FINAL_WEIGHT",
+            "EXPECTED_RETURN_5D",
+            "EXPECTED_RETURN_15D",
             "EXPECTED_RETURN_30D",
+            "EST_HOLD_DAYS",
             "SIGNAL"
         ]
     ):
@@ -702,6 +757,12 @@ elif page == "Meta Strategy":
 # =========================================================
 
 elif page == "Reinforcement Learning":
+    if not validate_dataframe(
+        rl_df,
+        "RL Portfolio",
+        ["FINAL_RL_SCORE"]
+    ):
+        st.stop()
 
     st.title(
         "🤖 Reinforcement Learning Portfolio"
@@ -731,6 +792,12 @@ elif page == "Reinforcement Learning":
 # =========================================================
 
 elif page == "ML Alpha":
+    if not validate_dataframe(
+        ml_df,
+        "ML Alpha",
+        ["ML_PREDICTED_ALPHA"]
+    ):
+        st.stop()
 
     st.title(
         "🧠 ML Alpha Predictions"
@@ -778,6 +845,11 @@ elif page == "ML Alpha":
 # =========================================================
 
 elif page == "Execution Analytics":
+    if not validate_dataframe(
+        execution_df,
+        "Execution Analytics"
+    ):
+        st.stop()
 
     st.title(
         "🏦 Institutional Execution Analytics"
