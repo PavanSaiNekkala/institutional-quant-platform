@@ -144,6 +144,13 @@ PIPELINE = [
         "requires": ["optimised_portfolio.csv"],
         "produces": ["portfolio_monitor.csv"],
         "optional": True
+    },
+
+    {
+        "script": "monthly_factsheet_generator.py",
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["monthly_factsheet.xlsx"],
+        "optional": True
     }
 ]
 
