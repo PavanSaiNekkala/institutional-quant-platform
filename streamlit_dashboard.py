@@ -286,7 +286,7 @@ if page == "Dashboard":
     # PORTFOLIO VISUALS
     # -----------------------------------------------------
 
-    chart_col1, chart_col2 = st.columns(2)
+    chart_col1 = st.columns(1)
 
     with chart_col1:
 
