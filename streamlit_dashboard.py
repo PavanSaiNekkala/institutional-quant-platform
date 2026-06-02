@@ -5,21 +5,6 @@ import plotly.graph_objects as go
 
 from pathlib import Path
 
-from st_aggrid import GridOptionsBuilder
-
-gb = GridOptionsBuilder.from_dataframe(df)
-
-for col in df.columns:
-    gb.configure_column(
-        col,
-        autoSize=True
-    )
-
-AgGrid(
-    df,
-    gridOptions=gb.build(),
-    fit_columns_on_grid_load=True
-)
 # =========================================================
 # PAGE CONFIG
 # =========================================================
@@ -141,7 +126,7 @@ if missing:
 
     st.stop()
 
- # =========================================================
+# =========================================================
 # DATA VALIDATION
 # =========================================================
 
@@ -280,6 +265,21 @@ page = st.sidebar.radio(
     visible_pages
 )
 
+from st_aggrid import GridOptionsBuilder
+
+gb = GridOptionsBuilder.from_dataframe(df)
+
+for col in df.columns:
+    gb.configure_column(
+        col,
+        autoSize=True
+    )
+
+AgGrid(
+    df,
+    gridOptions=gb.build(),
+    fit_columns_on_grid_load=True
+)
 # =========================================================
 # DASHBOARD
 # =========================================================
