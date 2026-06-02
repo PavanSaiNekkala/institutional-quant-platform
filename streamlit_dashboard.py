@@ -730,10 +730,11 @@ elif page == "Meta Strategy":
         .sort_values(
             "MULTI_FACTOR_SCORE",
             ascending=False
-        ),
+        )
+        .head(25),
         use_container_width=True
     )
-
+    
     st.divider()
 
     display_cols = [
