@@ -18,6 +18,8 @@ CONFIDENCE_LEVEL = 0.95
 
 RISK_FREE_RATE = 0.06
 
+PORTFOLIO_VALUE = 1000000
+
 # =========================================================
 # PATHS
 # =========================================================
@@ -47,6 +49,7 @@ RISK_METRICS_FILE = (
     / "data"
     / "risk_metrics.csv"
 )
+
 
 # =========================================================
 # LOAD PORTFOLIO
@@ -86,7 +89,7 @@ weight_col = None
 
 for col in portfolio.columns:
 
-    if col.upper() in weight_candidates:
+    if col.strip().upper() in weight_candidates:
 
         weight_col = col
 
@@ -157,28 +160,6 @@ portfolio.columns = [
     for c in portfolio.columns
 ]
 
-weight_col = None
-
-for col in portfolio.columns:
-
-    if col.upper() in [
-
-        "FINAL_WEIGHT",
-
-        "WEIGHT",
-
-        "PORTFOLIO_WEIGHT",
-
-        "OPTIMAL_WEIGHT",
-
-        "ALLOC_WEIGHT"
-
-    ]:
-
-        weight_col = col
-
-        break
-
 if weight_col is None:
     raise Exception(
         f"\n❌ Weight column not found.\n"
@@ -194,6 +175,15 @@ if weights.max() > 1:
     weights = weights / 100
 
 weights = weights.values
+
+weight_sum = weights.sum()
+
+if abs(weight_sum - 1) > 0.05:
+
+    print(
+        f"\n⚠️ WARNING: Portfolio weights sum to "
+        f"{weight_sum:.3f}"
+    )
 
 tickers = [
 
@@ -262,8 +252,12 @@ returns = (
 # BENCHMARK RETURNS
 # =========================================================
 
-benchmark_returns = returns[BENCHMARK]
+if BENCHMARK not in returns.columns:
 
+    raise Exception(
+        f"Benchmark {BENCHMARK} not downloaded"
+    )
+benchmark_returns = returns[BENCHMARK]
 # =========================================================
 # PORTFOLIO RETURNS
 # =========================================================
@@ -317,6 +311,11 @@ years = (
 
     / TRADING_DAYS
 )
+
+if len(portfolio_returns) < 20:
+    raise Exception(
+        "Insufficient history for risk analysis"
+    )
 
 portfolio_cagr = (
 
@@ -382,6 +381,14 @@ cvar_95 = portfolio_returns[
 
 ].mean()
 
+
+common_idx = portfolio_returns.index.intersection(
+    benchmark_returns.index
+)
+
+portfolio_returns = portfolio_returns.loc[common_idx]
+benchmark_returns = benchmark_returns.loc[common_idx]
+
 # =========================================================
 # BETA CALCULATION
 # =========================================================
@@ -421,13 +428,26 @@ correlation_matrix = (
     stock_returns.corr()
 )
 
-avg_correlation = (
+corr = correlation_matrix.copy()
 
-    correlation_matrix
+np.fill_diagonal(corr.values, np.nan)
 
-    .mean()
+avg_correlation = np.nanmean(corr.values)
 
-    .mean()
+if np.isnan(avg_correlation):
+    avg_correlation = 0
+
+diversification_score = max(
+    0,
+    min(
+        100,
+        100 * (1 - avg_correlation)
+    )
+)
+
+var_rupees = (
+    PORTFOLIO_VALUE
+    * abs(var_95)
 )
 
 # =========================================================
@@ -464,13 +484,13 @@ max_position = (
 )
 
 top5_concentration = (
-
     portfolio[weight_col]
-
     .nlargest(5)
-
     .sum()
 )
+
+if top5_concentration > 1:
+    top5_concentration /= 100
 
 # =========================================================
 # WIN RATE
@@ -517,13 +537,69 @@ if avg_correlation > 0.70:
     risk_score -= 15
 
 # Concentration Penalty
-if top5_concentration > 60:
+concentration_check = top5_concentration
 
+if concentration_check > 1:
+    concentration_check /= 100
+
+if concentration_check > 0.60:
     risk_score -= 15
+    
+risk_score = max(risk_score, 0)
 
-risk_score = max(
-    risk_score,
-    0
+if risk_score >= 90:
+    risk_grade = "A"
+
+elif risk_score >= 75:
+    risk_grade = "B"
+
+elif risk_score >= 60:
+    risk_grade = "C"
+
+else:
+    risk_grade = "D"
+    
+# =========================================================
+# SORTINO RATIO
+# =========================================================
+
+downside = portfolio_returns[
+    portfolio_returns < 0
+]
+
+downside_vol = (
+    downside.std()
+    * np.sqrt(TRADING_DAYS)
+)
+
+sortino_ratio = (
+    (portfolio_cagr - RISK_FREE_RATE)
+    / downside_vol
+    if downside_vol > 0
+    else 0
+)
+
+active_returns = (
+    portfolio_returns
+    - benchmark_returns
+)
+
+active_return = (
+    active_returns.mean()
+    * TRADING_DAYS
+    * 100
+)
+
+tracking_error = (
+    active_returns.std()
+    * np.sqrt(TRADING_DAYS)
+)
+
+information_ratio = (
+    (active_returns.mean() * 252)
+    / tracking_error
+    if tracking_error > 0
+    else 0
 )
 
 # =========================================================
@@ -555,6 +631,20 @@ risk_metrics = pd.DataFrame({
             2
         )
     ],
+    
+    "ACTIVE_RETURN":[
+        round(active_return,2)
+    ],
+
+    "SORTINO_RATIO":[
+        round(sortino_ratio,2)
+    ],
+
+    "DIVERSIFICATION_SCORE":[
+        round(diversification_score,2)
+    ],
+
+    "RISK_GRADE":[risk_grade],
 
     "MAX_DRAWDOWN": [
 
@@ -594,6 +684,18 @@ risk_metrics = pd.DataFrame({
             win_rate,
             2
         )
+    ],
+
+    "VAR_95_RS":[
+        round(var_rupees,0)
+    ],
+
+    "TRACKING_ERROR":[
+        round(tracking_error*100,2)
+    ],
+    
+    "INFORMATION_RATIO":[
+        round(information_ratio,2)
     ],
 
     "AVG_CORRELATION": [
@@ -643,6 +745,16 @@ risk_report["WEIGHT_RANK"] = (
 # =========================================================
 # SAVE FILES
 # =========================================================
+
+EQUITY_CURVE_FILE = (
+    ROOT_DIR
+    / "data"
+    / "risk_equity_curve.csv"
+)
+
+equity_curve.to_csv(
+    EQUITY_CURVE_FILE
+)
 
 risk_metrics.to_csv(
 
