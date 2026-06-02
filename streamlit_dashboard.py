@@ -201,7 +201,7 @@ if st.sidebar.button(
             "Pipeline Failed"
         )
         
-st.sidebar.title("🏦 Institutional Quant Platform")
+st.sidebar.title("🏦 Institutional Quant Platform by NEKKY")
 
 available_cols = [
     c for c in [
