@@ -202,6 +202,17 @@ PIPELINE = [
         ],
         "optional": True
     },
+
+    {
+        "script": "performance_analytics_engine.py",
+        "requires": [
+            "portfolio_returns.csv"
+        ],
+        "produces": [
+            "performance_analytics.csv"
+        ],
+        "optional": True
+    },
 ]
 
 from datetime import datetime
