@@ -188,11 +188,12 @@ if weight_col is None:
 
 print(f"\n✅ Using Weight Column: {weight_col}")
 
-weights = (
-    portfolio[weight_col]
-    .astype(float)
-    / 100
-).values
+weights = portfolio[weight_col].astype(float)
+
+if weights.max() > 1:
+    weights = weights / 100
+
+weights = weights.values
 
 tickers = [
 
