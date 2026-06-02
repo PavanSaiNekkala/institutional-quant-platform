@@ -151,6 +151,19 @@ PIPELINE = [
         "requires": ["optimised_portfolio.csv"],
         "produces": ["monthly_factsheet.xlsx"],
         "optional": True
+    },
+
+    {
+        "script": "experiment_tracker.py",
+        "requires": [
+            "walk_forward_stats.csv",
+            "market_regime.csv",
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "strategy_versions.csv"
+        ],
+        "optional": True
     }
 ]
 
