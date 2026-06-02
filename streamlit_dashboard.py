@@ -80,6 +80,10 @@ portfolio_df = load_csv(
     "portfolio_intelligence.csv"
 )
 
+risk_summary = load_csv(
+    "portfolio_risk_summary.csv"
+)
+
 equity_curve_df = load_csv(
     "walk_forward_equity_curve.csv"
 )
@@ -316,11 +320,15 @@ if page == "Dashboard":
 
     with col5:
 
-        portfolio_vol = (
-            risk_summary["Portfolio Volatility"].iloc[0]
-            if "Portfolio Volatility" in risk_summary.columns
-            else None
-        )
+        portfolio_vol = None
+
+        if (
+            risk_summary is not None
+            and "VOLATILITY" in risk_summary.columns
+        ):
+            portfolio_vol = (
+                risk_summary["VOLATILITY"].iloc[0]
+            )
 
         st.metric(
             "Portfolio Volatility",
