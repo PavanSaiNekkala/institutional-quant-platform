@@ -359,27 +359,7 @@ if page == "Dashboard":
         top_df[display_cols],
         use_container_width=True
     )
-    
-    st.dataframe(
-        top_decile_df[
-            [
-                "Symbol",
-                "Sector",
-                "MULTI_FACTOR_SCORE",
-                "Sharpe",
-                "Momentum"
-            ]
-        ]
-        .sort_values(
-            "MULTI_FACTOR_SCORE",
-            ascending=False
-        )
-        .head(25),
-        use_container_width=True
-    )
-    
-
-    
+        
 # =========================================================
 # MARKET REGIME
 # =========================================================
@@ -726,6 +706,32 @@ elif page == "Meta Strategy":
             meta_df["EST_HOLD_DAYS"].mean(),
             0
         )
+    )
+    
+    top_decile_df = factor_df[
+        factor_df["MULTI_FACTOR_SCORE"]
+        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.90)
+    ]
+
+    st.subheader(
+        "🏆 Top Decile Stocks"
+    )
+
+    st.dataframe(
+        top_decile_df[
+            [
+                "Symbol",
+                "Sector",
+                "MULTI_FACTOR_SCORE",
+                "Sharpe",
+                "Momentum"
+            ]
+        ]
+        .sort_values(
+            "MULTI_FACTOR_SCORE",
+            ascending=False
+        ),
+        use_container_width=True
     )
 
     st.divider()
