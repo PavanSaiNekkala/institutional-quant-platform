@@ -25,6 +25,12 @@ OUTPUT_FILE = (
     / "expected_returns.csv"
 )
 
+NEWS_FILE = (
+    BASE_DIR
+    / "data"
+    / "news_rankings.csv"
+)
+
 # =========================================================
 # LOAD
 # =========================================================
@@ -34,6 +40,55 @@ print("\n📥 Loading Factor Model Rankings...")
 df = pd.read_csv(INPUT_FILE)
 
 print("✅ Data Loaded")
+
+# =========================================================
+# LOAD NEWS
+# =========================================================
+
+if NEWS_FILE.exists():
+
+    print(
+        "\n📰 Loading News Rankings..."
+    )
+
+    news_df = pd.read_csv(
+        NEWS_FILE
+    )
+
+    df = df.merge(
+
+        news_df[
+            [
+                "Symbol",
+                "NEWS_ALPHA",
+                "NEWS_SCORE"
+            ]
+        ],
+
+        on="Symbol",
+
+        how="left"
+
+    )
+
+else:
+
+    print(
+        "\n⚠ news_rankings.csv not found"
+    )
+
+    df["NEWS_ALPHA"] = 50
+    df["NEWS_SCORE"] = 0
+
+df["NEWS_ALPHA"] = (
+    df["NEWS_ALPHA"]
+    .fillna(50)
+)
+
+df["NEWS_SCORE"] = (
+    df["NEWS_SCORE"]
+    .fillna(0)
+)
 
 print("\n===== INPUT CHECK =====")
 
@@ -101,15 +156,17 @@ print(
 
 df["PREDICTION_SCORE"] = (
 
-      df["ALPHA_SCORE"] * 0.35
+      df["ALPHA_SCORE"] * 0.30
 
-    + df["MULTI_FACTOR_SCORE"] * 0.35
+    + df["MULTI_FACTOR_SCORE"] * 0.30
 
     + df["RS_30D"] * 0.15
 
     + df["RS_60D"] * 0.10
 
     + df["Momentum"] * 0.05
+
+    + df["NEWS_ALPHA"] * 0.10
 
 )
 
@@ -146,9 +203,39 @@ df["EXPECTED_RETURN_15D"] = (
     * 2.2
 )
 
+# Base Return
+
 df["EXPECTED_RETURN_30D"] = (
+
     df["EXPECTED_RETURN_5D"]
+
     * 3.5
+
+)
+
+# News Adjustment
+
+df["EXPECTED_RETURN_30D"] = (
+
+    df["EXPECTED_RETURN_30D"]
+
+    *
+
+    (
+
+        1
+
+        +
+
+        (
+            df["NEWS_ALPHA"]
+            - 50
+        )
+
+        / 500
+
+    )
+
 )
 
 # =========================================================
