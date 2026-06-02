@@ -133,13 +133,6 @@ PIPELINE = [
     },
 
     {
-        "script": "factor_attribution_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["factor_attribution.csv"],
-        "optional": True
-    },
-
-    {
         "script": "portfolio_monitor.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": ["portfolio_monitor.csv"],
