@@ -1,12 +1,12 @@
 Symbol,Sector,Industry,MarketCap
 RELIANCE.NS,Energy,Oil & Gas Refining & Marketing,17862863355904
-HDFCBANK.NS,Financial Services,Banks - Regional,11434776854528
+HDFCBANK.NS,Financial Services,Banks - Regional,11435754127360
 BHARTIARTL.NS,Communication Services,Telecom Services,11029219115008
 ICICIBANK.NS,Financial Services,Banks - Regional,8887814062080
-SBIN.NS,Financial Services,Banks - Regional,8806932152320
 TCS.NS,Technology,Information Technology Services,8312193548288
 BAJFINANCE.NS,Financial Services,Credit Services,5528003018752
 LT.NS,Industrials,Engineering & Construction,5517530365952
+LICI.NS,Financial Services,Insurance - Life,5121350565888
 HINDUNILVR.NS,Consumer Defensive,Household & Personal Products,4897253097472
 INFY.NS,Technology,Information Technology Services,4867370254336
 ADANIPOWER.NS,Utilities,Utilities - Independent Power Producers,4479834914816
@@ -16,9 +16,11 @@ MARUTI.NS,Consumer Cyclical,Auto Manufacturers,4070255624192
 ADANIENT.NS,Energy,Thermal Coal,3988625031168
 AXISBANK.NS,Financial Services,Banks - Regional,3967961268224
 KOTAKBANK.NS,Financial Services,Banks - Regional,3753795911680
+NTPC.NS,Utilities,Utilities - Regulated Electric,3672127832064
 TITAN.NS,Consumer Cyclical,Luxury Goods,3570002296832
 M&M.NS,Consumer Cyclical,Auto Manufacturers,3566503985152
 ITC.NS,Consumer Defensive,Tobacco,3503865724928
+ONGC.NS,Energy,Oil & Gas Integrated,3324967649280
 ULTRACEMCO.NS,Basic Materials,Building Materials,3304113307648
 HCLTECH.NS,Technology,Information Technology Services,3233525268480
 JSWSTEEL.NS,Basic Materials,Steel,3171359129600
@@ -32,16 +34,15 @@ POWERGRID.NS,Utilities,Utilities - Regulated Electric,2661367676928
 DMART.NS,Consumer Defensive,Discount Stores,2655480446976
 HINDZINC.NS,Basic Materials,Other Industrial Metals & Mining,2646105915392
 TATASTEEL.NS,Basic Materials,Steel,2626197127168
-LICI.NS,Financial Services,Insurance - Life,2560675282944
 HINDALCO.NS,Basic Materials,Aluminum,2552121524224
 ASIANPAINT.NS,Basic Materials,Specialty Chemicals,2523535245312
 ADANIGREEN.NS,Utilities,Utilities - Renewable,2383299215360
 ETERNAL.NS,Consumer Cyclical,Internet Retail,2281004597248
+WIPRO.NS,Technology,Information Technology Services,2165316255744
 SHRIRAMFIN.NS,Financial Services,Credit Services,2162368839680
 GRASIM.NS,Basic Materials,Building Materials,2104098947072
 IOC.NS,Energy,Oil & Gas Refining & Marketing,1960028012544
 EICHERMOT.NS,Consumer Cyclical,Auto Manufacturers,1949069737984
-SBILIFE.NS,Financial Services,Insurance - Life,1818248347648
 ADANIENSOL.NS,Utilities,Utilities - Independent Power Producers,1797719588864
 VBL.NS,Consumer Defensive,Beverages - Non-Alcoholic,1777396613120
 DIVISLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,1739748278272
@@ -117,11 +118,13 @@ SHREECEM.NS,Basic Materials,Building Materials,904183545856
 LENSKART.NS,Healthcare,Medical Instruments & Supplies,897334968320
 LODHA.NS,Real Estate,Real Estate - Development,892031205376
 WAAREEENER.NS,Technology,Solar,890597277696
+OFSS.NS,Technology,Software - Infrastructure,887272570880
 ASHOKLEY.NS,Industrials,Farm & Heavy Construction Machinery,879785934848
 RECLTD.NS,Financial Services,Credit Services,872650375168
 ICICIGI.NS,Financial Services,Insurance - Diversified,872245821440
 PERSISTENT.NS,Technology,Information Technology Services,843960090624
 SAIL.NS,Basic Materials,Steel,841346711552
+NTPCGREEN.NS,Utilities,Utilities - Renewable,839346683904
 MEESHO.NS,Consumer Cyclical,Internet Retail,826960969728
 HINDPETRO.NS,Energy,Oil & Gas Refining & Marketing,826871840768
 AUROPHARMA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,824919326720
@@ -129,15 +132,18 @@ NMDC.NS,Basic Materials,Steel,812100157440
 ATGL.NS,Utilities,Utilities - Regulated Gas,807040581632
 SRF.NS,Industrials,Conglomerates,799169904640
 NATIONALUM.NS,Basic Materials,Aluminum,797465575424
+OIL.NS,Energy,Oil & Gas Integrated,785244880896
 NHPC.NS,Utilities,Utilities - Renewable,775476609024
 IDBI.NS,Financial Services,Banks - Regional,774925647872
 POLICYBZR.NS,Financial Services,Insurance Brokers,774184894464
+NYKAA.NS,Consumer Cyclical,Internet Retail,763697627136
 BHARTIHEXA.NS,Communication Services,Telecom Services,757099986944
-DABUR.NS,Consumer Defensive,Household & Personal Products,753108844544
+DABUR.NS,Consumer Defensive,Household & Personal Products,753220190208
 LAURUSLABS.NS,Healthcare,Drug Manufacturers - Specialty & Generic,749717553152
 SUZLON.NS,Industrials,Specialty Industrial Machinery,739686612992
 MCX.NS,Financial Services,Financial Data & Stock Exchanges,735672991744
 AUBANK.NS,Financial Services,Banks - Regional,725271904256
+YESBANK.NS,Financial Services,Banks - Regional,722189287424
 HAVELLS.NS,Industrials,Electrical Equipment & Parts,717079969792
 TORNTPOWER.NS,Utilities,Utilities - Independent Power Producers,711612563456
 FEDERALBNK.NS,Financial Services,Banks - Regional,710222217216
@@ -149,24 +155,23 @@ BAJAJHFL.NS,Financial Services,Mortgage Finance,700024094720
 NAM-INDIA.NS,Financial Services,Asset Management,697798033408
 DIXON.NS,Technology,Consumer Electronics,695640653824
 BIOCON.NS,Healthcare,Biotechnology,689268391936
-LTF.NS,Financial Services,Credit Services,679603470336
+LTF.NS,Financial Services,Credit Services,679618609152
 GICRE.NS,Financial Services,Insurance - Reinsurance,659040370688
 SWIGGY.NS,Consumer Cyclical,Internet Retail,650862133248
 NAUKRI.NS,Communication Services,Internet Content & Information,650360717312
-SCHAEFFLER.NS,Consumer Cyclical,Auto Parts,637687693312
 ALKEM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,635428208640
 IOB.NS,Financial Services,Banks - Regional,634504675328
 COFORGE.NS,Technology,Information Technology Services,628315914240
 PHOENIXLTD.NS,Real Estate,Real Estate - Diversified,625084071936
-UNOMINDA.NS,Consumer Cyclical,Auto Parts,623306932224
+UNOMINDA.NS,Consumer Cyclical,Auto Parts,623318138880
 BANKINDIA.NS,Financial Services,Banks - Regional,622531772416
 GLENMARK.NS,Healthcare,Drug Manufacturers - Specialty & Generic,621180354560
 IDFCFIRSTB.NS,Financial Services,Banks - Regional,613527257088
+OBEROIRLTY.NS,Real Estate,Real Estate - Development,599725572096
 BERGEPAINT.NS,Basic Materials,Specialty Chemicals,598042869760
 MAHABANK.NS,Financial Services,Banks - Regional,597172289536
 TIINDIA.NS,Industrials,Conglomerates,591642492928
 LINDEINDIA.NS,Basic Materials,Specialty Chemicals,588461113344
-SBICARD.NS,Financial Services,Credit Services,586143760384
 PRESTIGE.NS,Real Estate,Real Estate - Diversified,585017786368
 JSL.NS,Basic Materials,Steel,573386719232
 JSWINFRA.NS,Industrials,Marine Shipping,570892288000
@@ -231,6 +236,7 @@ IREDA.NS,Financial Services,Credit Services,354721628160
 CONCOR.NS,Industrials,Railroads,353466875904
 GODFRYPHLP.NS,Consumer Defensive,Tobacco,351676497920
 EMBASSY.NS,Unknown,Unknown,350644862976
+WOCKPHARMA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,349829398528
 JBCHEPHARM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,343627726848
 POONAWALLA.NS,Financial Services,Credit Services,343473717248
 UBL.NS,Consumer Defensive,Beverages - Brewers,340025016320
@@ -238,6 +244,7 @@ TATAINVEST.NS,Financial Services,Asset Management,339848593408
 KPRMILL.NS,Consumer Cyclical,Textile Manufacturing,339799506944
 BANDHANBNK.NS,Financial Services,Banks - Regional,333706264576
 EXIDEIND.NS,Consumer Cyclical,Auto Parts,333412499456
+NXST.NS,Unknown,Unknown,329983098880
 DALBHARAT.NS,Basic Materials,Building Materials,328037302272
 DELHIVERY.NS,Industrials,Integrated Freight & Logistics,327376732160
 EMCURE.NS,Healthcare,Drug Manufacturers - Specialty & Generic,323407446016
@@ -254,7 +261,6 @@ HSCL.NS,Basic Materials,Specialty Chemicals,304440410112
 ESCORTS.NS,Industrials,Farm & Heavy Construction Machinery,303983689728
 KIMS.NS,Healthcare,Medical Care Facilities,301664763904
 GRSE.NS,Industrials,Aerospace & Defense,298018504704
-SCHNEIDER.NS,Industrials,Electrical Equipment & Parts,297301966848
 MANAPPURAM.NS,Financial Services,Credit Services,296877162496
 LICHSGFIN.NS,Financial Services,Mortgage Finance,295741358080
 ABSLAMC.NS,Financial Services,Asset Management,294756122624
@@ -265,6 +271,7 @@ CRISIL.NS,Financial Services,Financial Data & Stock Exchanges,287825133568
 SJVN.NS,Utilities,Utilities - Renewable,286521360384
 CHOLAHLDNG.NS,Financial Services,Credit Services,285684629504
 ITI.NS,Technology,Communication Equipment,284474638336
+NUVAMA.NS,Financial Services,Asset Management,283765506048
 NBCC.NS,Industrials,Engineering & Construction,281880002560
 METROBRAND.NS,Consumer Cyclical,Apparel Retail,281431769088
 GODIGIT.NS,Financial Services,Insurance - Property & Casualty,279827939328
@@ -321,6 +328,7 @@ BOSCH-HCIL.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",21396208025
 AEGISVOPAK.NS,Energy,Oil & Gas Equipment & Services,213709422592
 SYRMA.NS,Technology,Electronic Components,213293645824
 GMDCLTD.NS,Energy,Thermal Coal,212471709696
+ONESOURCE.NS,Healthcare,Biotechnology,210696060928
 EMMVEE.NS,Technology,Solar,210403655680
 CREDITACC.NS,Financial Services,Credit Services,210329108480
 RBLBANK.NS,Financial Services,Banks - Regional,209763876864
@@ -332,7 +340,6 @@ PFIZER.NS,Healthcare,Drug Manufacturers - General,206564720640
 GRINDWELL.NS,Industrials,Building Products & Equipment,204610568192
 RAMCOCEM.NS,Basic Materials,Building Materials,204404719616
 SUNTV.NS,Communication Services,Broadcasting,203603820544
-SAMMAANCAP.NS,Financial Services,Mortgage Finance,203242962944
 BAYERCROP.NS,Basic Materials,Agricultural Inputs,203228135424
 AFFLE.NS,Communication Services,Advertising Agencies,202452172800
 IIFL.NS,Financial Services,Credit Services,198921617408
@@ -354,7 +361,6 @@ ACMESOLAR.NS,Utilities,Utilities - Renewable,185975488512
 BBOX.NS,Technology,Software - Application,185875316736
 FSL.NS,Technology,Information Technology Services,184498176000
 CEMPRO.NS,Industrials,Engineering & Construction,184465522688
-SARDAEN.NS,Basic Materials,Steel,183784456192
 GPIL.NS,Basic Materials,Steel,183136124928
 ELGIEQUIP.NS,Industrials,Specialty Industrial Machinery,182918856704
 REDINGTON.NS,Technology,Information Technology Services,182325428224
@@ -370,12 +376,11 @@ SUNDRMFAST.NS,Consumer Cyclical,Auto Parts,176308207616
 RATNAMANI.NS,Basic Materials,Steel,176036052992
 KAJARIACER.NS,Industrials,Building Products & Equipment,175470264320
 URBANCO.NS,Technology,Software - Application,175461679104
-SANSERA.NS,Consumer Cyclical,Auto Parts,174922432512
 KANSAINER.NS,Basic Materials,Specialty Chemicals,173962575872
 CUPID.NS,Consumer Defensive,Household & Personal Products,173582254080
 EMAMILTD.NS,Consumer Defensive,Household & Personal Products,173552402432
 VTL.NS,Consumer Cyclical,Textile Manufacturing,173453361152
-CHALET.NS,Consumer Cyclical,Lodging,170870161408
+AARTIIND.NS,Basic Materials,Specialty Chemicals,170967072768
 FRACTAL.NS,Technology,Software - Infrastructure,169162096640
 NAVA.NS,Industrials,Conglomerates,169093267456
 JSWCEMENT.NS,Basic Materials,Building Materials,169038331904
@@ -384,6 +389,7 @@ CENTURYPLY.NS,Basic Materials,Lumber & Wood Production,167562870784
 NATCOPHARM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,167163248640
 LMW.NS,Industrials,Specialty Industrial Machinery,166729580544
 BIKAJI.NS,Consumer Defensive,Packaged Foods,166714638336
+OLAELEC.NS,Consumer Cyclical,Auto Manufacturers,165946703872
 CIEINDIA.NS,Consumer Cyclical,Auto Parts,165933105152
 PINELABS.NS,Technology,Software - Infrastructure,165179555840
 COHANCE.NS,Healthcare,Drug Manufacturers - Specialty & Generic,164431233024
@@ -413,6 +419,7 @@ CHOICEIN.NS,Financial Services,Capital Markets,148937228288
 VENTIVE.NS,Consumer Cyclical,Lodging,148730970112
 SOBHA.NS,Real Estate,Real Estate - Development,148141752320
 AETHER.NS,Basic Materials,Specialty Chemicals,148063305728
+NSLNISP.NS,Basic Materials,Steel,147995590656
 SHRIPISTON.NS,Consumer Cyclical,Auto Parts,147025100800
 KFINTECH.NS,Technology,Software - Application,145954668544
 MINDACORP.NS,Consumer Cyclical,Auto Parts,145641324544
@@ -442,7 +449,6 @@ GRWRHITECH.NS,Basic Materials,Specialty Chemicals,135061520384
 HAPPYFORGE.NS,Industrials,Metal Fabrication,134732464128
 PGEL.NS,Technology,Electronic Components,134289612800
 KSB.NS,Industrials,Specialty Industrial Machinery,133923176448
-SCI.NS,Industrials,Marine Shipping,133730902016
 INDIGRID.NS,Unknown,Unknown,133416214528
 THANGAMAYL.NS,Consumer Cyclical,Luxury Goods,133158486016
 JYOTICNC.NS,Industrials,Specialty Industrial Machinery,133156225024
@@ -475,6 +481,7 @@ ASTRAMICRO.NS,Technology,Communication Equipment,124966617088
 TRIDENT.NS,Consumer Cyclical,Textile Manufacturing,123415044096
 INDGN.NS,Healthcare,Health Information Services,122501652480
 TECHNOE.NS,Industrials,Engineering & Construction,122486710272
+NUVOCO.NS,Basic Materials,Building Materials,122111688704
 INGERRAND.NS,Industrials,Specialty Industrial Machinery,122079764480
 AFCONS.NS,Industrials,Engineering & Construction,121865445376
 AEQUS.NS,Industrials,Aerospace & Defense,121056337920
@@ -504,7 +511,6 @@ GODREJAGRO.NS,Consumer Defensive,Packaged Foods,111039791104
 CONCORDBIO.NS,Healthcare,Biotechnology,111029190656
 RPOWER.NS,Utilities,Utilities - Independent Power Producers,110673231872
 FINPIPE.NS,Industrials,Building Products & Equipment,110041325568
-SANDUMA.NS,Basic Materials,Steel,109981212672
 VIYASH.NS,Healthcare,Drug Manufacturers - Specialty & Generic,109290389504
 FIRSTCRY.NS,Consumer Cyclical,Internet Retail,108356796416
 HEG.NS,Industrials,Electrical Equipment & Parts,108173557760
@@ -516,8 +522,8 @@ SOUTHBANK.NS,Financial Services,Banks - Regional,107479441408
 TI.NS,Consumer Defensive,Beverages - Wineries & Distilleries,107321581568
 MGL.NS,Utilities,Utilities - Regulated Gas,106403414016
 SKFINDUS.NS,Industrials,Tools & Accessories,106118586368
-SANOFICONR.NS,Healthcare,Drug Manufacturers - General,105785303040
 IIFLCAPS.NS,Financial Services,Capital Markets,105562619904
+WHIRLPOOL.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",105445416960
 EDELWEISS.NS,Financial Services,Financial Conglomerates,105206996992
 MEDPLUS.NS,Healthcare,Pharmaceutical Retailers,105033048064
 BBTC.NS,Consumer Defensive,Packaged Foods,105027649536
@@ -526,10 +532,10 @@ UJJIVANSFB.NS,Financial Services,Banks - Regional,104746975232
 RKFORGE.NS,Industrials,Metal Fabrication,104301764608
 ACE.NS,Industrials,Farm & Heavy Construction Machinery,104071159808
 LLOYDSENT.NS,Basic Materials,Steel,103423893504
-SBFC.NS,Financial Services,Credit Services,102014779392
 LLOYDSENGG.NS,Industrials,Specialty Industrial Machinery,101607735296
 INTELLECT.NS,Technology,Software - Application,101526847488
 WAAREERTL.NS,Industrials,Engineering & Construction,101444976640
+OLECTRA.NS,Industrials,Farm & Heavy Construction Machinery,101008547840
 NAZARA.NS,Communication Services,Electronic Gaming & Multimedia,100970233856
 KIRLPNU.NS,Industrials,Specialty Industrial Machinery,100899561472
 STAR.NS,Healthcare,Drug Manufacturers - Specialty & Generic,100846166016
@@ -559,13 +565,13 @@ BLACKBUCK.NS,Technology,Software - Application,93496844288
 UTLSOLAR.NS,Technology,Solar,93482278912
 TEJASNET.NS,Technology,Communication Equipment,93378904064
 VOLTAMP.NS,Industrials,Electrical Equipment & Parts,92743639040
+ZEEL.NS,Communication Services,Broadcasting,92008153088
 RATEGAIN.NS,Technology,Software - Application,91779702784
 BSOFT.NS,Technology,Information Technology Services,91615600640
 PCJEWELLER.NS,Consumer Cyclical,Luxury Goods,89725337600
 V2RETAIL.NS,Consumer Cyclical,Apparel Retail,89084592128
 LEMONTREE.NS,Consumer Cyclical,Lodging,88805711872
 AMAGI.NS,Technology,Software - Application,88504262656
-SAREGAMA.NS,Communication Services,Entertainment,88253374464
 TSFINV.NS,Financial Services,Asset Management,88199495680
 SUDEEPPHRM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,88156397568
 VARROC.NS,Consumer Cyclical,Auto Parts,87958937600
@@ -587,6 +593,7 @@ SUPRIYA.NS,Healthcare,Biotechnology,84708147200
 WEWORK.NS,Real Estate,Real Estate Services,83839221760
 TIPSMUSIC.NS,Communication Services,Entertainment,83755261952
 CLEAN.NS,Basic Materials,Specialty Chemicals,83703996416
+ORKLAINDIA.NS,Consumer Defensive,Packaged Foods,83577126912
 THYROCARE.NS,Healthcare,Diagnostics & Research,83138109440
 TTML.NS,Communication Services,Telecom Services,83064881152
 MAHSEAMLES.NS,Basic Materials,Steel,82396143616
@@ -612,6 +619,7 @@ BLUEJET.NS,Healthcare,Biotechnology,77478330368
 REDTAPE.NS,Consumer Cyclical,Footwear & Accessories,76790505472
 CAMPUS.NS,Consumer Cyclical,Footwear & Accessories,76688613376
 MIDHANI.NS,Basic Materials,Steel,76397248512
+YATHARTH.NS,Healthcare,Medical Care Facilities,76394553344
 ABFRL.NS,Consumer Cyclical,Apparel Manufacturing,76340486144
 SHREEJISPG.NS,Industrials,Marine Shipping,76294619136
 IMFA.NS,Basic Materials,Other Industrial Metals & Mining,76172402688
@@ -634,7 +642,6 @@ SUVEN.NS,Healthcare,Drug Manufacturers - Specialty & Generic,72483602432
 SGMART.NS,Industrials,Industrial Distribution,72185405440
 SHREMINVIT.NS,Unknown,Unknown,72079613952
 CERA.NS,Industrials,Building Products & Equipment,71968530432
-SANOFI.NS,Healthcare,Drug Manufacturers - General,71800266752
 KINGFA.NS,Basic Materials,Specialty Chemicals,71768113152
 MAHLIFE.NS,Real Estate,Real Estate - Development,71608483840
 IXIGO.NS,Consumer Cyclical,Travel Services,71393402880
@@ -648,7 +655,6 @@ WELENT.NS,Industrials,Engineering & Construction,69312217088
 BORORENEW.NS,Technology,Solar,69012316160
 RCF.NS,Basic Materials,Agricultural Inputs,68988600320
 GOKULAGRO.NS,Consumer Defensive,Packaged Foods,68740448256
-PRICOLLTD.NS,Consumer Cyclical,Auto Parts,68564434944
 EPL.NS,Consumer Cyclical,Packaging & Containers,68485398528
 ASHAPURMIN.NS,Basic Materials,Other Industrial Metals & Mining,68430114816
 TANLA.NS,Technology,Software - Application,68393226240
@@ -696,6 +702,7 @@ PRAJIND.NS,Industrials,Engineering & Construction,62174777344
 PRSMJOHNSN.NS,Basic Materials,Building Materials,62144401408
 ALOKINDS.NS,Consumer Cyclical,Textile Manufacturing,62065504256
 SKIPPER.NS,Industrials,Engineering & Construction,61798019072
+OMNI.NS,Industrials,Specialty Industrial Machinery,61233225728
 JSLL.NS,Healthcare,Medical Care Facilities,61180821504
 CSBBANK.NS,Financial Services,Banks - Regional,60850925568
 MOIL.NS,Basic Materials,Other Industrial Metals & Mining,60333367296
@@ -706,9 +713,9 @@ FIEMIND.NS,Consumer Cyclical,Auto Parts,58837598208
 KOVAI.NS,Healthcare,Medical Care Facilities,58754473984
 FEDFINA.NS,Financial Services,Credit Services,58637651968
 HCC.NS,Industrials,Engineering & Construction,58387943424
+AARTIPHARM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,58234003456
 SIS.NS,Industrials,Security & Protection Services,57594187776
 HAPPSTMNDS.NS,Technology,Information Technology Services,56926736384
-SAPPHIRE.NS,Consumer Cyclical,Restaurants,56899682304
 PICCADIL.NS,Consumer Defensive,Beverages - Wineries & Distilleries,56771055616
 BALAMINES.NS,Basic Materials,Specialty Chemicals,56760074240
 SAATVIKGL.NS,Technology,Solar,56409202688
@@ -732,8 +739,8 @@ AEROFLEX.NS,Industrials,Metal Fabrication,51390656512
 GOKEX.NS,Consumer Cyclical,Apparel Manufacturing,51309858816
 AHLUCONT.NS,Industrials,Engineering & Construction,51155050496
 MASTEK.NS,Technology,Information Technology Services,51151290368
+JSFB.NS,Financial Services,Banks - Regional,51021938688
 RTNPOWER.NS,Utilities,Utilities - Independent Power Producers,51016007680
-JSFB.NS,Financial Services,Banks - Regional,51013951488
 ICRA.NS,Financial Services,Financial Data & Stock Exchanges,50795327488
 PURVA.NS,Real Estate,Real Estate - Development,50750029824
 IFBIND.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",50506678272
@@ -785,6 +792,7 @@ ITDC.NS,Consumer Cyclical,Lodging,46019571712
 RAYMONDLSL.NS,Consumer Cyclical,Apparel Manufacturing,45977780224
 RALLIS.NS,Basic Materials,Agricultural Inputs,45945221120
 GULFOILLUB.NS,Basic Materials,Specialty Chemicals,45941665792
+TIMEX.NS,Consumer Cyclical,Luxury Goods,45427499008
 KODYTECH.NS,Unknown,Unknown,45253836800
 BANARISUG.NS,Consumer Defensive,Confectioners,45199347712
 NORTHARC.NS,Financial Services,Credit Services,44921896960
@@ -816,8 +824,8 @@ ADVENZYMES.NS,Basic Materials,Specialty Chemicals,42500546560
 TRUALT.NS,Energy,Oil & Gas Refining & Marketing,42464686080
 KMEW.NS,Industrials,Marine Shipping,42393415680
 GHCL.NS,Basic Materials,Chemicals,42352463872
+ORIANA.NS,Unknown,Unknown,42219130880
 TEXRAIL.NS,Industrials,Railroads,42143035392
-SBCL.NS,Industrials,Metal Fabrication,42097147904
 GREAVESCOT.NS,Industrials,Specialty Industrial Machinery,42047733760
 KRISHANA.NS,Basic Materials,Agricultural Inputs,42027311104
 VISHNU.NS,Basic Materials,Specialty Chemicals,41718644736
@@ -825,19 +833,23 @@ VRLLOG.NS,Industrials,Trucking,41461817344
 SEAMECLTD.NS,Industrials,Marine Shipping,41444966400
 MOSCHIP.NS,Technology,Semiconductor Equipment & Materials,41382871040
 LXCHEM.NS,Basic Materials,Specialty Chemicals,41221357568
-SANDHAR.NS,Consumer Cyclical,Auto Parts,40816852992
+OSWALPUMPS.NS,Industrials,Electrical Equipment & Parts,40631345152
 CAPILLARY.NS,Technology,Software - Infrastructure,40542633984
 SINDHUTRAD.NS,Industrials,Conglomerates,40105570304
 WAKEFIT.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",40011616256
 VSTTILLERS.NS,Industrials,Farm & Heavy Construction Machinery,39988703232
 HEMIPROP.NS,Real Estate,Real Estate - Diversified,39789158400
 RBA.NS,Consumer Cyclical,Restaurants,39606444032
+ORCHPHARMA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,39413813248
 POCL.NS,Basic Materials,Specialty Chemicals,39365652480
 STYRENIX.NS,Basic Materials,Chemicals,39355895808
+PACEDIGITK.NS,Technology,Communication Equipment,39293575168
+ORIENTELEC.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",39005581312
 TARC.NS,Real Estate,Real Estate - Development,38811070464
 AGI.NS,Consumer Cyclical,Packaging & Containers,38731087872
 SHOPERSTOP.NS,Consumer Cyclical,Department Stores,38719860736
 EMUDHRA.NS,Technology,Software - Application,38576869376
+WHEELS.NS,Consumer Cyclical,Auto Parts,38032424960
 FOSECOIND.NS,Basic Materials,Chemicals,37976252416
 UNIVCABLES.NS,Industrials,Electrical Equipment & Parts,37946335232
 VADILALIND.NS,Consumer Defensive,Packaged Foods,37803671552
@@ -859,7 +871,6 @@ ANUP.NS,Industrials,Specialty Industrial Machinery,36859899904
 KSL.NS,Basic Materials,Steel,36710039552
 RPTECH.NS,Technology,Electronics & Computer Distribution,36610555904
 NFL.NS,Basic Materials,Agricultural Inputs,36602056704
-SAMHI.NS,Consumer Cyclical,Lodging,36570042368
 MANINDS.NS,Basic Materials,Steel,36503404544
 DBCORP.NS,Communication Services,Publishing,36485156864
 INDOSTAR.NS,Financial Services,Credit Services,36447834112
@@ -872,15 +883,15 @@ HARSHA.NS,Industrials,Tools & Accessories,35552722944
 GMMPFAUDLR.NS,Industrials,Specialty Industrial Machinery,35300413440
 RAYMOND.NS,Industrials,Specialty Industrial Machinery,35272257536
 HEIDELBERG.NS,Basic Materials,Building Materials,35245703168
+OPTIEMUS.NS,Technology,Electronics & Computer Distribution,35116326912
 IDEAFORGE.NS,Technology,Computer Hardware,34954092544
+AARTIDRUGS.NS,Healthcare,Drug Manufacturers - Specialty & Generic,34947280896
 JTEKTINDIA.NS,Consumer Cyclical,Auto Parts,34935365632
-SANATHAN.NS,Consumer Cyclical,Textile Manufacturing,34808233984
+NRBBEARING.NS,Consumer Cyclical,Auto Parts,34901827584
 GUFICBIO.NS,Healthcare,Drug Manufacturers - Specialty & Generic,34767945728
-CIGNITITEC.NS,Unknown,Unknown,34711924736
 ELLEN.NS,Basic Materials,Chemicals,34649018368
 PREMEXPLN.NS,Basic Materials,Specialty Chemicals,34615472128
 CHEMPLASTS.NS,Basic Materials,Chemicals,34518482944
-SASKEN.NS,Technology,Information Technology Services,34474807296
 MAHLOG.NS,Industrials,Integrated Freight & Logistics,34469888000
 CYIENTDLM.NS,Technology,Electronic Components,34364784640
 INDRAMEDCO.NS,Healthcare,Medical Care Facilities,34299451392
@@ -888,6 +899,7 @@ ASHOKA.NS,Industrials,Engineering & Construction,34200512512
 ZOTA.NS,Healthcare,Biotechnology,34130302976
 TFCILTD.NS,Financial Services,Credit Services,34051977216
 PITTIENG.NS,Industrials,Metal Fabrication,33857142784
+WSTCSTPAPR.NS,Basic Materials,Paper & Paper Products,33813739520
 SHANTIGEAR.NS,Industrials,Specialty Industrial Machinery,33777248256
 SMSPHARMA.NS,Healthcare,Drug Manufacturers - General,33667905536
 MARINE.NS,Industrials,Electrical Equipment & Parts,33325510656
@@ -925,9 +937,8 @@ FLAIR.NS,Industrials,Business Equipment & Supplies,30596276224
 MARATHON.NS,Real Estate,Real Estate - Development,30312278016
 NIITMTS.NS,Consumer Defensive,Education & Training Services,30279247872
 RAMKY.NS,Industrials,Engineering & Construction,30263654400
-SANGHVIMOV.NS,Industrials,Rental & Leasing Services,30158749696
 MAITHANALL.NS,Basic Materials,Steel,30150830080
-SAMBHV.NS,Basic Materials,Steel,30144886784
+WONDERLA.NS,Consumer Cyclical,Leisure,30078246912
 CARYSIL.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",30035392512
 TVSSRICHAK.NS,Consumer Cyclical,Auto Parts,29860964352
 SHAREINDIA.NS,Financial Services,Capital Markets,29727451136
@@ -943,6 +954,7 @@ SETL.NS,Industrials,Specialty Industrial Machinery,29121363968
 SUNCLAY.NS,Industrials,Metal Fabrication,29025976320
 ROSSARI.NS,Basic Materials,Specialty Chemicals,28922734592
 SOTL.NS,Basic Materials,Specialty Chemicals,28805658624
+NSIL.NS,Financial Services,Asset Management,28759945216
 ANTELOPUS.NS,Energy,Oil & Gas E&P,28606337024
 PRINCEPIPE.NS,Industrials,Building Products & Equipment,28480456704
 VENUSPIPES.NS,Basic Materials,Steel,28447361024
@@ -950,9 +962,11 @@ NITINSPIN.NS,Consumer Cyclical,Textile Manufacturing,28346124288
 PARAGMILK.NS,Consumer Defensive,Packaged Foods,28306556928
 ELPROINTL.NS,Unknown,Unknown,28299624448
 INTERARCH.NS,Industrials,Engineering & Construction,28255539200
+ORIENTCEM.NS,Basic Materials,Building Materials,28133619712
 TATVA.NS,Basic Materials,Specialty Chemicals,27965202432
 GATEWAY.NS,Industrials,Integrated Freight & Logistics,27865137152
 FUSION.NS,Financial Services,Credit Services,27718178816
+ZAGGLE.NS,Technology,Software - Infrastructure,27660111872
 INDOTECH.NS,Industrials,Electrical Equipment & Parts,27539783680
 MEDIASSIST.NS,Healthcare,Healthcare Plans,27456659456
 BUILDPRO.NS,Consumer Cyclical,Home Improvement Retail,27450236928
@@ -964,11 +978,13 @@ JASH.NS,Industrials,Specialty Industrial Machinery,26624591872
 KKCL.NS,Consumer Cyclical,Apparel Manufacturing,26609754112
 PRAKASH.NS,Basic Materials,Steel,26548883456
 EFCIL.NS,Real Estate,Real Estate Services,26461650944
+YASHO.NS,Basic Materials,Specialty Chemicals,26447769600
 INA.NS,Technology,Solar,26440697856
 ARVSMART.NS,Real Estate,Real Estate - Development,26414794752
 DIAMONDYD.NS,Consumer Defensive,Packaged Foods,26373312512
 SOLARA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,26370318336
 BOROLTD.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",26343958528
+XPROINDIA.NS,Basic Materials,Specialty Chemicals,26329085952
 JTLIND.NS,Basic Materials,Steel,26301093888
 VSSL.NS,Basic Materials,Steel,26196985856
 MONARCH.NS,Financial Services,Capital Markets,26142695424
@@ -976,12 +992,12 @@ AUTOAXLES.NS,Consumer Cyclical,Auto Parts,26139174912
 EUROPRATIK.NS,Basic Materials,Building Materials,26127429632
 SIYSIL.NS,Consumer Cyclical,Textile Manufacturing,26115020800
 JUBLCPL.NS,Basic Materials,Specialty Chemicals,26071379968
-SANGAMIND.NS,Consumer Cyclical,Textile Manufacturing,25924741120
 VINDHYATEL.NS,Industrials,Engineering & Construction,25881098240
 BOMDYEING.NS,Consumer Cyclical,Textile Manufacturing,25738379264
 APCOTEXIND.NS,Basic Materials,Specialty Chemicals,25544011776
 DDEVPLSTIK.NS,Basic Materials,Specialty Chemicals,25534937088
 MOREPENLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,25485326336
+WINDMACHIN.NS,Industrials,Specialty Industrial Machinery,25482444800
 EASEMYTRIP.NS,Consumer Cyclical,Travel Services,25421602816
 KIRIINDUS.NS,Basic Materials,Specialty Chemicals,25379678208
 SUNDROP.NS,Consumer Defensive,Packaged Foods,25332285440
@@ -994,19 +1010,20 @@ PATELENG.NS,Industrials,Engineering & Construction,24936296448
 GKENERGY.NS,Utilities,Utilities - Renewable,24851200000
 GLOBUSSPR.NS,Consumer Defensive,Beverages - Wineries & Distilleries,24834217984
 RAMCOIND.NS,Industrials,Building Products & Equipment,24801949696
+OWAIS.NS,Unknown,Unknown,24718059520
 DIVGIITTS.NS,Consumer Cyclical,Auto Parts,24662073344
 PARKHOTELS.NS,Consumer Cyclical,Lodging,24401477632
 PROTEAN.NS,Technology,Information Technology Services,24394407936
 PANACEABIO.NS,Healthcare,Biotechnology,24380858368
 GANECOS.NS,Consumer Cyclical,Textile Manufacturing,24364826624
 VEEDOL.NS,Basic Materials,Specialty Chemicals,24363831296
-SATIN.NS,Financial Services,Credit Services,24363444224
 BGRENERGY.NS,Industrials,Engineering & Construction,24325662720
 RHETAN.NS,Basic Materials,Steel,24280780800
 VIDYAWIRES.NS,Industrials,Electrical Equipment & Parts,24246923264
 STYLEBAAZA.NS,Consumer Cyclical,Apparel Retail,24187213824
 UNICHEMLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,24152692736
 SIRCA.NS,Basic Materials,Specialty Chemicals,24062664704
+ORISSAMINE.NS,Basic Materials,Steel,24037199872
 MUFIN.NS,Financial Services,Credit Services,23939973120
 BHARATRAS.NS,Basic Materials,Agricultural Inputs,23864535040
 REPCOHOME.NS,Financial Services,Mortgage Finance,23801470976
@@ -1069,12 +1086,10 @@ RAJRATAN.NS,Basic Materials,Steel,21014116352
 VINCOFE.NS,Consumer Defensive,Beverages - Non-Alcoholic,20947081216
 VIMTALABS.NS,Healthcare,Diagnostics & Research,20696412160
 GMBREW.NS,Consumer Defensive,Beverages - Wineries & Distilleries,20652476416
-SCILAL.NS,Real Estate,Real Estate Services,20625580032
 STOVEKRAFT.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",20556335104
 RANEHOLDIN.NS,Consumer Cyclical,Auto Parts,20538628096
 ALPEXSOLAR.NS,Unknown,Unknown,20531959808
 STALLION.NS,Basic Materials,Specialty Chemicals,20512350208
-SANSTAR.NS,Basic Materials,Chemicals,20507944960
 KCP.NS,Basic Materials,Building Materials,20489439232
 GSPCROP.NS,Basic Materials,Agricultural Inputs,20261242880
 BCG.NS,Communication Services,Advertising Agencies,20245774336
@@ -1097,6 +1112,7 @@ GOCLCORP.NS,Basic Materials,Specialty Chemicals,19355578368
 NDRAUTO.NS,Consumer Cyclical,Auto Parts,19323936768
 KARNIKA.NS,Unknown,Unknown,19302922240
 ADOR.NS,Industrials,Specialty Industrial Machinery,19167461376
+NUCLEUS.NS,Technology,Software - Application,19118753792
 TCIEXP.NS,Industrials,Integrated Freight & Logistics,19111528448
 RISHABH.NS,Technology,Scientific & Technical Instruments,18987290624
 HGS.NS,Industrials,Specialty Business Services,18905843712
@@ -1129,24 +1145,24 @@ ENSER.NS,Unknown,Unknown,17850488832
 DELTACORP.NS,Consumer Cyclical,Resorts & Casinos,17721092096
 CANTABIL.NS,Consumer Cyclical,Apparel Manufacturing,17633409024
 STUDDS.NS,Consumer Cyclical,Auto Parts,17606711296
+ORIENTHOT.NS,Consumer Cyclical,Lodging,17581303808
 KRSNAA.NS,Healthcare,Diagnostics & Research,17568784384
-SBC.NS,Industrials,Conglomerates,17547601920
 JINDRILL.NS,Energy,Oil & Gas Equipment & Services,17477054464
 SOLARWORLD.NS,Technology,Solar,17442004992
 SURYODAY.NS,Financial Services,Banks - Regional,17330556928
-HESTERBIO.NS,Healthcare,Drug Manufacturers - Specialty & Generic,17159196672
 GOCOLORS.NS,Consumer Cyclical,Apparel Retail,17093694464
 JGCHEM.NS,Basic Materials,Other Industrial Metals & Mining,17051815936
 ASIANENE.NS,Energy,Oil & Gas Equipment & Services,17050423296
 ACCELYA.NS,Technology,Information Technology Services,17023400960
 MBEL.NS,Industrials,Engineering & Construction,17021596672
-SPMLINFRA.NS,Industrials,Engineering & Construction,17000887296
 WAAREEINDO.NS,Technology,Solar,16980546560
 HITECH.NS,Basic Materials,Steel,16964820992
+SPMLINFRA.NS,Industrials,Engineering & Construction,16956942336
 NGLFINE.NS,Healthcare,Drug Manufacturers - General,16927785984
 GOODYEAR.NS,Consumer Cyclical,Auto Parts,16839703552
 THEJO.NS,Industrials,Specialty Industrial Machinery,16818759680
 RAMCOSYS.NS,Technology,Software - Application,16801915904
+WINDLAS.NS,Healthcare,Drug Manufacturers - Specialty & Generic,16779316224
 ARMANFIN.NS,Financial Services,Credit Services,16737396736
 SUMMITSEC.NS,Financial Services,Capital Markets,16629286912
 JAGRAN.NS,Communication Services,Publishing,16613551104
@@ -1170,11 +1186,12 @@ MAHASTEEL.NS,Basic Materials,Steel,15638974464
 ALGOQUANT.NS,Financial Services,Capital Markets,15620506624
 AQYLON.NS,Communication Services,Broadcasting,15612041216
 SDBL.NS,Consumer Defensive,Beverages - Brewers,15605071872
+ONEPOINT.NS,Industrials,Specialty Business Services,15552956416
 DYCL.NS,Industrials,Electrical Equipment & Parts,15514033152
 LANDMARK.NS,Consumer Cyclical,Auto & Truck Dealerships,15501658112
-INFOBEAN.NS,Technology,Software - Application,15471818752
 GANDHAR.NS,Energy,Oil & Gas Refining & Marketing,15421897728
 KRISHNADEF.NS,Industrials,Specialty Industrial Machinery,15389009920
+YATRA.NS,Consumer Cyclical,Travel Services,15338557440
 MOBIKWIK.NS,Technology,Software - Infrastructure,15287841792
 SHRIRAMPPS.NS,Real Estate,Real Estate - Development,15256503296
 MCLOUD.NS,Technology,Information Technology Services,15192041472
@@ -1199,8 +1216,8 @@ ALLTIME.NS,Consumer Defensive,Household & Personal Products,14410400768
 VINYAS.NS,Unknown,Unknown,14406366208
 STLNETWORK.NS,Communication Services,Telecom Services,14393375744
 CLSEL.NS,Consumer Defensive,Packaged Foods,14348326912
+INDSWFTLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,14278218752
 PRECAM.NS,Consumer Cyclical,Auto Parts,14259272704
-INDSWFTLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,14257694720
 NAVKARCORP.NS,Industrials,Integrated Freight & Logistics,14209010688
 ESAFSFB.NS,Financial Services,Banks - Regional,14162877440
 SEPC.NS,Industrials,Engineering & Construction,14085516288
@@ -1209,6 +1226,7 @@ SYNCOMF.NS,Healthcare,Drug Manufacturers - Specialty & Generic,13883800576
 SAHANA.NS,Unknown,Unknown,13883089920
 WENDT.NS,Industrials,Tools & Accessories,13781000192
 SPIC.NS,Basic Materials,Agricultural Inputs,13739614208
+OMAXE.NS,Real Estate,Real Estate - Development,13678571520
 AURUM.NS,Real Estate,Real Estate Services,13646405632
 NINSYS.NS,Technology,Information Technology Services,13645929472
 KCK.NS,Unknown,Unknown,13610764288
@@ -1256,6 +1274,7 @@ TECHLABS.NS,Unknown,Unknown,12252274688
 BLUSPRING.NS,Industrials,Specialty Business Services,12242204672
 HARDWYN.NS,Industrials,Building Products & Equipment,12235272192
 KROSS.NS,Consumer Cyclical,Auto Parts,12198732800
+ORIENTTECH.NS,Technology,Information Technology Services,12170632192
 CAPITALSFB.NS,Financial Services,Banks - Regional,12159763456
 MOL.NS,Basic Materials,Agricultural Inputs,12151132160
 LINCOLN.NS,Healthcare,Drug Manufacturers - Specialty & Generic,12142021632
@@ -1285,7 +1304,6 @@ BHARATSE.NS,Consumer Cyclical,Auto Parts,11504959488
 GALAPREC.NS,Industrials,Specialty Industrial Machinery,11501798400
 GULPOLY.NS,Basic Materials,Chemicals,11381432320
 MONTECARLO.NS,Consumer Cyclical,Apparel Manufacturing,11296902144
-SARTELE.NS,Unknown,Unknown,11275180032
 RAJRILTD.NS,Consumer Cyclical,Textile Manufacturing,11261797376
 RIIL.NS,Industrials,Engineering & Construction,11218545664
 ARIHANTSUP.NS,Real Estate,Real Estate - Development,11203909632
@@ -1316,6 +1334,7 @@ AVTNPL.NS,Basic Materials,Specialty Chemicals,10602012672
 SHREDIGCEM.NS,Basic Materials,Building Materials,10591876096
 FINOPB.NS,Financial Services,Banks - Regional,10545435648
 ROTO.NS,Industrials,Specialty Industrial Machinery,10520462336
+OAL.NS,Basic Materials,Specialty Chemicals,10511694848
 CENTRUM.NS,Financial Services,Financial Conglomerates,10505594880
 TAC.NS,Unknown,Unknown,10495319040
 RSL.NS,Basic Materials,Steel,10428407808
@@ -1344,6 +1363,7 @@ BHAGYANGR.NS,Basic Materials,Copper,9849661440
 WCIL.NS,Industrials,Integrated Freight & Logistics,9838678016
 CONTROLPR.NS,Industrials,Business Equipment & Supplies,9830842368
 THEMISMED.NS,Healthcare,Drug Manufacturers - Specialty & Generic,9785288704
+ORICONENT.NS,Consumer Cyclical,Packaging & Containers,9784301568
 NAHARSPING.NS,Consumer Cyclical,Textile Manufacturing,9746648064
 CREST.NS,Financial Services,Financial Conglomerates,9726598144
 MODISONLTD.NS,Industrials,Electrical Equipment & Parts,9696059392
@@ -1374,18 +1394,18 @@ TEMBO.NS,Industrials,Metal Fabrication,9258633216
 ROHLTD.NS,Consumer Cyclical,Lodging,9239555072
 NDTV.NS,Communication Services,Broadcasting,9236960256
 INDOAMIN.NS,Basic Materials,Chemicals,9211361280
+YUKEN.NS,Industrials,Specialty Industrial Machinery,9195688960
 SUYOG.NS,Communication Services,Telecom Services,9186222080
 PRECOT.NS,Consumer Cyclical,Textile Manufacturing,9151800320
 MACPOWER.NS,Industrials,Specialty Industrial Machinery,9151305728
-ZUARI.NS,Basic Materials,Agricultural Inputs,9148457984
 GAYAPROJ.NS,Industrials,Engineering & Construction,9118832640
 SEJALLTD.NS,Industrials,Building Products & Equipment,9111481344
 TVSELECT.NS,Technology,Computer Hardware,9068447744
 DENTALKART.NS,Unknown,Unknown,9018726400
 AVADHSUGAR.NS,Consumer Defensive,Confectioners,9006286848
 DHAMPURSUG.NS,Consumer Defensive,Confectioners,9005483008
+UTTAMSUGAR.NS,Consumer Defensive,Confectioners,8948090880
 HEXATRADEX.NS,Financial Services,Credit Services,8943012864
-UTTAMSUGAR.NS,Consumer Defensive,Confectioners,8923556864
 MAXIND.NS,Healthcare,Medical Care Facilities,8901049344
 MEIL.NS,Industrials,Electrical Equipment & Parts,8844402688
 EIMCOELECO.NS,Industrials,Farm & Heavy Construction Machinery,8811207680
@@ -1400,6 +1420,7 @@ RAMASTEEL.NS,Basic Materials,Steel,8605576192
 REGAAL.NS,Consumer Defensive,Packaged Foods,8570217984
 SALSTEEL.NS,Basic Materials,Steel,8565845504
 SIGACHI.NS,Healthcare,Drug Manufacturers - Specialty & Generic,8548548096
+OMINFRAL.NS,Industrials,Engineering & Construction,8518071296
 VIVIANA.NS,Unknown,Unknown,8472270848
 DRONE.NS,Unknown,Unknown,8466799104
 SUPREMEINF.NS,Industrials,Engineering & Construction,8433988608
@@ -1416,7 +1437,6 @@ DWARKESH.NS,Consumer Defensive,Confectioners,8255180288
 RSWM.NS,Consumer Cyclical,Textile Manufacturing,8246562816
 GANESHCP.NS,Consumer Defensive,Packaged Foods,8237370368
 ARROWGREEN.NS,Consumer Cyclical,Packaging & Containers,8231224320
-SARLAPOLY.NS,Consumer Cyclical,Textile Manufacturing,8212519936
 SGIL.NS,Industrials,Metal Fabrication,8210247680
 FINKURVE.NS,Financial Services,Credit Services,8198423040
 JITFINFRA.NS,Industrials,Engineering & Construction,8159641600
@@ -1466,6 +1486,7 @@ UNIENTER.NS,Basic Materials,Chemicals,7377423872
 PVP.NS,Industrials,Conglomerates,7374631936
 SADHNANIQ.NS,Basic Materials,Chemicals,7352441856
 GTPL.NS,Communication Services,Entertainment,7346085888
+XCHANGING.NS,Technology,Information Technology Services,7311425536
 RMDRIP.NS,Industrials,Farm & Heavy Construction Machinery,7301296640
 GLOSTERLTD.NS,Consumer Cyclical,Textile Manufacturing,7288210944
 ADVENTHTL.NS,Consumer Cyclical,Lodging,7235898880
@@ -1479,7 +1500,6 @@ ABINFRA.NS,Industrials,Engineering & Construction,7160828928
 HERANBA.NS,Basic Materials,Agricultural Inputs,7131200512
 PVSL.NS,Consumer Cyclical,Auto & Truck Dealerships,7129787904
 VLSFINANCE.NS,Financial Services,Capital Markets,7080595456
-SANDESH.NS,Communication Services,Publishing,7077408768
 DBOL.NS,Consumer Defensive,Farm Products,7064673792
 STCINDIA.NS,Industrials,Conglomerates,7056000000
 BIGBLOC.NS,Industrials,Building Products & Equipment,7049056256
@@ -1504,7 +1524,7 @@ WELINV.NS,Financial Services,Capital Markets,6691431936
 BHAGERIA.NS,Basic Materials,Specialty Chemicals,6682796544
 MUKKA.NS,Consumer Defensive,Packaged Foods,6678000128
 SOFTTECH.NS,Technology,Software - Application,6661529088
-SAURASHCEM.NS,Basic Materials,Building Materials,6632459264
+WTICAB.NS,Unknown,Unknown,6644692480
 CCCL.NS,Industrials,Engineering & Construction,6616507904
 KSOLVES.NS,Technology,Software - Application,6597829120
 ADVANCE.NS,Basic Materials,Agricultural Inputs,6587357696
@@ -1526,6 +1546,7 @@ TREL.NS,Real Estate,Real Estate Services,6304546816
 NAHARPOLY.NS,Consumer Cyclical,Packaging & Containers,6283461632
 AGARIND.NS,Basic Materials,Specialty Chemicals,6261330432
 SHREERAMA.NS,Consumer Cyclical,Packaging & Containers,6199588864
+OSWALGREEN.NS,Financial Services,Asset Management,6196804608
 PASUPTAC.NS,Consumer Cyclical,Textile Manufacturing,6174251008
 COMSYN.NS,Consumer Cyclical,Packaging & Containers,6173510656
 SNOWMAN.NS,Industrials,Integrated Freight & Logistics,6155105280
@@ -1539,17 +1560,20 @@ GLOTTIS.NS,Industrials,Integrated Freight & Logistics,6012663296
 URJA.NS,Technology,Solar,6001108992
 MALLCOM.NS,Industrials,Security & Protection Services,5989151744
 APTECHT.NS,Consumer Defensive,Education & Training Services,5970809856
+OSWALAGRO.NS,Real Estate,Real Estate - Development,5965811712
 HINDCOMPOS.NS,Consumer Cyclical,Auto Parts,5962983936
 PYRAMID.NS,Consumer Cyclical,Packaging & Containers,5960531968
+EMKAY.NS,Financial Services,Capital Markets,5940525568
 VINSYS.NS,Unknown,Unknown,5940157440
 SUTLEJTEX.NS,Consumer Cyclical,Textile Manufacturing,5920193536
-EMKAY.NS,Financial Services,Capital Markets,5918709760
 AFIL.NS,Financial Services,Credit Services,5903176192
 LINC.NS,Industrials,Business Equipment & Supplies,5896410112
 DISHTV.NS,Communication Services,Entertainment,5836782080
+ONWARDTEC.NS,Technology,Information Technology Services,5836135424
 PREMIERPOL.NS,Basic Materials,Specialty Chemicals,5779689472
 LAXMIINDIA.NS,Financial Services,Credit Services,5729707008
 TBI.NS,Unknown,Unknown,5717174272
+OCCLLTD.NS,Basic Materials,Chemicals,5705841152
 EIFFL.NS,Consumer Defensive,Packaged Foods,5676719616
 BESTAGRO.NS,Basic Materials,Agricultural Inputs,5674737664
 TGL.NS,Unknown,Unknown,5665011200
@@ -1557,14 +1581,13 @@ CEWATER.NS,Utilities,Utilities - Regulated Water,5656280064
 MANBA.NS,Financial Services,Credit Services,5655952896
 SUBEXLTD.NS,Technology,Software - Application,5653975040
 FOCUS.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",5632695808
-SATIA.NS,Basic Materials,Paper & Paper Products,5586999808
 CHEMFAB.NS,Basic Materials,Specialty Chemicals,5586339328
 PHANTOMFX.NS,Unknown,Unknown,5570866688
 PENINLAND.NS,Real Estate,Real Estate - Development,5566400000
 ELIN.NS,Industrials,Electrical Equipment & Parts,5520208896
 SHREEKARNI.NS,Unknown,Unknown,5516160000
+OMAXAUTO.NS,Consumer Cyclical,Auto Parts,5513605120
 TRANSPEK.NS,Basic Materials,Chemicals,5512398336
-SCHAND.NS,Communication Services,Publishing,5471775232
 NBIFIN.NS,Financial Services,Capital Markets,5469427200
 ZIMLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,5465750016
 TPLPLASTEH.NS,Consumer Cyclical,Packaging & Containers,5454749696
@@ -1578,6 +1601,7 @@ TIRUPATIFL.NS,Industrials,Metal Fabrication,5335610880
 PRIMO.NS,Basic Materials,Chemicals,5329127424
 IRIS.NS,Technology,Software - Application,5322034176
 LOKESHMACH.NS,Industrials,Specialty Industrial Machinery,5319933440
+ONMOBILE.NS,Communication Services,Telecom Services,5315004416
 ANNAPURNA.NS,Unknown,Unknown,5299866624
 KAMATHOTEL.NS,Consumer Cyclical,Lodging,5292262400
 HMVL.NS,Communication Services,Publishing,5269542400
@@ -1594,9 +1618,11 @@ GFLLIMITED.NS,Financial Services,Asset Management,5164048384
 SICALLOG.NS,Industrials,Integrated Freight & Logistics,5158889984
 CSLFINANCE.NS,Financial Services,Credit Services,5150533120
 HTMEDIA.NS,Communication Services,Publishing,5149184512
+WSI.NS,Industrials,Engineering & Construction,5139631104
 MUNJALSHOW.NS,Consumer Cyclical,Auto Parts,5135357952
 ENIL.NS,Communication Services,Broadcasting,5125522944
 GLOBAL.NS,Consumer Defensive,Education & Training Services,5118146048
+ZEEMEDIA.NS,Communication Services,Broadcasting,5109752320
 BMWVENTLTD.NS,Basic Materials,Steel,5107513856
 SURANI.NS,Unknown,Unknown,5081875456
 INTLCONV.NS,Industrials,Specialty Industrial Machinery,5071227392
@@ -1618,12 +1644,15 @@ DONEAR.NS,Consumer Cyclical,Textile Manufacturing,4923360256
 S&SPOWER.NS,Industrials,Electrical Equipment & Parts,4919959040
 NILASPACES.NS,Real Estate,Real Estate - Development,4911798784
 MONEYBOXX.NS,Financial Services,Credit Services,4888738304
+ORIENTBELL.NS,Industrials,Building Products & Equipment,4880935936
 ESSARSHPNG.NS,Industrials,Marine Shipping,4879049728
 ADVANIHOTR.NS,Consumer Cyclical,Lodging,4869660160
+ORIENTCER.NS,Basic Materials,Specialty Chemicals,4856155136
 KRISHCA.NS,Unknown,Unknown,4841628160
 GUJAPOLLO.NS,Industrials,Specialty Industrial Machinery,4836512768
 UNIDT.NS,Energy,Oil & Gas Equipment & Services,4815495168
 SAAKSHI.NS,Unknown,Unknown,4794486784
+ORBTEXP.NS,Consumer Cyclical,Textile Manufacturing,4786058240
 SAIFL.NS,Unknown,Unknown,4778807296
 ABCOTS.NS,Consumer Cyclical,Textile Manufacturing,4772474880
 SCPL.NS,Consumer Defensive,Packaged Foods,4749471232
@@ -1640,12 +1669,12 @@ BBTCL.NS,Consumer Cyclical,Packaging & Containers,4632463872
 VINYLINDIA.NS,Basic Materials,Specialty Chemicals,4629203968
 KANPRPLA.NS,Consumer Cyclical,Packaging & Containers,4627680768
 KNAGRI.NS,Consumer Defensive,Farm Products,4625798144
-SARVESHWAR.NS,Consumer Defensive,Packaged Foods,4618599424
+NRL.NS,Industrials,Waste Management,4618643456
 PPL.NS,Industrials,Building Products & Equipment,4612205568
-SBGLP.NS,Real Estate,Real Estate - Development,4604206592
 HITECHCORP.NS,Consumer Cyclical,Packaging & Containers,4575434752
 DICIND.NS,Basic Materials,Specialty Chemicals,4572507136
 UGARSUGAR.NS,Consumer Defensive,Confectioners,4540499968
+LEMERITE.NS,Consumer Cyclical,Textile Manufacturing,4524823552
 UNIVPHOTO.NS,Healthcare,Medical Devices,4511642624
 SRGHFL.NS,Financial Services,Mortgage Finance,4491983872
 MANCREDIT.NS,Financial Services,Credit Services,4487566336
@@ -1663,6 +1692,7 @@ RAMANEWS.NS,Consumer Defensive,Beverages - Non-Alcoholic,4396038656
 SHERA.NS,Unknown,Unknown,4395872256
 NEWJAISA.NS,Unknown,Unknown,4377918976
 RUSHIL.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",4374844928
+WINSOL.NS,Unknown,Unknown,4370110464
 VALIANTLAB.NS,Healthcare,Drug Manufacturers - Specialty & Generic,4361836544
 KOTHARIPRO.NS,Industrials,Conglomerates,4354219520
 CGRAPHICS.NS,Unknown,Unknown,4330193920
@@ -1722,6 +1752,7 @@ CHAVDA.NS,Unknown,Unknown,3843870208
 FELIX.NS,Unknown,Unknown,3839397888
 SETCO.NS,Consumer Cyclical,Auto Parts,3838173440
 IL&FSENGG.NS,Industrials,Engineering & Construction,3835291648
+ORIENTPPR.NS,Basic Materials,Paper & Paper Products,3800242432
 SINCLAIR.NS,Consumer Cyclical,Lodging,3771710976
 PROV.NS,Unknown,Unknown,3756893184
 NDL.NS,Consumer Cyclical,Textile Manufacturing,3747826432
@@ -1782,6 +1813,7 @@ VARDMNPOLY.NS,Consumer Cyclical,Textile Manufacturing,3202416128
 DCMSRIND.NS,Consumer Defensive,Confectioners,3200442624
 URBAN.NS,Unknown,Unknown,3197704960
 BELLACASA.NS,Consumer Cyclical,Textile Manufacturing,3191847680
+AARTISURF.NS,Basic Materials,Specialty Chemicals,3184107776
 GENUSPAPER.NS,Basic Materials,Paper & Paper Products,3178076416
 MANOMAY.NS,Consumer Cyclical,Textile Manufacturing,3170621440
 ANLON.NS,Unknown,Unknown,3165232384
@@ -1812,6 +1844,8 @@ UNIVASTU.NS,Industrials,Engineering & Construction,2864186624
 KCPSUGIND.NS,Consumer Defensive,Confectioners,2863920896
 UYFINCORP.NS,Financial Services,Credit Services,2845965568
 UFO.NS,Communication Services,Entertainment,2830371840
+OILCOUNTUB.NS,Energy,Oil & Gas Equipment & Services,2825111040
+OMFREIGHT.NS,Industrials,Integrated Freight & Logistics,2817624064
 USASEEDS.NS,Unknown,Unknown,2814338816
 FCSSOFT.NS,Technology,Information Technology Services,2803667200
 HALDER.NS,Consumer Defensive,Farm Products,2788629760
@@ -1820,6 +1854,7 @@ EFACTOR.NS,Unknown,Unknown,2774676736
 CINELINE.NS,Communication Services,Entertainment,2772497152
 SUNDRMBRAK.NS,Consumer Cyclical,Auto Parts,2743185664
 AHLEAST.NS,Consumer Cyclical,Lodging,2730877440
+ONDOOR.NS,Unknown,Unknown,2707944448
 MASON.NS,Unknown,Unknown,2696499968
 KONSTELEC.NS,Unknown,Unknown,2696104960
 NIPPOBATRY.NS,Industrials,Electrical Equipment & Parts,2683124992
@@ -1839,18 +1874,22 @@ SPECTSTM.NS,Unknown,Unknown,2535621888
 DCG.NS,Unknown,Unknown,2534591488
 PODDARMENT.NS,Basic Materials,Specialty Chemicals,2529423872
 BCONCEPTS.NS,Consumer Cyclical,Footwear & Accessories,2524459520
+ZEAL.NS,Unknown,Unknown,2522197760
 DPEL.NS,Unknown,Unknown,2519098368
 PKTEA.NS,Consumer Defensive,Farm Products,2503482624
 RCOM.NS,Communication Services,Telecom Services,2487988992
 TRF.NS,Industrials,Specialty Industrial Machinery,2486336768
 NDGL.NS,Financial Services,Capital Markets,2482899968
+AARON.NS,Industrials,Specialty Industrial Machinery,2476502272
 SHREEOSFM.NS,Unknown,Unknown,2464544000
 KMSUGAR.NS,Consumer Defensive,Confectioners,2457324288
 DELAPLEX.NS,Unknown,Unknown,2451501056
 BALAJEE.NS,Consumer Cyclical,Packaging & Containers,2448756992
+YASHOPTICS.NS,Unknown,Unknown,2436935168
 SURANAT&P.NS,Utilities,Utilities - Independent Power Producers,2435533824
 GLOBECIVIL.NS,Industrials,Engineering & Construction,2426980096
 PAVNAIND.NS,Consumer Cyclical,Auto Parts,2412473856
+NURECA.NS,Healthcare,Medical Devices,2400136960
 CLEDUCATE.NS,Consumer Defensive,Education & Training Services,2399952384
 DIAMINESQ.NS,Basic Materials,Chemicals,2393913600
 NOVAAGRI.NS,Basic Materials,Agricultural Inputs,2388225792
@@ -1892,6 +1931,7 @@ RULKA.NS,Unknown,Unknown,2212238848
 INTENTECH.NS,Technology,Software - Infrastructure,2199467520
 UCAL.NS,Consumer Cyclical,Auto Parts,2188806656
 STARPAPER.NS,Basic Materials,Paper & Paper Products,2180161792
+ZEELEARN.NS,Consumer Defensive,Education & Training Services,2171691776
 VSTL.NS,Basic Materials,Steel,2154702336
 DRCSYSTEMS.NS,Technology,Information Technology Services,2152574976
 SILGO.NS,Consumer Cyclical,Luxury Goods,2151953152
@@ -1918,6 +1958,7 @@ LYKALABS.NS,Healthcare,Biotechnology,2047892224
 DELPHIFX.NS,Financial Services,Capital Markets,2045533312
 FONEBOX.NS,Unknown,Unknown,2023784960
 BROOKS.NS,Healthcare,Drug Manufacturers - Specialty & Generic,2019294464
+WORTHPERI.NS,Consumer Cyclical,Packaging & Containers,2018175744
 DUCOL.NS,Unknown,Unknown,2015562496
 SHRADHA.NS,Real Estate,Real Estate - Development,2009435776
 BTTL.NS,Consumer Cyclical,Textile Manufacturing,2006290432
@@ -1967,6 +2008,7 @@ AUSOMENT.NS,Financial Services,Capital Markets,1762751360
 DRSDILIP.NS,Unknown,Unknown,1762301184
 GREENCHEF.NS,Unknown,Unknown,1754696832
 SHRITECH.NS,Unknown,Unknown,1742757504
+WOMANCART.NS,Unknown,Unknown,1740787200
 TRIGYN.NS,Technology,Information Technology Services,1730774144
 IVP.NS,Basic Materials,Specialty Chemicals,1724692480
 EFORCE.NS,Unknown,Unknown,1717560064
@@ -2037,6 +2079,7 @@ JAINAM.NS,Unknown,Unknown,1478567936
 SIGIND.NS,Industrials,Conglomerates,1471849984
 PRAENG.NS,Real Estate,Real Estate - Development,1470050432
 ALPA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,1466529792
+XELPMOC.NS,Technology,Information Technology Services,1455530112
 PARTYCRUS.NS,Unknown,Unknown,1454986752
 INDBANK.NS,Financial Services,Capital Markets,1454273664
 BALAXI.NS,Healthcare,Drug Manufacturers - Specialty & Generic,1435947136
@@ -2059,22 +2102,23 @@ LATTEYS.NS,Industrials,Specialty Industrial Machinery,1362076160
 URAVIDEF.NS,Consumer Cyclical,Auto Parts,1351470080
 FELDVR.NS,Consumer Cyclical,Department Stores,1349452928
 MAHAPEXLTD.NS,Financial Services,Credit Services,1348594432
+ZENITHDRUG.NS,Unknown,Unknown,1345323264
 BCPL.NS,Industrials,Infrastructure Operations,1344747776
 BSL.NS,Consumer Cyclical,Textile Manufacturing,1336232192
+AARTECH.NS,Industrials,Electrical Equipment & Parts,1334673408
 SURANASOL.NS,Technology,Solar,1332514688
 JOCIL.NS,Basic Materials,Specialty Chemicals,1321781632
 TARMAT.NS,Industrials,Engineering & Construction,1313367040
 LAL.NS,Consumer Cyclical,Apparel Manufacturing,1309342976
 INDIANCARD.NS,Consumer Cyclical,Textile Manufacturing,1303303424
+WIPL.NS,Basic Materials,Lumber & Wood Production,1302976512
 CALSOFT.NS,Technology,Software - Application,1302724864
-SAMPANN.NS,Basic Materials,Specialty Chemicals,1300298368
 IBLFL.NS,Unknown,Unknown,1290939904
 ALPHAGEO.NS,Energy,Oil & Gas Equipment & Services,1286510336
 CORALFINAC.NS,Real Estate,Real Estate Services,1285237888
 VISHWARAJ.NS,Consumer Defensive,Confectioners,1278648576
 VIPULLTD.NS,Real Estate,Real Estate - Diversified,1270045056
 PRAXIS.NS,Consumer Cyclical,Specialty Retail,1269097344
-SAMBHAAV.NS,Communication Services,Publishing,1268976000
 NORBTEAEXP.NS,Consumer Defensive,Farm Products,1265911552
 TEXMOPIPES.NS,Industrials,Building Products & Equipment,1259472256
 CUBEXTUB.NS,Basic Materials,Copper,1257635584
@@ -2091,7 +2135,6 @@ LAMBODHARA.NS,Consumer Cyclical,Textile Manufacturing,1228085120
 VEEKAYEM.NS,Unknown,Unknown,1227733760
 CROWN.NS,Industrials,Rental & Leasing Services,1227721600
 RILINFRA.NS,Unknown,Unknown,1219557760
-SATIPOLY.NS,Unknown,Unknown,1218940800
 SOMICONVEY.NS,Industrials,Specialty Industrial Machinery,1216179968
 GANGESSECU.NS,Consumer Defensive,Packaged Foods,1213147136
 MEDIORG.NS,Unknown,Unknown,1186964992
@@ -2106,6 +2149,7 @@ BTML.NS,Communication Services,Entertainment,1155597824
 BEARDSELL.NS,Industrials,Building Products & Equipment,1154321024
 GLOBALPET.NS,Unknown,Unknown,1141610496
 NAVKARURB.NS,Basic Materials,Building Materials,1133311232
+OBCL.NS,Industrials,Trucking,1112749568
 REGENCERAM.NS,Industrials,Building Products & Equipment,1103671808
 PAR.NS,Healthcare,Drug Manufacturers - Specialty & Generic,1098926976
 PRECISION.NS,Unknown,Unknown,1095147520
@@ -2121,6 +2165,7 @@ RAJMET.NS,Basic Materials,Copper,1064448000
 ARTNIRMAN.NS,Real Estate,Real Estate - Development,1061628288
 LOYALTEX.NS,Consumer Cyclical,Textile Manufacturing,1059618112
 BHANDARI.NS,Consumer Cyclical,Apparel Manufacturing,1055471936
+ZENITHEXPO.NS,Consumer Cyclical,Textile Manufacturing,1054535168
 SHYAMCENT.NS,Basic Materials,Steel,1054499712
 GLOBE.NS,Consumer Cyclical,Textile Manufacturing,1053979904
 KONTOR.NS,Unknown,Unknown,1051750016
@@ -2133,6 +2178,7 @@ BAGFILMS.NS,Communication Services,Broadcasting,1034436096
 PRESSTONIC.NS,Unknown,Unknown,1029114304
 SIL.NS,Consumer Cyclical,Textile Manufacturing,1022830144
 SADBHIN.NS,Industrials,Engineering & Construction,1021453184
+OSWALSEEDS.NS,Basic Materials,Agricultural Inputs,1018975808
 INVENTURE.NS,Financial Services,Capital Markets,1018500032
 MAL.NS,Unknown,Unknown,1018294528
 AKSHOPTFBR.NS,Technology,Communication Equipment,1011981312
@@ -2146,6 +2192,7 @@ BANKA.NS,Industrials,Pollution & Treatment Controls,984333184
 AUROIMPEX.NS,Unknown,Unknown,983384448
 PALASHSECU.NS,Consumer Defensive,Packaged Foods,980604096
 MOKSH.NS,Consumer Cyclical,Luxury Goods,979862912
+ONELIFECAP.NS,Financial Services,Capital Markets,979579200
 SELMC.NS,Consumer Cyclical,Textile Manufacturing,979119232
 MOTOGENFIN.NS,Real Estate,Real Estate Services,977784256
 GRAPHISAD.NS,Unknown,Unknown,975965120
@@ -2174,7 +2221,6 @@ MVKAGRO.NS,Unknown,Unknown,885253504
 SYNOPTICS.NS,Unknown,Unknown,884464000
 MAHICKRA.NS,Unknown,Unknown,884097088
 CURAA.NS,Technology,Software - Application,880902016
-LEMERITE.NS,Consumer Cyclical,Textile Manufacturing,880614016
 DIGJAMLMTD.NS,Consumer Cyclical,Textile Manufacturing,879000000
 ARIHANTACA.NS,Unknown,Unknown,878306752
 TOTAL.NS,Industrials,Integrated Freight & Logistics,871985472
@@ -2206,9 +2252,9 @@ HISARMETAL.NS,Basic Materials,Steel,778571968
 TOUCHWOOD.NS,Communication Services,Advertising Agencies,773692608
 JHS.NS,Consumer Defensive,Household & Personal Products,773541056
 ENERGYDEV.NS,Utilities,Utilities - Regulated Electric,772825024
+OMFURN.NS,Unknown,Unknown,765336000
 IL&FSTRANS.NS,Industrials,Infrastructure Operations,763187264
 PATTECH.NS,Unknown,Unknown,759816448
-SANGINITA.NS,Basic Materials,Chemicals,756066240
 PIONEEREMB.NS,Consumer Cyclical,Textile Manufacturing,750664192
 VELS.NS,Unknown,Unknown,748664000
 RKEC.NS,Industrials,Engineering & Construction,744428352
@@ -2227,9 +2273,11 @@ LCCINFOTEC.NS,Consumer Defensive,Education & Training Services,704720128
 TRIDHYA.NS,Unknown,Unknown,702133184
 AJOONI.NS,Consumer Defensive,Packaged Foods,701031488
 GSTL.NS,Unknown,Unknown,700534400
+ODIGMA.NS,Communication Services,Advertising Agencies,697688576
 VIAZ.NS,Unknown,Unknown,692181504
 FMNL.NS,Real Estate,Real Estate Services,691814400
 ROML.NS,Consumer Defensive,Packaged Foods,690079040
+ORCHASP.NS,Technology,Software - Application,682457984
 TFL.NS,Financial Services,Mortgage Finance,677929152
 UMA.NS,Unknown,Unknown,676147456
 SHEETAL.NS,Unknown,Unknown,675331200
@@ -2250,8 +2298,10 @@ GATECHDVR.NS,Financial Services,Asset Management,633280000
 ATLASCYCLE.NS,Consumer Cyclical,Leisure,631847872
 AGROPHOS.NS,Basic Materials,Agricultural Inputs,631741440
 CPS.NS,Unknown,Unknown,630611456
+WINNY.NS,Unknown,Unknown,629299968
+YUDIZ.NS,Unknown,Unknown,628965888
 SERVICE.NS,Unknown,Unknown,622068864
-SANGANI.NS,Unknown,Unknown,619964544
+ORIENTLTD.NS,Consumer Cyclical,Packaging & Containers,620800000
 KSR.NS,Consumer Cyclical,Footwear & Accessories,616594688
 AGARWALFT.NS,Unknown,Unknown,615334272
 HRHNEXT.NS,Unknown,Unknown,614666560
@@ -2273,6 +2323,7 @@ PRITI.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",574860800
 SUVIDHAA.NS,Technology,Information Technology Services,574501888
 PALREDTEC.NS,Technology,Consumer Electronics,571872448
 JAIPURKURT.NS,Consumer Cyclical,Apparel Manufacturing,569978240
+OSIAHYPER.NS,Consumer Cyclical,Department Stores,569425728
 MALUPAPER.NS,Basic Materials,Paper & Paper Products,568270848
 BIOFILCHEM.NS,Healthcare,Drug Manufacturers - Specialty & Generic,566653696
 AILIMITED.NS,Unknown,Unknown,566027584
@@ -2306,7 +2357,9 @@ MANUGRAPH.NS,Industrials,Specialty Industrial Machinery,487921760
 ISHAN.NS,Unknown,Unknown,486529408
 ARCHIES.NS,Consumer Cyclical,Specialty Retail,485756416
 RKDL.NS,Consumer Defensive,Beverages - Wineries & Distilleries,485039968
+YCCL.NS,Unknown,Unknown,482598016
 CONTI.NS,Unknown,Unknown,471264128
+ORIENTALTL.NS,Industrials,Building Products & Equipment,468976352
 MASKINVEST.NS,Financial Services,Capital Markets,463828000
 UWCSL.NS,Unknown,Unknown,462857632
 SPRL.NS,Unknown,Unknown,461691008
@@ -2359,7 +2412,6 @@ GSS.NS,Technology,Information Technology Services,340908416
 VERA.NS,Unknown,Unknown,339281248
 LIBAS.NS,Consumer Cyclical,Apparel Manufacturing,337737504
 CBAZAAR.NS,Unknown,Unknown,333610912
-SANWARIA.NS,Consumer Defensive,Farm Products,332943680
 MOHITIND.NS,Consumer Cyclical,Textile Manufacturing,331428832
 MADHAV.NS,Industrials,Building Products & Equipment,329965376
 DHTL.NS,Unknown,Unknown,329051136
@@ -2367,7 +2419,7 @@ PEARLPOLY.NS,Consumer Cyclical,Packaging & Containers,326597664
 SGL.NS,Consumer Cyclical,Textile Manufacturing,326300960
 KANDARP.NS,Unknown,Unknown,323925280
 KEEPLEARN.NS,Consumer Defensive,Education & Training Services,323881120
-QFIL.NS,Unknown,Unknown,316793984
+OLIL.NS,Unknown,Unknown,322359904
 GANGAFORGE.NS,Industrials,Metal Fabrication,315437184
 KANANIIND.NS,Consumer Cyclical,Luxury Goods,304716704
 KRIDHANINF.NS,Basic Materials,Steel,304712384
@@ -2376,6 +2428,7 @@ ARSHIYA.NS,Industrials,Integrated Freight & Logistics,300362560
 SUNREST.NS,Unknown,Unknown,296458272
 SHUBHLAXMI.NS,Unknown,Unknown,295814400
 KHANDSE.NS,Financial Services,Capital Markets,295466208
+WILLAMAGOR.NS,Financial Services,Credit Services,291877408
 TREEHOUSE.NS,Consumer Defensive,Education & Training Services,286020512
 FLFL.NS,Consumer Cyclical,Apparel Manufacturing,282484832
 SUPERSPIN.NS,Consumer Cyclical,Textile Manufacturing,282371648
@@ -2407,6 +2460,7 @@ TVVISION.NS,Communication Services,Broadcasting,203408624
 ACEINTEG.NS,Industrials,Staffing & Employment Services,195125984
 ASTRON.NS,Basic Materials,Paper & Paper Products,186213456
 EUROTEXIND.NS,Real Estate,Real Estate - Development,182811248
+WINSOME.NS,Consumer Cyclical,Textile Manufacturing,178881600
 IMPEXFERRO.NS,Basic Materials,Other Industrial Metals & Mining,176912720
 RADAAN.NS,Communication Services,Entertainment,175483392
 BOHRAIND.NS,Basic Materials,Agricultural Inputs,175051584
@@ -2416,7 +2470,6 @@ TCIFINANCE.NS,Financial Services,Credit Services,170174368
 SILLYMONKS.NS,Communication Services,Entertainment,167669552
 MEP.NS,Industrials,Infrastructure Operations,166935904
 RITEZONE.NS,Unknown,Unknown,164980576
-SAROJA.NS,Unknown,Unknown,164839968
 VIVIDHA.NS,Consumer Cyclical,Textile Manufacturing,163912304
 GLFL.NS,Financial Services,Shell Companies,163568384
 VIVO.NS,Unknown,Unknown,163215008
@@ -2438,263 +2491,210 @@ ARENTERP.NS,Basic Materials,Other Industrial Metals & Mining,125764072
 ANTGRAPHIC.NS,Consumer Cyclical,Packaging & Containers,125557776
 AHIMSA.NS,Unknown,Unknown,124806968
 LAKPRE.NS,Industrials,Tools & Accessories,122091952
+ORTINGLOBE.NS,Healthcare,Drug Manufacturers - Specialty & Generic,122052192
 COMPINFO.NS,Technology,Electronics & Computer Distribution,117006240
 MTEDUCARE.NS,Consumer Defensive,Education & Training Services,113398048
 ACCORD.NS,Unknown,Unknown,99993600
 PREMIER.NS,Industrials,Specialty Industrial Machinery,96076496
 SHANTI.NS,Consumer Defensive,Farm Products,73299600
+ORTEL.NS,Communication Services,Entertainment,52763040
 JALAN.NS,Unknown,Unknown,45792244
 VASA.NS,Unknown,Unknown,38651952
-SANCO.NS,Industrials,Electrical Equipment & Parts,31880400
-SURYALA.NS,Unknown,Unknown,0
-MOSERVICE.NS,Unknown,Unknown,0
-MOREALTY.NS,Unknown,Unknown,0
-MMWL.NS,Communication Services,Entertainment,0
-MNC.NS,Unknown,Unknown,0
+ZFSTEERING.NS,Consumer Cyclical,Auto Parts,0
+A2ZINFRA.NS,Unknown,Unknown,0
+AAREYDRUGS.NS,Unknown,Unknown,0
+AAKASH.NS,Unknown,Unknown,0
+AARNAV.NS,Unknown,Unknown,0
+AAATECH.NS,Unknown,Unknown,0
+3PLAND.NS,Unknown,Unknown,0
+5PAISA.NS,Unknown,Unknown,0
+XTGLOBAL.NS,Technology,Software - Application,0
+3MINDIA.NS,Unknown,Unknown,0
+ZSARACOM.NS,Unknown,Unknown,0
+TCC.NS,Unknown,Unknown,0
+TECHNVISN.NS,Unknown,Unknown,0
+3IINFOLTD.NS,Unknown,Unknown,0
+DEFENCE.NS,Unknown,Unknown,0
+SELECTIPO.NS,Unknown,Unknown,0
+SBICARD.NS,Unknown,Unknown,0
+SBILIFE.NS,Unknown,Unknown,0
+SBIN.NS,Unknown,Unknown,0
+SCANSTL.NS,Unknown,Unknown,0
+SCHAEFFLER.NS,Unknown,Unknown,0
+TENNIND.NS,Consumer Cyclical,Auto Parts,0
+SCHNEIDER.NS,Unknown,Unknown,0
+SCI.NS,Unknown,Unknown,0
+SCILAL.NS,Unknown,Unknown,0
+SEIL.NS,Unknown,Unknown,0
+MAHKTECH.NS,Unknown,Unknown,0
+CONS.NS,Unknown,Unknown,0
+CIGNITITEC.NS,Unknown,Unknown,0
+CMPDI.NS,Basic Materials,Other Industrial Metals & Mining,0
+CHALET.NS,Consumer Cyclical,Lodging,0
+CHEMICAL.NS,Unknown,Unknown,0
+SAPPL.NS,Unknown,Unknown,0
+SARDAEN.NS,Unknown,Unknown,0
+SAREGAMA.NS,Unknown,Unknown,0
+SARLAPOLY.NS,Unknown,Unknown,0
+SAROJA.NS,Unknown,Unknown,0
+SCHAND.NS,Unknown,Unknown,0
+SARTELE.NS,Unknown,Unknown,0
+SARVESHWAR.NS,Unknown,Unknown,0
+SATIA.NS,Unknown,Unknown,0
+SASKEN.NS,Unknown,Unknown,0
+SATIPOLY.NS,Unknown,Unknown,0
+SAURASHCEM.NS,Unknown,Unknown,0
+SBC.NS,Unknown,Unknown,0
+SATIN.NS,Unknown,Unknown,0
+SBCL.NS,Unknown,Unknown,0
+SBFC.NS,Unknown,Unknown,0
 BNAGROCHEM.NS,Unknown,Unknown,0
-MOCAPITAL.NS,Unknown,Unknown,0
 BNALTD.NS,Unknown,Unknown,0
+ULTRAMAR.NS,Basic Materials,Specialty Chemicals,0
 BIRLAPREC.NS,Unknown,Unknown,0
 BLACKROSE.NS,Unknown,Unknown,0
-BI.NS,Unknown,Unknown,0
-BIMETAL.NS,Consumer Cyclical,Auto Parts,0
-SIKA.NS,Unknown,Unknown,0
-SINGERIND.NS,Unknown,Unknown,0
-RAJPALAYAM.NS,Unknown,Unknown,0
-ASHIKA.NS,Unknown,Unknown,0
-ARTEMISMED.NS,Unknown,Unknown,0
-AONETOTAL.NS,Unknown,Unknown,0
-PRADPME.NS,Unknown,Unknown,0
-PRAVEG.NS,Unknown,Unknown,0
-PIONRINV.NS,Unknown,Unknown,0
+SAYAJIHOTL.NS,Unknown,Unknown,0
 BLIL.NS,Unknown,Unknown,0
-ORIENTHOT.NS,Unknown,Unknown,0
-ORIENTLTD.NS,Unknown,Unknown,0
-ORIENTPPR.NS,Unknown,Unknown,0
-SONAL.NS,Unknown,Unknown,0
-OSWALSEEDS.NS,Unknown,Unknown,0
-OWAIS.NS,Unknown,Unknown,0
-PACEDIGITK.NS,Unknown,Unknown,0
-CHEMICAL.NS,Unknown,Unknown,0
-ORIENTTECH.NS,Unknown,Unknown,0
-ORKLAINDIA.NS,Unknown,Unknown,0
-ORTEL.NS,Unknown,Unknown,0
-ORISSAMINE.NS,Unknown,Unknown,0
-OSIAHYPER.NS,Unknown,Unknown,0
-ORTINGLOBE.NS,Unknown,Unknown,0
-OSWALAGRO.NS,Unknown,Unknown,0
-PREMCO.NS,Unknown,Unknown,0
-CMPDI.NS,Basic Materials,Other Industrial Metals & Mining,0
-CONS.NS,Unknown,Unknown,0
-COMFINTE.NS,Unknown,Unknown,0
-MOTOUR.NS,Unknown,Unknown,0
-NATIONSTD.NS,Unknown,Unknown,0
-NEAGI.NS,Unknown,Unknown,0
-NILE.NS,Unknown,Unknown,0
-OSWALGREEN.NS,Unknown,Unknown,0
+DISAQ.NS,Unknown,Unknown,0
+RAJPALAYAM.NS,Unknown,Unknown,0
 QUINT.NS,Unknown,Unknown,0
-BEEKAY.NS,Unknown,Unknown,0
-BHARATCOAL.NS,Basic Materials,Coking Coal,0
-BFSI.NS,Unknown,Unknown,0
-VELJAN.NS,Unknown,Unknown,0
-CORONA.NS,Healthcare,Drug Manufacturers - General,0
-CONSUMER.NS,Unknown,Unknown,0
-OSWALPUMPS.NS,Unknown,Unknown,0
-NITTAGELA.NS,Basic Materials,Specialty Chemicals,0
-SHRIKRISH.NS,Unknown,Unknown,0
-ABANSENT.NS,Unknown,Unknown,0
-ABGSEC.NS,Unknown,Unknown,0
-ABMKNO.NS,Unknown,Unknown,0
-WHEELS.NS,Unknown,Unknown,0
-WILLAMAGOR.NS,Unknown,Unknown,0
-SHBAJRG.NS,Unknown,Unknown,0
-SHINDL.NS,Unknown,Unknown,0
-WINSOME.NS,Unknown,Unknown,0
-WINSOL.NS,Unknown,Unknown,0
-WIPL.NS,Unknown,Unknown,0
-WIPRO.NS,Unknown,Unknown,0
-WOCKPHARMA.NS,Unknown,Unknown,0
-WOMANCART.NS,Unknown,Unknown,0
-ZENITHDRUG.NS,Unknown,Unknown,0
-AVAILFC.NS,Unknown,Unknown,0
-AARON.NS,Unknown,Unknown,0
-SAYAJIHOTL.NS,Consumer Cyclical,Lodging,0
-AKCAPIT.NS,Unknown,Unknown,0
-WSTCSTPAPR.NS,Unknown,Unknown,0
-WTICAB.NS,Unknown,Unknown,0
-XCHANGING.NS,Unknown,Unknown,0
-XELPMOC.NS,Unknown,Unknown,0
-TECH.NS,Unknown,Unknown,0
-TECHNVISN.NS,Unknown,Unknown,0
-TENNIND.NS,Consumer Cyclical,Auto Parts,0
-OMFURN.NS,Unknown,Unknown,0
-OMNI.NS,Unknown,Unknown,0
-NPBET.NS,Unknown,Unknown,0
-NRBBEARING.NS,Unknown,Unknown,0
-NRL.NS,Unknown,Unknown,0
-3PLAND.NS,Unknown,Unknown,0
+PIONRINV.NS,Unknown,Unknown,0
 PML.NS,Unknown,Unknown,0
-BENGALASM.NS,Unknown,Unknown,0
-BAJAJST.NS,Unknown,Unknown,0
-ORIENTELEC.NS,Unknown,Unknown,0
-MSCIINDIA.NS,Unknown,Unknown,0
-SAPPL.NS,Unknown,Unknown,0
-RSDFIN.NS,Unknown,Unknown,0
-RRIL.NS,Unknown,Unknown,0
-AMBALALSA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,0
+AKCAPIT.NS,Unknown,Unknown,0
+PREMCO.NS,Unknown,Unknown,0
+WELSPLSOL.NS,Unknown,Unknown,0
+ZODIAC.NS,Unknown,Unknown,0
+3BBLACKBIO.NS,Unknown,Unknown,0
+PRICOLLTD.NS,Consumer Cyclical,Auto Parts,0
+PRADPME.NS,Unknown,Unknown,0
 AMIRCHAND.NS,Consumer Defensive,Farm Products,0
 ALPHA.NS,Unknown,Unknown,0
-SELECTIPO.NS,Unknown,Unknown,0
-SCANSTL.NS,Unknown,Unknown,0
-SEIL.NS,Unknown,Unknown,0
-MODEFENCE.NS,Unknown,Unknown,0
-AONETMMQ50.NS,Unknown,Unknown,0
-YESBANK.NS,Unknown,Unknown,0
-YCCL.NS,Unknown,Unknown,0
-YATRA.NS,Unknown,Unknown,0
-YATHARTH.NS,Unknown,Unknown,0
-YASHOPTICS.NS,Unknown,Unknown,0
-YASHO.NS,Unknown,Unknown,0
-XTGLOBAL.NS,Unknown,Unknown,0
-MOIPO.NS,Unknown,Unknown,0
-ZEEL.NS,Unknown,Unknown,0
-ZEELEARN.NS,Unknown,Unknown,0
-ZEAL.NS,Unknown,Unknown,0
-3BBLACKBIO.NS,Unknown,Unknown,0
-3IINFOLTD.NS,Unknown,Unknown,0
-ZAGGLE.NS,Unknown,Unknown,0
-ASTAR.NS,Unknown,Unknown,0
-MENNPIS.NS,Unknown,Unknown,0
-XPROINDIA.NS,Unknown,Unknown,0
-NSLNISP.NS,Unknown,Unknown,0
-NSIL.NS,Unknown,Unknown,0
-NTPC.NS,Unknown,Unknown,0
-NTPCGREEN.NS,Unknown,Unknown,0
-NUCLEUS.NS,Unknown,Unknown,0
-NURECA.NS,Unknown,Unknown,0
-NUVOCO.NS,Unknown,Unknown,0
-NUVAMA.NS,Unknown,Unknown,0
-20MICRONS.NS,Unknown,Unknown,0
-ACSTECH.NS,Unknown,Unknown,0
-OFSS.NS,Unknown,Unknown,0
-OIL.NS,Unknown,Unknown,0
-OILCOUNTUB.NS,Unknown,Unknown,0
-OLAELEC.NS,Unknown,Unknown,0
-OLECTRA.NS,Unknown,Unknown,0
-DAICHI.NS,Unknown,Unknown,0
-TAALTECH.NS,Unknown,Unknown,0
-FRONTSP.NS,Unknown,Unknown,0
-GNRL.NS,Unknown,Unknown,0
-GRAVISSHO.NS,Unknown,Unknown,0
-GRANDOAK.NS,Unknown,Unknown,0
-GUJRAFFIA.NS,Unknown,Unknown,0
-HALDYNGL.NS,Unknown,Unknown,0
-OLIL.NS,Unknown,Unknown,0
-ORIENTALTL.NS,Unknown,Unknown,0
-ORICONENT.NS,Unknown,Unknown,0
-TIMEX.NS,Consumer Cyclical,Luxury Goods,0
-INDPRUD.NS,Unknown,Unknown,0
-INVPRECQ.NS,Unknown,Unknown,0
-INTERNET.NS,Unknown,Unknown,0
-OMAXE.NS,Unknown,Unknown,0
-OMAXAUTO.NS,Unknown,Unknown,0
-LICNFNHGP.NS,Unknown,Unknown,0
-A2ZINFRA.NS,Unknown,Unknown,0
-AAATECH.NS,Unknown,Unknown,0
 AADHARHFC.NS,Unknown,Unknown,0
-AAKASH.NS,Unknown,Unknown,0
-AAREYDRUGS.NS,Unknown,Unknown,0
-SHARDUL.NS,Financial Services,Capital Markets,0
-ZSARACOM.NS,Unknown,Unknown,0
-ZODIAC.NS,Unknown,Unknown,0
-ZFSTEERING.NS,Consumer Cyclical,Auto Parts,0
-ZENITHEXPO.NS,Unknown,Unknown,0
-YUDIZ.NS,Unknown,Unknown,0
-WELSPLSOL.NS,Unknown,Unknown,0
-AARNAV.NS,Unknown,Unknown,0
-5PAISA.NS,Unknown,Unknown,0
-AARTECH.NS,Unknown,Unknown,0
-TCC.NS,Unknown,Unknown,0
-TATSILV.NS,Unknown,Unknown,0
-KOTIC.NS,Unknown,Unknown,0
-KPL.NS,Unknown,Unknown,0
-LAHOTIOV.NS,Unknown,Unknown,0
-ZEEMEDIA.NS,Unknown,Unknown,0
-3MINDIA.NS,Unknown,Unknown,0
-21STCENMGM.NS,Unknown,Unknown,0
-AARTIDRUGS.NS,Unknown,Unknown,0
-WSI.NS,Unknown,Unknown,0
-WPIL.NS,Unknown,Unknown,0
-WONDERLA.NS,Unknown,Unknown,0
-WORTHPERI.NS,Unknown,Unknown,0
-YUKEN.NS,Unknown,Unknown,0
-AARTISURF.NS,Unknown,Unknown,0
-AARTIPHARM.NS,Unknown,Unknown,0
-AARTIIND.NS,Unknown,Unknown,0
-360ONE.NS,Unknown,Unknown,0
-IT.NS,Unknown,Unknown,0
-THACKER.NS,Unknown,Unknown,0
-THAKDEV.NS,Unknown,Unknown,0
-WHIRLPOOL.NS,Unknown,Unknown,0
-WIMPLAST.NS,Unknown,Unknown,0
-ONEPOINT.NS,Unknown,Unknown,0
-ONDOOR.NS,Unknown,Unknown,0
-ONELIFECAP.NS,Unknown,Unknown,0
-ONESOURCE.NS,Unknown,Unknown,0
-ONGC.NS,Unknown,Unknown,0
-ONMOBILE.NS,Unknown,Unknown,0
-ONWARDTEC.NS,Unknown,Unknown,0
-OPTIEMUS.NS,Unknown,Unknown,0
-ORBTEXP.NS,Unknown,Unknown,0
-ORCHPHARMA.NS,Unknown,Unknown,0
-TAMBOLIIN.NS,Unknown,Unknown,0
-ORIENTCER.NS,Unknown,Unknown,0
-ORIENTCEM.NS,Unknown,Unknown,0
-ORIENTBELL.NS,Unknown,Unknown,0
-63MOONS.NS,Unknown,Unknown,0
-DEFENCE.NS,Unknown,Unknown,0
-DISAQ.NS,Unknown,Unknown,0
-ULTRAMAR.NS,Basic Materials,Specialty Chemicals,0
-ORCHASP.NS,Unknown,Unknown,0
-MCCHRLS-B.NS,Unknown,Unknown,0
-MERCANTILE.NS,Unknown,Unknown,0
+SANSERA.NS,Unknown,Unknown,0
+SANOFICONR.NS,Unknown,Unknown,0
+SANGINITA.NS,Unknown,Unknown,0
+SANOFI.NS,Unknown,Unknown,0
+SANGHVIMOV.NS,Unknown,Unknown,0
+SANGANI.NS,Unknown,Unknown,0
+SANDUMA.NS,Unknown,Unknown,0
+SANGAMIND.NS,Unknown,Unknown,0
+SANDHAR.NS,Unknown,Unknown,0
+SANCO.NS,Unknown,Unknown,0
+SANDESH.NS,Unknown,Unknown,0
+SAMPANN.NS,Unknown,Unknown,0
+SAMMAANCAP.NS,Unknown,Unknown,0
+BIMETAL.NS,Consumer Cyclical,Auto Parts,0
+BI.NS,Unknown,Unknown,0
+BFSI.NS,Unknown,Unknown,0
+CORONA.NS,Healthcare,Drug Manufacturers - General,0
+CONSUMER.NS,Unknown,Unknown,0
+COMFINTE.NS,Unknown,Unknown,0
 COCKERILL.NS,Industrials,Metal Fabrication,0
-DRAGARWQ.NS,Unknown,Unknown,0
-ECAPINSURE.NS,Unknown,Unknown,0
-ELCIDIN.NS,Unknown,Unknown,0
-ELANTAS.NS,Basic Materials,Specialty Chemicals,0
-ORIANA.NS,Unknown,Unknown,0
-MARC.NS,Unknown,Unknown,0
-MAHKTECH.NS,Unknown,Unknown,0
-KIRANVYPAR.NS,Unknown,Unknown,0
-KLBRENG-B.NS,Unknown,Unknown,0
-NYKAA.NS,Unknown,Unknown,0
-OBCL.NS,Unknown,Unknown,0
-OBEROIRLTY.NS,Unknown,Unknown,0
-OCCLLTD.NS,Unknown,Unknown,0
-ODIGMA.NS,Unknown,Unknown,0
-WINDMACHIN.NS,Unknown,Unknown,0
-WINNY.NS,Unknown,Unknown,0
-WINDLAS.NS,Unknown,Unknown,0
-KAMAHOLD.NS,Unknown,Unknown,0
-KANCHI.NS,Unknown,Unknown,0
-EVINDIA.NS,Unknown,Unknown,0
-ESG.NS,Unknown,Unknown,0
-IWP.NS,Unknown,Unknown,0
-OAL.NS,Unknown,Unknown,0
-NXST.NS,Unknown,Unknown,0
-FERMENTA.NS,Unknown,Unknown,0
+SBGLP.NS,Unknown,Unknown,0
+LICNFNHGP.NS,Unknown,Unknown,0
+SHARDUL.NS,Financial Services,Capital Markets,0
 FEDDERSHOL.NS,Unknown,Unknown,0
+SIKA.NS,Unknown,Unknown,0
+SHRIKRISH.NS,Unknown,Unknown,0
+MAKEINDIA.NS,Unknown,Unknown,0
+KOTIC.NS,Unknown,Unknown,0
 MAFANG.NS,Unknown,Unknown,0
 MADHAVIPL.NS,Unknown,Unknown,0
-MAKEINDIA.NS,Unknown,Unknown,0
-EMPOWER.NS,Unknown,Unknown,0
-HBESD.NS,Unknown,Unknown,0
-HAWKINCOOK.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
-OMFREIGHT.NS,Unknown,Unknown,0
-OMINFRAL.NS,Unknown,Unknown,0
-OMPOWER.NS,Unknown,Unknown,0
-ELM250.NS,Unknown,Unknown,0
-ELITECON.NS,Unknown,Unknown,0
-EMULTIMQ.NS,Unknown,Unknown,0
+SANWARIA.NS,Unknown,Unknown,0
+SANSTAR.NS,Unknown,Unknown,0
+SAMBHAAV.NS,Unknown,Unknown,0
+SAMBHV.NS,Unknown,Unknown,0
+MCCHRLS-B.NS,Unknown,Unknown,0
+SAMHI.NS,Unknown,Unknown,0
+KAMAHOLD.NS,Unknown,Unknown,0
+KANCHI.NS,Unknown,Unknown,0
+FRONTSP.NS,Unknown,Unknown,0
+SANATHAN.NS,Unknown,Unknown,0
+MARC.NS,Unknown,Unknown,0
+BAJAJST.NS,Unknown,Unknown,0
+MENNPIS.NS,Unknown,Unknown,0
+MERCANTILE.NS,Unknown,Unknown,0
+AVAILFC.NS,Unknown,Unknown,0
+ASTAR.NS,Unknown,Unknown,0
+MOTOUR.NS,Unknown,Unknown,0
+SINGERIND.NS,Unknown,Unknown,0
+MMWL.NS,Communication Services,Entertainment,0
+MNC.NS,Unknown,Unknown,0
+MODEFENCE.NS,Unknown,Unknown,0
+MOCAPITAL.NS,Unknown,Unknown,0
+RRIL.NS,Unknown,Unknown,0
+RSDFIN.NS,Unknown,Unknown,0
+VELJAN.NS,Unknown,Unknown,0
+SHBAJRG.NS,Unknown,Unknown,0
+SHINDL.NS,Unknown,Unknown,0
+TECH.NS,Unknown,Unknown,0
+KIRANVYPAR.NS,Unknown,Unknown,0
+BHARATCOAL.NS,Basic Materials,Coking Coal,0
+BEEKAY.NS,Unknown,Unknown,0
+BENGALASM.NS,Unknown,Unknown,0
+FERMENTA.NS,Unknown,Unknown,0
+SAPPHIRE.NS,Unknown,Unknown,0
+TAALTECH.NS,Unknown,Unknown,0
+KLBRENG-B.NS,Unknown,Unknown,0
+INTERNET.NS,Unknown,Unknown,0
+MOSERVICE.NS,Unknown,Unknown,0
+MOREALTY.NS,Unknown,Unknown,0
+MSCIINDIA.NS,Unknown,Unknown,0
+ARTEMISMED.NS,Unknown,Unknown,0
+ASHIKA.NS,Unknown,Unknown,0
+MOIPO.NS,Unknown,Unknown,0
+ECAPINSURE.NS,Unknown,Unknown,0
 MAJESAUT.NS,Real Estate,Real Estate Services,0
+EMULTIMQ.NS,Unknown,Unknown,0
+ELCIDIN.NS,Unknown,Unknown,0
+EVINDIA.NS,Unknown,Unknown,0
+EMPOWER.NS,Unknown,Unknown,0
+ESG.NS,Unknown,Unknown,0
+SURYALA.NS,Unknown,Unknown,0
+SONAL.NS,Unknown,Unknown,0
+GRAVISSHO.NS,Unknown,Unknown,0
+GRANDOAK.NS,Unknown,Unknown,0
+INVPRECQ.NS,Unknown,Unknown,0
+GNRL.NS,Unknown,Unknown,0
+AONETMMQ50.NS,Unknown,Unknown,0
+AONETOTAL.NS,Unknown,Unknown,0
+NILE.NS,Unknown,Unknown,0
+NITTAGELA.NS,Basic Materials,Specialty Chemicals,0
+NATIONSTD.NS,Unknown,Unknown,0
+NEAGI.NS,Unknown,Unknown,0
+ELITECON.NS,Unknown,Unknown,0
+ELM250.NS,Unknown,Unknown,0
+TAMBOLIIN.NS,Unknown,Unknown,0
+ELANTAS.NS,Basic Materials,Specialty Chemicals,0
+HALDYNGL.NS,Unknown,Unknown,0
+AMBALALSA.NS,Healthcare,Drug Manufacturers - Specialty & Generic,0
+OMPOWER.NS,Industrials,Engineering & Construction,0
+NPBET.NS,Unknown,Unknown,0
+GUJRAFFIA.NS,Unknown,Unknown,0
+INFOBEAN.NS,Technology,Software - Application,0
+ABANSENT.NS,Unknown,Unknown,0
+ABGSEC.NS,Unknown,Unknown,0
+360ONE.NS,Unknown,Unknown,0
+20MICRONS.NS,Unknown,Unknown,0
+21STCENMGM.NS,Unknown,Unknown,0
+THACKER.NS,Unknown,Unknown,0
+ABMKNO.NS,Unknown,Unknown,0
+HESTERBIO.NS,Healthcare,Drug Manufacturers - Specialty & Generic,0
+PRAVEG.NS,Unknown,Unknown,0
+ZUARI.NS,Basic Materials,Agricultural Inputs,0
+IWP.NS,Unknown,Unknown,0
+INDPRUD.NS,Unknown,Unknown,0
+DAICHI.NS,Unknown,Unknown,0
+THAKDEV.NS,Unknown,Unknown,0
+ACSTECH.NS,Unknown,Unknown,0
+WPIL.NS,Unknown,Unknown,0
+WIMPLAST.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
+IT.NS,Unknown,Unknown,0
+HAWKINCOOK.NS,Consumer Cyclical,"Furnishings, Fixtures & Appliances",0
+HBESD.NS,Unknown,Unknown,0
+QFIL.NS,Unknown,Unknown,0
+63MOONS.NS,Unknown,Unknown,0
+LAHOTIOV.NS,Unknown,Unknown,0
+TATSILV.NS,Unknown,Unknown,0
+KPL.NS,Unknown,Unknown,0
+DRAGARWQ.NS,Unknown,Unknown,0
