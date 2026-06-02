@@ -202,18 +202,18 @@ if st.sidebar.button(
         
 st.sidebar.title("🏦 Institutional Quant Platform")
 
-signals_df = portfolio_df[
-    [
+available_cols = [
+    c for c in [
         "Symbol",
         "EXPECTED_RETURN_5D",
         "EXPECTED_RETURN_15D",
         "EXPECTED_RETURN_30D",
-        "HOLD_DAYS",
-        "ENTRY_PRICE",
-        "TARGET_PRICE",
-        "STOPLOSS"
+        "EST_HOLD_DAYS"
     ]
-].copy()
+    if c in portfolio_df.columns
+]
+
+signals_df = portfolio_df[available_cols].copy()
 
 signals_df["SIGNAL"] = "BUY"
 
