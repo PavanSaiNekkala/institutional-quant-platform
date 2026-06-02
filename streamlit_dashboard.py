@@ -638,7 +638,7 @@ elif page == "Live Signals":
             🚀 {row['Symbol']}
             Confidence: {row['CONFIDENCE']}%
             30D Return: {row['EXPECTED_RETURN_30D']:.2f}%
-            Hold: {row['HOLD_DAYS']} Days
+            Hold: {row['EST_HOLD_DAYS']} Days
             """
         )
 # =========================================================
