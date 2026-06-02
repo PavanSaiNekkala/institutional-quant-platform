@@ -49,17 +49,6 @@ entry_df = pd.read_csv(
 expected_df = pd.read_csv(
     EXPECTED_FILE
 )
-print("\nEXPECTED DF COLUMNS")
-print(expected_df.columns.tolist())
-
-print("\nFACTOR COLUMNS")
-print(factor_df.columns.tolist())
-
-print("\nENTRY COLUMNS")
-print(entry_df.columns.tolist())
-
-print("\nEXPECTED COLUMNS")
-print(expected_df.columns.tolist())
 
 # =========================================================
 # NORMALIZE SYMBOLS
