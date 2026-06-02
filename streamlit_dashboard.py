@@ -544,11 +544,11 @@ elif page == "Expected Returns":
 # =========================================================
 
 elif page == "Portfolio Intelligence":
-        if not validate_dataframe(
-                portfolio_df,
-                'Portfolio Intelligence'
-            ):
-                st.stop()
+    if not validate_dataframe(
+            portfolio_df,
+            'Portfolio Intelligence'
+        ):
+            st.stop()
 
     st.title(
         "🧠 Portfolio Intelligence"
