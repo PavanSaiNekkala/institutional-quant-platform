@@ -256,9 +256,10 @@ if page == "Dashboard":
         2
     )
 
-    buy_candidates = len(
+    top_decile = len(
         factor_df[
-            factor_df["MULTI_FACTOR_SCORE"] > 80
+            factor_df["MULTI_FACTOR_SCORE"]
+            >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.90)
         ]
     )
 
@@ -278,8 +279,8 @@ if page == "Dashboard":
     )
 
     col4.metric(
-        "High Conviction Ideas",
-        buy_candidates
+        "Top Decile Stocks",
+            top_decile
     )
 
     st.divider()
