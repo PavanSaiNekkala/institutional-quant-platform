@@ -41,6 +41,16 @@ PIPELINE = [
             "institutional_rankings.csv"
         ]
     },
+    
+    {
+        "script": "entry_quality_engine.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
+        "produces": [
+            "entry_quality_scores.csv"
+        ]
+    }    
 
     {
         "script": "generate_metadata.py",
@@ -113,16 +123,6 @@ PIPELINE = [
             "ml_alpha_predictions.csv"
         ]
     },
-
-    {
-        "script": "entry_quality_engine.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "entry_quality_scores.csv"
-        ]
-    }    
 
     {
         "script": "meta_strategy_engine.py",
