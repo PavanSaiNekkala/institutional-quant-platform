@@ -281,35 +281,6 @@ if page == "Dashboard":
     # -----------------------------------------------------
     # INSTITUTIONAL KPI CARDS
     # -----------------------------------------------------
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    total_stocks = len(factor_df)
-
-    avg_score = round(
-        factor_df["MULTI_FACTOR_SCORE"].mean(),
-        2
-    )
-
-    avg_sharpe = round(
-        factor_df["Sharpe"].mean(),
-        2
-    )
-
-    col1.metric(
-        "Stocks Universe",
-        total_stocks
-    )
-
-    col2.metric(
-        "Avg Factor Score",
-        avg_score
-    )
-
-    col3.metric(
-        "Avg Sharpe",
-        avg_sharpe
-    )
     
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
