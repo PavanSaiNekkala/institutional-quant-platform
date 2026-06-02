@@ -213,12 +213,10 @@ available_cols = [
     if c in portfolio_df.columns
 ]
 
-signals_df = portfolio_df[available_cols].copy()
-
-signals_df["SIGNAL"] = "BUY"
+signals_df = expected_df.copy()
 
 signals_df["CONFIDENCE"] = (
-    portfolio_df["MULTI_FACTOR_SCORE"]
+    signals_df["EXPECTED_RETURN_30D"]
     .rank(pct=True) * 100
 ).round(0)
 
