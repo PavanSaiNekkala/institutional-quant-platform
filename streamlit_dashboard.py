@@ -251,6 +251,22 @@ signals_df = signals_df.sort_values(
     ascending=False
 )
 
+DEFAULT_PAGES = [
+    "Dashboard",
+    "Market Regime",
+    "Expected Returns",
+    "Live Signals",
+    "Portfolio Intelligence",
+    "Portfolio Performance"
+]
+
+with st.sidebar.expander("⚙️ Customize Sidebar", expanded=False):
+    visible_pages = st.multiselect(
+        "Visible Pages",
+        ALL_PAGES,
+        default=DEFAULT_PAGES
+    )
+
 page = st.sidebar.radio(
     "Navigation",
     visible_pages
