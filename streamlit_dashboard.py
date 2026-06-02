@@ -225,6 +225,24 @@ signals_df = signals_df.sort_values(
     "CONFIDENCE",
     ascending=False
 )
+# ---------------------------
+# Sidebar Page Visibility
+# ---------------------------
+
+ALL_PAGES = [
+    "Dashboard",
+    "Market Regime",
+    "Expected Returns",
+    "Live Signals",
+    "Portfolio Intelligence",
+    "Portfolio Performance",
+    "Meta Strategy",
+    "Reinforcement Learning",
+    "ML Alpha",
+    "Execution Analytics",
+    "Performance Analytics",
+    "Pipeline Health"
+]
 
 DEFAULT_PAGES = [
     "Dashboard",
