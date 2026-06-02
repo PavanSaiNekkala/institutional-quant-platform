@@ -140,6 +140,47 @@ else:
     df["ENTRY_SCORE"] = 0
 
 # =========================================================
+# LIQUIDITY MERGE
+# =========================================================
+
+LIQUIDITY_FILE = (
+    ROOT_DIR
+    / "data"
+    / "liquidity_scores.csv"
+)
+
+if LIQUIDITY_FILE.exists():
+
+    liquidity_df = pd.read_csv(
+        LIQUIDITY_FILE
+    )
+
+    df = df.merge(
+
+        liquidity_df[
+            [
+                "Symbol",
+                "LIQUIDITY_SCORE"
+            ]
+        ],
+
+        on="Symbol",
+
+        how="left"
+    )
+
+    df["LIQUIDITY_SCORE"] = (
+
+        df["LIQUIDITY_SCORE"]
+
+        .fillna(0)
+    )
+
+else:
+
+    df["LIQUIDITY_SCORE"] = 0
+    
+# =========================================================
 # FACTOR ENGINE
 # =========================================================
 
@@ -282,52 +323,53 @@ df["FACTOR_ENTRY"] = (
 
     * 100
 )
+# ---------------------------------------------------------
+# LIQUIDITY FACTOR
+# ---------------------------------------------------------
 
+df["FACTOR_LIQUIDITY"] = (
+
+    df["LIQUIDITY_SCORE"]
+
+    .rank(pct=True)
+
+    * 100
+)
 # =========================================================
 # FINAL FACTOR MODEL SCORE
 # =========================================================
 
 df["MULTI_FACTOR_SCORE"] = (
 
-    (
-        df["FACTOR_ALPHA"] * 0.20
-    )
+    (df["FACTOR_ALPHA"] * 0.20)
 
     +
 
-    (
-        df["FACTOR_MOMENTUM"] * 0.15
-    )
+    (df["FACTOR_MOMENTUM"] * 0.15)
 
     +
 
-    (
-        df["FACTOR_RS"] * 0.20
-    )
+    (df["FACTOR_RS"] * 0.20)
 
     +
 
-    (
-        df["FACTOR_SHARPE"] * 0.10
-    )
+    (df["FACTOR_SHARPE"] * 0.10)
 
     +
 
-    (
-        df["FACTOR_LOW_VOL"] * 0.10
-    )
+    (df["FACTOR_LOW_VOL"] * 0.10)
 
     +
 
-    (
-        df["FACTOR_SECTOR"] * 0.10
-    )
+    (df["FACTOR_SECTOR"] * 0.05)
 
     +
 
-    (
-        df["FACTOR_ENTRY"] * 0.15
-    )
+    (df["FACTOR_ENTRY"] * 0.15)
+
+    +
+
+    (df["FACTOR_LIQUIDITY"] * 0.05)
 
 )
 
@@ -368,6 +410,8 @@ score_cols = [
     "FACTOR_SECTOR",
     
     "FACTOR_ENTRY",
+    
+    "FACTOR_LIQUIDITY",
 
     "MULTI_FACTOR_SCORE"
 
