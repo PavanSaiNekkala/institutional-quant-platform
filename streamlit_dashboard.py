@@ -1024,33 +1024,32 @@ elif page == "Performance Analytics":
 # =========================================================
 # PIPELINE HEALTH
 # =========================================================
-st.title("🛠 Pipeline Health")
-
-c1, c2, c3 = st.columns(3)
-
-c1.metric(
-    "Pipeline Runs",
-    len(health_df)
-)
-
-c2.metric(
-    "Success Rate",
-    f"{health_df['SUCCESS'].mean()*100:.1f}%"
-)
-
-c3.metric(
-    "Avg Runtime",
-    f"{health_df['RUNTIME_SEC'].mean():.0f}s"
-)
-
-st.dataframe(
-    health_df,
-    use_container_width=True
-)
 
 elif page == "Pipeline Health":
 
     st.title("🛠 Pipeline Health")
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric(
+        "Pipeline Runs",
+        len(health_df)
+    )
+
+    c2.metric(
+        "Success Rate",
+        f"{health_df['SUCCESS'].mean()*100:.1f}%"
+    )
+
+    c3.metric(
+        "Avg Runtime",
+        f"{health_df['RUNTIME_SEC'].mean():.0f}s"
+    )
+
+    st.dataframe(
+        health_df,
+        use_container_width=True
+    )
 
     if health_df is None:
 
