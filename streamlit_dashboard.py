@@ -246,9 +246,9 @@ ALL_PAGES = [
 
 DEFAULT_PAGES = [
     "Dashboard",
-    "Market Regime",
-    "Expected Returns",
     "Live Signals",
+    "Expected Returns",
+    "Execution Analytics",
     "Portfolio Intelligence",
     "Portfolio Performance"
 ]
