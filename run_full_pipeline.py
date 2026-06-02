@@ -188,7 +188,20 @@ PIPELINE = [
             "historical_signals.csv"
         ],
         "optional": True
-    }
+    },
+
+    {
+        "script": "strategy_version_control.py",
+        "requires": [
+            "walk_forward_stats.csv",
+            "market_regime.csv",
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "strategy_registry.csv"
+        ],
+        "optional": True
+    },
 ]
 
 from datetime import datetime
