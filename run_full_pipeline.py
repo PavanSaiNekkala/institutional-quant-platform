@@ -115,6 +115,16 @@ PIPELINE = [
     },
 
     {
+        "script": "entry_quality_engine.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
+        "produces": [
+            "entry_quality_scores.csv"
+        ]
+    }    
+
+    {
         "script": "meta_strategy_engine.py",
         "requires": [
             "ml_alpha_predictions.csv"
