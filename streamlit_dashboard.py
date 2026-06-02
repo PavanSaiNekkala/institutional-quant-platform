@@ -354,12 +354,30 @@ if page == "Dashboard":
 
         "Sharpe"
     ]
-
+    
+    st.dataframe(
+        top_decile_df[
+            [
+                "Symbol",
+                "Sector",
+                "MULTI_FACTOR_SCORE",
+                "Sharpe",
+                "Momentum"
+            ]
+        ]
+        .sort_values(
+            "MULTI_FACTOR_SCORE",
+            ascending=False
+        )
+        .head(25),
+        use_container_width=True
+    )
+    
     st.dataframe(
         top_df[display_cols],
         use_container_width=True
     )
-
+    
 # =========================================================
 # MARKET REGIME
 # =========================================================
