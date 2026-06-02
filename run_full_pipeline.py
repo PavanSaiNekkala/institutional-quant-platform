@@ -41,16 +41,6 @@ PIPELINE = [
             "institutional_rankings.csv"
         ]
     },
-    
-    {
-        "script": "entry_quality_engine.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "entry_quality_scores.csv"
-        ]
-    },
 
     {
         "script": "liquidity_engine.py",
@@ -59,6 +49,16 @@ PIPELINE = [
         ],
         "produces": [
             "liquidity_scores.csv"
+        ]
+    },
+    
+    {
+        "script": "entry_quality_engine.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
+        "produces": [
+            "entry_quality_scores.csv"
         ]
     },
 
