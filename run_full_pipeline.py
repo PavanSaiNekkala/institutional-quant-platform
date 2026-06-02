@@ -174,7 +174,8 @@ PIPELINE = [
         ],
         "produces": [
             "capacity_report.csv"
-        ]
+        ],
+        "optional": True
     }
 ]
 
