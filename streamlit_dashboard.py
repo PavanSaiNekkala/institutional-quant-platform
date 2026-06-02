@@ -323,13 +323,14 @@ if page == "Dashboard":
 
         portfolio_vol = None
 
-        if (
-            risk_summary is not None
-            and "Portfolio Volatility" in risk_summary.columns
-        ):
-            portfolio_vol = (
-                risk_summary["Portfolio Volatility"].iloc[0]
-            )
+        if risk_summary is not None:
+
+            vol_row = risk_summary[
+                risk_summary["Metric"] == "Portfolio Volatility"
+            ]
+
+            if not vol_row.empty:
+                portfolio_vol = vol_row["Value"].iloc[0]
 
         st.metric(
             "Portfolio Volatility",
