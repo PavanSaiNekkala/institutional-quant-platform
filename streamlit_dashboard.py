@@ -11,7 +11,7 @@ from pathlib import Path
 
 st.set_page_config(
 
-    page_title="Institutional Quant Platform by Nekky",
+    page_title="Institutional Quant Platform by Nekky_29",
 
     layout="wide",
 
@@ -201,7 +201,7 @@ if st.sidebar.button(
             "Pipeline Failed"
         )
         
-st.sidebar.title("🏦 Institutional Quant Platform by NEKKY")
+st.sidebar.title("🏦 Institutional Quant Platform by Nekky_29")
 
 available_cols = [
     c for c in [
