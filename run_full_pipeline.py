@@ -1,6 +1,7 @@
 import subprocess
 import time
 import os
+import sys
 import pandas as pd
 
 from pathlib import Path
@@ -27,35 +28,25 @@ PIPELINE = [
     {
         "script": "regime_engine.py",
         "requires": [],
-        "produces": [
-            "market_regime.csv"
-        ]
+        "produces": ["market_regime.csv"]
     },
 
     {
         "script": "factor_model.py",
         "requires": [],
-        "produces": [
-            "factor_model_rankings.csv"
-        ]
+        "produces": ["factor_model_rankings.csv"]
     },
 
     {
         "script": "expected_return_engine.py",
-        "requires": [
-            "factor_model_rankings.csv"
-        ],
-        "produces": [
-            "expected_returns.csv"
-        ]
+        "requires": ["factor_model_rankings.csv"],
+        "produces": ["expected_returns.csv"]
     },
 
     {
         "script": "entry_quality_engine.py",
         "requires": [],
-        "produces": [
-            "entry_quality_scores.csv"
-        ]
+        "produces": ["entry_quality_scores.csv"]
     },
 
     {
@@ -65,121 +56,97 @@ PIPELINE = [
             "entry_quality_scores.csv",
             "expected_returns.csv"
         ],
-        "produces": [
-            "conviction_scores.csv"
-        ]
+        "produces": ["conviction_scores.csv"]
     },
 
     {
         "script": "turnover_control.py",
-        "requires": [
-            "conviction_scores.csv"
-        ],
-        "produces": [
-            "target_portfolio.csv"
-        ]
-    },
-
-    {
-        "script": "sector_exposure_engine.py",
-        "requires": [
-            "risk_parity_portfolio.csv"
-        ],
-        "produces": [
-            "sector_controlled_portfolio.csv"
-        ]
+        "requires": ["conviction_scores.csv"],
+        "produces": ["target_portfolio.csv"]
     },
 
     {
         "script": "position_sizing_engine.py",
-        "requires": [
-            "target_portfolio.csv"
-        ],
-        "produces": [
-            "position_sized_portfolio.csv"
-        ]
+        "requires": ["target_portfolio.csv"],
+        "produces": ["position_sized_portfolio.csv"]
     },
 
     {
         "script": "risk_parity_engine.py",
-        "requires": [
-            "position_sized_portfolio.csv"
-        ],
-        "produces": [
-            "risk_parity_portfolio.csv"
-        ]
+        "requires": ["position_sized_portfolio.csv"],
+        "produces": ["risk_parity_portfolio.csv"]
+    },
+
+    {
+        "script": "sector_exposure_engine.py",
+        "requires": ["risk_parity_portfolio.csv"],
+        "produces": ["sector_controlled_portfolio.csv"]
     },
 
     {
         "script": "portfolio_optimiser.py",
-        "requires": [
-            "risk_parity_portfolio.csv"
-        ],
-        "produces": [
-            "optimised_portfolio.csv"
-        ]
+        "requires": ["sector_controlled_portfolio.csv"],
+        "produces": ["optimised_portfolio.csv"]
     },
 
     {
         "script": "risk_engine.py",
-        "requires": [
-            "optimised_portfolio.csv"
-        ],
-        "produces": [
-            "portfolio_risk_report.csv"
-        ]
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["portfolio_risk_report.csv"]
     },
 
     {
         "script": "factor_attribution_engine.py",
-        "requires": [
-            "optimised_portfolio.csv"
-        ],
-        "produces": [
-            "factor_attribution.csv"
-        ]
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["factor_attribution.csv"]
     },
 
     {
         "script": "rebalance_engine.py",
-        "requires": [
-            "optimised_portfolio.csv"
-        ],
-        "produces": [
-            "rebalance_plan.csv"
-        ]
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["rebalance_plan.csv"]
+    },
+
+    {
+        "script": "stop_loss_engine.py",
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["stoploss_signals.csv"]
     },
 
     {
         "script": "portfolio_lifecycle_engine.py",
-        "requires": [
-            "optimised_portfolio.csv"
-        ],
+        "requires": ["optimised_portfolio.csv"],
         "produces": [
-            "portfolio_lifecycle.csv"
+            "portfolio_lifecycle.csv",
+            "current_positions.csv",
+            "exited_positions.csv"
         ]
     },
 
     {
         "script": "final_execution_engine.py",
         "requires": [
-            "rebalance_plan.csv"
+            "rebalance_plan.csv",
+            "stoploss_signals.csv"
         ],
-        "produces": [
-            "execution_plan.csv"
-        ]
+        "produces": ["execution_plan.csv"]
+    },
+
+    {
+        "script": "factor_attribution_engine.py",
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["factor_attribution.csv"],
+        "optional": True
     },
 
     {
         "script": "portfolio_monitor.py",
-        "requires": [
-            "optimised_portfolio.csv"
-        ],
-        "produces": [
-            "portfolio_monitor.csv"
-        ]
+        "requires": ["optimised_portfolio.csv"],
+        "produces": ["portfolio_monitor.csv"],
+        "optional": True
     }
 ]
+
 from datetime import datetime
 
 # =========================================================
@@ -268,7 +235,7 @@ def run_script(config):
     try:
 
         result = subprocess.run(
-            ["python", "-u", str(script_path)],
+            [sys.executable, "-u", str(script_path)],
             capture_output=True,
             text=True,
             timeout=3600
@@ -492,35 +459,41 @@ for file in sorted(
     
 health_file = DATA_DIR / "pipeline_health.csv"
 
-pd.DataFrame({
+new_row = pd.DataFrame({
 
     "TIMESTAMP":[pd.Timestamp.now()],
-
     "PIPELINE_VERSION":[PIPELINE_VERSION],
-
     "SUCCESS":[failed_script is None],
-
     "RUNTIME_SEC":[total_runtime],
-
     "MODULES_COMPLETED":[success_count],
-    
-    "GIT_SHA": [
+    "GIT_SHA":[
         os.getenv(
             "GITHUB_SHA",
             "LOCAL"
         )
     ],
-
     "MODULES_TOTAL":[len(PIPELINE)]
 
-}).to_csv(
+})
 
+if health_file.exists():
+
+    history = pd.read_csv(
+        health_file
+    )
+
+    history = pd.concat(
+        [history, new_row],
+        ignore_index=True
+    )
+
+    history = history.tail(1000)
+
+else:
+
+    history = new_row
+
+history.to_csv(
     health_file,
-
-    mode="a",
-
-    header=not health_file.exists(),
-
     index=False
-
 )
