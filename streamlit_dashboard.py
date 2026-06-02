@@ -11,7 +11,7 @@ from pathlib import Path
 
 st.set_page_config(
 
-    page_title="Institutional Quant Platform by NPS",
+    page_title="Institutional Quant Platform by Nekky",
 
     layout="wide",
 
