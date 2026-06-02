@@ -176,7 +176,19 @@ PIPELINE = [
             "capacity_report.csv"
         ],
         "optional": True
-    }
+    },
+    
+    {
+        "script": "signal_database.py",
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "historical_signals.parquet",
+            "historical_signals.csv"
+        ],
+        "optional": True
+    },
 ]
 
 from datetime import datetime
