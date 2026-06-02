@@ -317,8 +317,8 @@ if page == "Dashboard":
     with col5:
 
         portfolio_vol = (
-            risk_summary["VOLATILITY"].iloc[0]
-            if "VOLATILITY" in risk_summary.columns
+            risk_summary["Portfolio Volatility"].iloc[0]
+            if "Portfolio Volatility" in risk_summary.columns
             else None
         )
 
