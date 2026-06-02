@@ -172,9 +172,7 @@ page = st.sidebar.radio(
         "Market Regime",
 
         "Expected Returns",
-        
-        "Top Decile Stocks",
-               
+                 
         "Portfolio Intelligence",
         
         "Portfolio Performance",
@@ -258,13 +256,6 @@ if page == "Dashboard":
         2
     )
 
-    top_decile = len(
-        factor_df[
-            factor_df["MULTI_FACTOR_SCORE"]
-            >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.95)
-        ]
-    )
-
     col1.metric(
         "Stocks Universe",
         total_stocks
@@ -278,11 +269,6 @@ if page == "Dashboard":
     col3.metric(
         "Avg Sharpe",
         avg_sharpe
-    )
-
-    col4.metric(
-        "Top Decile Stocks",
-            top_decile
     )
 
     st.divider()
@@ -754,29 +740,7 @@ elif page == "Meta Strategy":
         fig,
         use_container_width=True
     )
-
-# =========================================================
-# TOP DECILE STOCKS
-# =========================================================
-elif page == "Top Decile Stocks":
-
-    st.title(
-        "🏆 Top Decile Stocks"
-    )
-
-    top_decile_df = factor_df[
-        factor_df["MULTI_FACTOR_SCORE"]
-        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.99)
-    ]
-
-    st.dataframe(
-        top_decile_df.sort_values(
-            "MULTI_FACTOR_SCORE",
-            ascending=False
-        ),
-        use_container_width=True
-    )
-    
+   
 # =========================================================
 # RL PORTFOLIO
 # =========================================================
