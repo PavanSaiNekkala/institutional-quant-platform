@@ -238,6 +238,8 @@ page = st.sidebar.radio(
         "Market Regime",
 
         "Expected Returns",
+
+        "Live Signals",
                  
         "Portfolio Intelligence",
         
