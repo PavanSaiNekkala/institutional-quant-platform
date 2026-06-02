@@ -16,7 +16,7 @@ DOWNLOAD_PERIOD = "1y"
 
 MAX_WORKERS = 5
 
-MIN_HISTORY = 252
+MIN_HISTORY = 100
 
 # =========================================================
 # PATHS
@@ -104,6 +104,13 @@ symbols = (
 print(
     f"\n✅ Loaded {len(symbols)} symbols"
 )
+print(
+    "\nSample symbols:"
+)
+
+print(
+    symbols[:10]
+)
 
 # =========================================================
 # RSI
@@ -177,6 +184,10 @@ def calculate_entry_score(
 
         if data.empty:
 
+            print(
+                f"❌ No Yahoo data: {symbol}"
+            )
+
             return None
 
         if isinstance(
@@ -205,15 +216,22 @@ def calculate_entry_score(
 
         if len(data) < MIN_HISTORY:
 
+            print(
+                f"❌ Insufficient history: "
+                f"{symbol} | {len(data)} rows"
+            )
+
             return None
 
         close = data["Close"]
 
         volume = data["Volume"]
 
-        latest_close = close.iloc[-1]
+        latest_close = float(
+            close.iloc[-1]
+        )
 
-        ema20 = (
+        ema20 = float(
 
             close
             .ewm(
@@ -224,7 +242,7 @@ def calculate_entry_score(
             .iloc[-1]
         )
 
-        ema50 = (
+        ema50 = float(
 
             close
             .ewm(
@@ -235,7 +253,7 @@ def calculate_entry_score(
             .iloc[-1]
         )
 
-        rsi = (
+        rsi = float(
 
             calculate_rsi(
                 close
@@ -243,7 +261,7 @@ def calculate_entry_score(
             .iloc[-1]
         )
 
-        avg_volume = (
+        avg_volume = float(
 
             volume
             .rolling(20)
@@ -260,20 +278,26 @@ def calculate_entry_score(
             else 0
         )
 
-        high_52w = (
-
-            close
-            .rolling(252)
-            .max()
-            .iloc[-1]
+        high_52w = float(
+            close.max()
         )
 
-        distance_to_high = (
+        if high_52w > 0:
 
-            latest_close
-            /
-            high_52w
-        )
+            distance_to_high = (
+
+                (
+                    latest_close
+                    /
+                    high_52w
+                )
+
+                - 1
+            ) * 100
+
+        else:
+
+            distance_to_high = 0
 
         # =========================================
         # ENTRY SCORE
@@ -351,7 +375,11 @@ def calculate_entry_score(
                 )
         }
 
-    except Exception:
+    except Exception as e:
+
+        print(
+            f"❌ {symbol}: {e}"
+        )
 
         return None
 
@@ -364,6 +392,16 @@ print(
 )
 
 results = []
+
+print(
+    "\n🧪 Testing first symbol..."
+)
+
+print(
+    calculate_entry_score(
+        symbols[0]
+    )
+)
 
 with ThreadPoolExecutor(
     max_workers=MAX_WORKERS

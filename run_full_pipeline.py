@@ -63,6 +63,16 @@ PIPELINE = [
     },
 
     {
+        "script": "entry_quality_engine.py",
+        "requires": [
+            "valid_stocks.xlsx"
+        ],
+        "produces": [
+            "entry_quality_scores.csv"
+        ]
+    },
+
+    {
         "script": "generate_metadata.py",
         "requires": [
             "valid_stocks.xlsx"
@@ -133,6 +143,51 @@ PIPELINE = [
             "ml_alpha_predictions.csv"
         ]
     },
+
+    {
+        "script": "conviction_engine.py",
+        "requires": [
+            "multi_factor_rankings.csv",
+            "entry_quality_scores.csv",
+            "expected_returns.csv"
+        ],
+        "produces": [
+            "conviction_scores.csv"
+        ]
+    },
+
+    {
+        "script": "correlation_engine.py",
+        "requires": [
+            "factor_model_rankings.csv"
+        ],
+        "produces": [
+            "correlation_matrix.csv",
+            "diversified_candidates.csv"
+        ]
+    },
+    
+    {
+        "script": "turnover_control.py",
+        "requires": [
+            "current_portfolio.csv",
+            "diversified_candidates.csv"
+        ],
+        "produces": [
+            "target_portfolio.csv"
+        ]
+    },
+    
+    {
+        "script": "position_sizing_engine.py",
+        "requires": [
+            "target_portfolio.csv",
+            "conviction_scores.csv"
+        ],
+        "produces": [
+            "position_sized_portfolio.csv"
+        ]
+    },        
 
     {
         "script": "meta_strategy_engine.py",
