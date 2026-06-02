@@ -196,36 +196,65 @@ if page == "Dashboard":
     ):
         st.stop()
 
+    # =====================================
+    # MARKET REGIME BANNER
+    # =====================================
+
+    if regime_df is not None and len(regime_df):
+
+        regime = regime_df.iloc[0].get(
+            "MARKET_REGIME",
+            "UNKNOWN"
+        )
+
+        if regime.upper() == "BULL":
+
+            st.success(
+                f"🟢 Current Market Regime: {regime}"
+            )
+
+        elif regime.upper() == "BEAR":
+
+            st.error(
+                f"🔴 Current Market Regime: {regime}"
+            )
+
+        else:
+
+            st.warning(
+                f"🟡 Current Market Regime: {regime}"
+            )
+
     st.title(
         "🏦 Institutional Quant Dashboard"
     )
 
     # -----------------------------------------------------
-    # KPIs
+    # INSTITUTIONAL KPI CARDS
     # -----------------------------------------------------
 
     col1, col2, col3, col4 = st.columns(4)
 
-    total_stocks = len(factor_df) if factor_df is not None else 0
+    total_stocks = len(factor_df)
 
     avg_score = round(
         factor_df["MULTI_FACTOR_SCORE"].mean(),
         2
-    ) if factor_df is not None else 0
-
-    top_sector = (
-        factor_df["Sector"]
-        .value_counts()
-        .idxmax()
-    ) if factor_df is not None and len(factor_df) else "N/A"
+    )
 
     avg_sharpe = round(
         factor_df["Sharpe"].mean(),
         2
-    ) if factor_df is not None else 0
+    )
+
+    buy_candidates = len(
+        factor_df[
+            factor_df["MULTI_FACTOR_SCORE"] > 80
+        ]
+    )
 
     col1.metric(
-        "Total Stocks",
+        "Stocks Universe",
         total_stocks
     )
 
@@ -235,36 +264,75 @@ if page == "Dashboard":
     )
 
     col3.metric(
-        "Top Sector",
-        top_sector
-    )
-
-    col4.metric(
         "Avg Sharpe",
         avg_sharpe
     )
 
+    col4.metric(
+        "High Conviction Ideas",
+        buy_candidates
+    )
+
     st.divider()
+    # -----------------------------------------------------
+    # PORTFOLIO VISUALS
+    # -----------------------------------------------------
+
+    chart_col1, chart_col2 = st.columns(2)
+
+    with chart_col1:
+
+        st.subheader("📊 Sector Distribution")
+
+        sector_counts = (
+            factor_df["Sector"]
+            .value_counts()
+            .head(10)
+        )
+
+        fig = px.pie(
+            values=sector_counts.values,
+            names=sector_counts.index,
+            title="Sector Allocation"
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
 
     # -----------------------------------------------------
     # TOP STOCKS
     # -----------------------------------------------------
 
     st.subheader(
-        "🏆 Top Multi-Factor Stocks"
-    )
+            "🏆 Top 25 Institutional Picks"
+        )
 
-    top_df = factor_df.sort_values(
+        top_df = (
+            factor_df
+            .sort_values(
+                "MULTI_FACTOR_SCORE",
+                ascending=False
+            )
+            .head(25)
+        )
 
-        by="MULTI_FACTOR_SCORE",
+        display_cols = [
 
-        ascending=False
-    ).head(25)
+            "Symbol",
 
-    st.dataframe(
-        top_df,
-        use_container_width=True
-    )
+            "Sector",
+
+            "MULTI_FACTOR_SCORE",
+
+            "Sharpe"
+        ]
+
+        st.dataframe(
+            top_df[display_cols],
+            use_container_width=True
+        )
 
     # -----------------------------------------------------
     # SCORE DISTRIBUTION
@@ -281,37 +349,6 @@ if page == "Dashboard":
         x="MULTI_FACTOR_SCORE",
 
         nbins=40
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
-
-    # -----------------------------------------------------
-    # SECTOR DISTRIBUTION
-    # -----------------------------------------------------
-
-    st.subheader(
-        "🏭 Sector Allocation"
-    )
-
-    sector_counts = (
-
-        factor_df["Sector"]
-
-        .value_counts()
-
-        .head(15)
-    )
-
-    fig = px.bar(
-
-        sector_counts,
-
-        x=sector_counts.index,
-
-        y=sector_counts.values
     )
 
     st.plotly_chart(
