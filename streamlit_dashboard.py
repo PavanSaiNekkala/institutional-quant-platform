@@ -172,6 +172,8 @@ page = st.sidebar.radio(
         "Market Regime",
 
         "Expected Returns",
+        
+        "Top Decile Stocks",
                
         "Portfolio Intelligence",
         
