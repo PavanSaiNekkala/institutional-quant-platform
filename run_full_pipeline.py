@@ -205,7 +205,7 @@ PIPELINE = [
             "performance_analytics.csv"
         ],
         "optional": True
-    },
+    }
 ]
 
 from datetime import datetime
