@@ -356,6 +356,11 @@ if page == "Dashboard":
     ]
     
     st.dataframe(
+        top_df[display_cols],
+        use_container_width=True
+    )
+    
+    st.dataframe(
         top_decile_df[
             [
                 "Symbol",
@@ -373,10 +378,7 @@ if page == "Dashboard":
         use_container_width=True
     )
     
-    st.dataframe(
-        top_df[display_cols],
-        use_container_width=True
-    )
+
     
 # =========================================================
 # MARKET REGIME
