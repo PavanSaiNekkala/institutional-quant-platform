@@ -316,22 +316,17 @@ if page == "Dashboard":
 
     with col5:
 
-        vol_col = None
-
-        if "VOLATILITY" in portfolio_df.columns:
-            vol_col = "VOLATILITY"
-
-        elif "Volatility" in portfolio_df.columns:
-            vol_col = "Volatility"
-
-        elif "Portfolio_Volatility" in portfolio_df.columns:
-            vol_col = "Portfolio_Volatility"
+        portfolio_vol = (
+            risk_summary["VOLATILITY"].iloc[0]
+            if "VOLATILITY" in risk_summary.columns
+            else None
+        )
 
         st.metric(
             "Portfolio Volatility",
             (
-                f"{portfolio_df[vol_col].mean():.2f}%"
-                if vol_col
+                f"{portfolio_vol:.2f}%"
+                if portfolio_vol is not None
                 else "N/A"
             )
         )
