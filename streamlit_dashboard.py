@@ -75,9 +75,15 @@ expected_df = load_csv(
     "expected_returns.csv"
 )
 
+portfolio_df = load_csv(
+    "portfolio_intelligence.csv"
+)
+
 required_files = {
 
     "factor_model_rankings.csv": factor_df,
+
+    "portfolio_intelligence.csv": portfolio_df,
 
     "meta_strategy_portfolio.csv": meta_df,
 
@@ -88,7 +94,7 @@ required_files = {
     "execution_simulation.csv": execution_df,
 
     "ml_alpha_predictions.csv": ml_df,
-
+    
     "expected_returns.csv": expected_df
 }
 
@@ -167,6 +173,8 @@ page = st.sidebar.radio(
         "Market Regime",
 
         "Expected Returns",
+        
+        "Portfolio Intelligence",
 
         "Meta Strategy",
 
@@ -439,7 +447,6 @@ elif page == "Market Regime":
 # =========================================================
 # EXPECTED RETURNS
 # =========================================================
-
 elif page == "Expected Returns":
 
     if not validate_dataframe(
@@ -457,6 +464,39 @@ elif page == "Expected Returns":
 
     st.title(
         "🎯 Expected Return Engine"
+    )
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Avg 5D Return %",
+        round(
+            expected_df["EXPECTED_RETURN_5D"].mean(),
+            2
+        )
+    )
+
+    c2.metric(
+        "Avg 15D Return %",
+        round(
+            expected_df["EXPECTED_RETURN_15D"].mean(),
+            2
+        )
+    )
+
+    c3.metric(
+        "Avg 30D Return %",
+        round(
+            expected_df["EXPECTED_RETURN_30D"].mean(),
+            2
+        )
+    )
+
+    c4.metric(
+        "Avg Hold Days",
+        round(
+            expected_df["EST_HOLD_DAYS"].mean(),
+            0
+        )
     )
 
     if expected_df is None:
@@ -499,7 +539,54 @@ elif page == "Expected Returns":
             fig,
             use_container_width=True
         )
+# =========================================================
+# PORTFOLIO INTELLIGENCE
+# =========================================================
 
+elif page == "Portfolio Intelligence":
+
+    st.title(
+        "🧠 Portfolio Intelligence"
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Exp Return 5D",
+        round(
+            portfolio_df["WEIGHTED_5D"].sum(),
+            2
+        )
+    )
+
+    c2.metric(
+        "Exp Return 15D",
+        round(
+            portfolio_df["WEIGHTED_15D"].sum(),
+            2
+        )
+    )
+
+    c3.metric(
+        "Exp Return 30D",
+        round(
+            portfolio_df["WEIGHTED_30D"].sum(),
+            2
+        )
+    )
+
+    c4.metric(
+        "Avg Hold Days",
+        round(
+            portfolio_df["EST_HOLD_DAYS"].mean(),
+            0
+        )
+    )
+
+    st.dataframe(
+        portfolio_df,
+        use_container_width=True
+    )
 # =========================================================
 # META STRATEGY
 # =========================================================
@@ -651,8 +738,15 @@ elif page == "ML Alpha":
         ascending=False
     ).head(50)
 
+    display_cols = [
+        "Symbol",
+        "Sector",
+        "ML_PREDICTED_ALPHA",
+        "Momentum"
+    ]
+
     st.dataframe(
-        top_ml,
+        top_ml[display_cols],
         use_container_width=True
     )
 
