@@ -189,6 +189,16 @@ PIPELINE = [
         ],
         "optional": True
     },
+
+    {
+        "script": "live_signal_api.py",
+        "requires": [
+            "optimised_portfolio.csv",
+            "market_regime.csv"
+        ],
+        "produces": [],
+        "optional": True
+    },
 ]
 
 from datetime import datetime
