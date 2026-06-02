@@ -98,6 +98,7 @@ required_files = {
     "expected_returns.csv": expected_df,
     "walk_forward_equity_curve.csv": equity_curve_df,
     "portfolio_intelligence.csv": portfolio_df,
+    "portfolio_risk_summary.csv": risk_summary,
     "meta_strategy_portfolio.csv": meta_df,
     "reinforcement_portfolio.csv": rl_df,
     "market_regime_v2.csv": regime_df,
