@@ -202,6 +202,31 @@ if st.sidebar.button(
         
 st.sidebar.title("🏦 Institutional Quant Platform")
 
+signals_df = portfolio_df[
+    [
+        "Symbol",
+        "EXPECTED_RETURN_5D",
+        "EXPECTED_RETURN_15D",
+        "EXPECTED_RETURN_30D",
+        "HOLD_DAYS",
+        "ENTRY_PRICE",
+        "TARGET_PRICE",
+        "STOPLOSS"
+    ]
+].copy()
+
+signals_df["SIGNAL"] = "BUY"
+
+signals_df["CONFIDENCE"] = (
+    portfolio_df["MULTI_FACTOR_SCORE"]
+    .rank(pct=True) * 100
+).round(0)
+
+signals_df = signals_df.sort_values(
+    "CONFIDENCE",
+    ascending=False
+)
+
 page = st.sidebar.radio(
 
     "Navigation",
@@ -591,6 +616,31 @@ elif page == "Expected Returns":
         fig,
         use_container_width=True
     )
+
+
+elif page == "Live Signals":
+
+    st.title("📡 Live Trading Signals")
+
+    st.dataframe(
+        signals_df,
+        use_container_width=True
+    )
+
+    st.subheader("Top Signals")
+
+    top5 = signals_df.head(5)
+
+    for _, row in top5.iterrows():
+
+        st.success(
+            f"""
+            🚀 {row['Symbol']}
+            Confidence: {row['CONFIDENCE']}%
+            30D Return: {row['EXPECTED_RETURN_30D']:.2f}%
+            Hold: {row['HOLD_DAYS']} Days
+            """
+        )
 # =========================================================
 # PORTFOLIO INTELLIGENCE
 # =========================================================
