@@ -325,10 +325,10 @@ if page == "Dashboard":
 
         if (
             risk_summary is not None
-            and "VOLATILITY" in risk_summary.columns
+            and "Portfolio Volatility" in risk_summary.columns
         ):
             portfolio_vol = (
-                risk_summary["VOLATILITY"].iloc[0]
+                risk_summary["Portfolio Volatility"].iloc[0]
             )
 
         st.metric(
