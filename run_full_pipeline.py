@@ -38,6 +38,12 @@ PIPELINE = [
     },
 
     {
+        "script": "news_engine.py",
+        "requires": [],
+        "produces": ["news_rankings.csv"]
+    },
+
+    {
         "script": "expected_return_engine.py",
         "requires": ["factor_model_rankings.csv"],
         "produces": ["expected_returns.csv"]
