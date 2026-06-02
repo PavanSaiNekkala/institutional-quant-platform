@@ -96,20 +96,31 @@ df = portfolio.merge(
     how="left"
 )
 
-df = df.merge(
+# =========================================================
+# ADD EXPECTED RETURN ONLY IF MISSING
+# =========================================================
 
-    expected_df[
-        [
-            "Symbol",
-            "EXPECTED_RETURN_30D"
-        ]
-    ],
+if "EXPECTED_RETURN_30D" not in df.columns:
 
-    on="Symbol",
+    df = df.merge(
 
-    how="left"
-)
+        expected_df[
+            [
+                "Symbol",
+                "EXPECTED_RETURN_30D"
+            ]
+        ],
 
+        on="Symbol",
+
+        how="left"
+    )
+
+else:
+
+    print(
+        "\n✅ EXPECTED_RETURN_30D already available"
+    )
 # =========================================================
 # FILL NA
 # =========================================================

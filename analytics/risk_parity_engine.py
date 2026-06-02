@@ -122,6 +122,20 @@ vol_df = pd.DataFrame({
 # MERGE
 # =========================================================
 
+# =========================================================
+# REMOVE OLD VOLATILITY
+# =========================================================
+
+df = df.drop(
+    columns=["VOLATILITY"],
+    errors="ignore"
+)
+
+df = df.drop(
+    columns=["VOLATILITY_x","VOLATILITY_y"],
+    errors="ignore"
+)
+
 df = df.merge(
 
     vol_df,

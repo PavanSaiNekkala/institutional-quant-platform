@@ -74,22 +74,121 @@ master["Symbol"] = (
 )
 
 # =========================================================
-# ADD SECTOR DATA
+# REMOVE DUPLICATES
 # =========================================================
 
-df = portfolio.merge(
+portfolio = (
 
-    master[
-        [
-            "Symbol",
-            "Sector",
-            "Industry"
-        ]
-    ],
+    portfolio
 
-    on="Symbol",
+    .drop_duplicates(
+        subset=["Symbol"],
+        keep="first"
+    )
 
-    how="left"
+    .reset_index(drop=True)
+
+)
+
+master = (
+
+    master
+
+    .drop_duplicates(
+        subset=["Symbol"],
+        keep="first"
+    )
+
+    .reset_index(drop=True)
+
+)
+
+# =========================================================
+# ADD SECTOR DATA IF REQUIRED
+# =========================================================
+
+if "Sector" in portfolio.columns:
+
+    print(
+        "\n✅ Sector column already available"
+    )
+
+    df = portfolio.copy()
+
+else:
+
+    print(
+        "\n📡 Merging Sector Information..."
+    )
+
+    df = portfolio.merge(
+
+        master[
+            [
+                "Symbol",
+                "Sector",
+                "Industry"
+            ]
+        ],
+
+        on="Symbol",
+
+        how="left"
+    )
+
+# =========================================================
+# HANDLE MERGE SUFFIXES
+# =========================================================
+
+if "Sector_x" in df.columns:
+
+    df["Sector"] = df["Sector_x"]
+
+elif "Sector_y" in df.columns:
+
+    df["Sector"] = df["Sector_y"]
+
+if "Industry_x" in df.columns:
+
+    df["Industry"] = df["Industry_x"]
+
+elif "Industry_y" in df.columns:
+
+    df["Industry"] = df["Industry_y"]
+
+# =========================================================
+# CLEAN TEMP COLUMNS
+# =========================================================
+
+drop_cols = [
+
+    c
+
+    for c in df.columns
+
+    if c.endswith("_x")
+    or c.endswith("_y")
+
+]
+
+df = df.drop(
+    columns=drop_cols,
+    errors="ignore"
+)
+
+# =========================================================
+# FILL MISSING SECTORS
+# =========================================================
+
+df["Sector"] = (
+
+    df["Sector"]
+
+    .fillna(
+        "UNKNOWN"
+    )
+
+    .astype(str)
 
 )
 
@@ -109,7 +208,9 @@ required_cols = [
 
 missing = [
 
-    c for c in required_cols
+    c
+
+    for c in required_cols
 
     if c not in df.columns
 
@@ -118,13 +219,11 @@ missing = [
 if missing:
 
     raise ValueError(
-
         f"Missing columns: {missing}"
-
     )
 
 # =========================================================
-# SORT BY PORTFOLIO WEIGHT
+# SORT BY WEIGHT
 # =========================================================
 
 df = df.sort_values(
@@ -146,31 +245,22 @@ sector_counter = {}
 for _, row in df.iterrows():
 
     sector = str(
-
         row["Sector"]
-
     ).upper()
 
     count = sector_counter.get(
-
         sector,
-
         0
-
     )
 
     if count < MAX_SECTOR_STOCKS:
 
         final_rows.append(
-
             row
-
         )
 
         sector_counter[sector] = (
-
             count + 1
-
         )
 
 # =========================================================
@@ -178,24 +268,26 @@ for _, row in df.iterrows():
 # =========================================================
 
 final_df = pd.DataFrame(
-
     final_rows
-
 )
 
 # =========================================================
-# RENORMALIZE WEIGHTS
+# NORMALIZE WEIGHTS
 # =========================================================
 
-final_df["FINAL_WEIGHT"] = (
-
+weight_sum = (
     final_df["FINAL_WEIGHT"]
-
-    /
-
-    final_df["FINAL_WEIGHT"].sum()
-
+    .sum()
 )
+
+if weight_sum > 0:
+
+    final_df["FINAL_WEIGHT"] = (
+
+        final_df["FINAL_WEIGHT"]
+
+        / weight_sum
+    )
 
 final_df["FINAL_WEIGHT_%"] = (
 
@@ -214,7 +306,6 @@ final_df.to_csv(
     OUTPUT_FILE,
 
     index=False
-
 )
 
 # =========================================================
@@ -222,26 +313,19 @@ final_df.to_csv(
 # =========================================================
 
 print(
-
     "\n✅ Sector Exposure Control Complete"
-
 )
 
 print(
-
     "\n📁 Saved:"
 )
 
 print(
-
     OUTPUT_FILE
-
 )
 
 print(
-
     "\n📊 Sector Allocation:\n"
-
 )
 
 print(
@@ -253,9 +337,7 @@ print(
 )
 
 print(
-
     "\n🏆 Top Holdings:\n"
-
 )
 
 print(
@@ -282,4 +364,9 @@ print(
     ),
 
     "%"
+)
+
+print(
+    "\nTotal Holdings:",
+    len(final_df)
 )

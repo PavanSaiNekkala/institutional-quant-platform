@@ -95,6 +95,15 @@ symbols = (
 print(
     f"✅ Loaded {len(symbols)} symbols"
 )
+print(
+    "\nUnique Symbols Loaded:",
+    len(symbols)
+)
+
+print(
+    "Original Rows:",
+    len(df)
+)
 
 # =========================================================
 # LIQUIDITY CALCULATION
@@ -353,6 +362,43 @@ liquidity_df = (
     )
 )
 
+# =========================================================
+# REMOVE DUPLICATE SYMBOLS
+# =========================================================
+
+before_rows = len(liquidity_df)
+
+liquidity_df = (
+
+    liquidity_df
+
+    .sort_values(
+        "LIQUIDITY_SCORE",
+        ascending=False
+    )
+
+    .drop_duplicates(
+        subset=["Symbol"],
+        keep="first"
+    )
+
+    .reset_index(drop=True)
+)
+
+after_rows = len(liquidity_df)
+
+print(
+    f"\n🧹 Removed {before_rows - after_rows} duplicate rows"
+)
+print(
+    "\nLiquidity Rows:",
+    len(liquidity_df)
+)
+
+print(
+    "Unique Symbols:",
+    liquidity_df["Symbol"].nunique()
+)
 # =========================================================
 # SAVE
 # =========================================================

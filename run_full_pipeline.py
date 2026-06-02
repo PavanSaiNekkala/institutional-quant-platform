@@ -129,13 +129,17 @@ PIPELINE = [
             "rebalance_plan.csv",
             "stoploss_signals.csv"
         ],
-        "produces": ["execution_plan.csv"]
+        "produces": ["execution_orders.csv"]
     },
 
     {
         "script": "portfolio_monitor.py",
         "requires": ["optimised_portfolio.csv"],
-        "produces": ["portfolio_monitor.csv"],
+        "produces": [
+                "portfolio_alerts.csv",
+                "portfolio_risk_summary.csv",
+                "portfolio_risk_report.csv"
+        ],
         "optional": True
     },
 
