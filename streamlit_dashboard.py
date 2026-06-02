@@ -346,7 +346,7 @@ if page == "Dashboard":
     with col5:
         st.metric(
             "Portfolio Volatility",
-            f"{portfolio_df['Volatality'].mean():.2f}%"
+            f"{portfolio_df['Volatility'].mean():.2f}%"
         )
 
     with col6:
