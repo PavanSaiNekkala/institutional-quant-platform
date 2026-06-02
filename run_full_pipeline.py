@@ -25,100 +25,16 @@ DATA_DIR = ROOT_DIR / "data"
 PIPELINE = [
 
     {
-        "script": "market_regime.py",
+        "script": "regime_engine.py",
         "requires": [],
         "produces": [
-            "market_regime_v2.csv"
-        ]
-    },
-
-    {
-        "script": "relative_strength.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "institutional_rankings.csv"
-        ]
-    },
-
-    {
-        "script": "liquidity_engine.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "liquidity_scores.csv"
-        ]
-    },
-    
-    {
-        "script": "entry_quality_engine.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "entry_quality_scores.csv"
-        ]
-    },
-
-    {
-        "script": "entry_quality_engine.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "entry_quality_scores.csv"
-        ]
-    },
-
-    {
-        "script": "generate_metadata.py",
-        "requires": [
-            "valid_stocks.xlsx"
-        ],
-        "produces": [
-            "stock_metadata.csv"
-        ]
-    },
-
-    {
-        "script": "sector_relative_strength.py",
-        "requires": [
-            "institutional_rankings.csv",
-            "stock_metadata.csv"
-        ],
-        "produces": [
-            "sector_relative_strength.csv"
-        ]
-    },
-
-    {
-        "script": "sector_summary.py",
-        "requires": [
-            "institutional_rankings.csv",
-            "stock_metadata.csv"
-        ],
-        "produces": [
-            "sector_summary.csv"
-        ]
-    },
-
-    {
-        "script": "cross_sectional_ranker.py",
-        "requires": [
-            "institutional_rankings.csv"
-        ],
-        "produces": [
-            "cross_sectional_rankings.csv"
+            "market_regime.csv"
         ]
     },
 
     {
         "script": "factor_model.py",
-        "requires": [
-            "cross_sectional_rankings.csv"
-        ],
+        "requires": [],
         "produces": [
             "factor_model_rankings.csv"
         ]
@@ -127,7 +43,7 @@ PIPELINE = [
     {
         "script": "expected_return_engine.py",
         "requires": [
-           "factor_model_rankings.csv"
+            "factor_model_rankings.csv"
         ],
         "produces": [
             "expected_returns.csv"
@@ -135,19 +51,17 @@ PIPELINE = [
     },
 
     {
-        "script": "ml_alpha_engine.py",
-        "requires": [
-            "factor_model_rankings.csv"
-        ],
+        "script": "entry_quality_engine.py",
+        "requires": [],
         "produces": [
-            "ml_alpha_predictions.csv"
+            "entry_quality_scores.csv"
         ]
     },
 
     {
         "script": "conviction_engine.py",
         "requires": [
-            "multi_factor_rankings.csv",
+            "factor_model_rankings.csv",
             "entry_quality_scores.csv",
             "expected_returns.csv"
         ],
@@ -157,73 +71,59 @@ PIPELINE = [
     },
 
     {
-        "script": "correlation_engine.py",
-        "requires": [
-            "factor_model_rankings.csv"
-        ],
-        "produces": [
-            "correlation_matrix.csv",
-            "diversified_candidates.csv"
-        ]
-    },
-    
-    {
         "script": "turnover_control.py",
         "requires": [
-            "current_portfolio.csv",
-            "diversified_candidates.csv"
+            "conviction_scores.csv"
         ],
         "produces": [
             "target_portfolio.csv"
         ]
     },
-    
+
+    {
+        "script": "sector_exposure_engine.py",
+        "requires": [
+            "risk_parity_portfolio.csv"
+        ],
+        "produces": [
+            "sector_controlled_portfolio.csv"
+        ]
+    },
+
     {
         "script": "position_sizing_engine.py",
         "requires": [
-            "target_portfolio.csv",
-            "conviction_scores.csv"
+            "target_portfolio.csv"
         ],
         "produces": [
             "position_sized_portfolio.csv"
         ]
-    },        
+    },
 
     {
-        "script": "meta_strategy_engine.py",
+        "script": "risk_parity_engine.py",
         "requires": [
-            "ml_alpha_predictions.csv"
+            "position_sized_portfolio.csv"
         ],
         "produces": [
-            "meta_strategy_portfolio.csv"
+            "risk_parity_portfolio.csv"
         ]
     },
 
     {
-        "script": "reinforcement_allocator.py",
+        "script": "portfolio_optimiser.py",
         "requires": [
-            "ml_alpha_predictions.csv",
-            "market_regime_v2.csv"
+            "risk_parity_portfolio.csv"
         ],
         "produces": [
-            "reinforcement_portfolio.csv"
-        ]
-    },
-
-    {
-        "script": "portfolio_optimizer.py",
-        "requires": [
-            "reinforcement_portfolio.csv"
-        ],
-        "produces": [
-            "portfolio_allocation.csv"
+            "optimised_portfolio.csv"
         ]
     },
 
     {
         "script": "risk_engine.py",
         "requires": [
-            "portfolio_allocation.csv"
+            "optimised_portfolio.csv"
         ],
         "produces": [
             "portfolio_risk_report.csv"
@@ -231,40 +131,55 @@ PIPELINE = [
     },
 
     {
-        "script": "portfolio_intelligence.py",
+        "script": "factor_attribution_engine.py",
         "requires": [
-            "ml_alpha_predictions.csv",
-            "sector_summary.csv",
-            "market_regime_v2.csv"
+            "optimised_portfolio.csv"
         ],
         "produces": [
-            "portfolio_intelligence.csv"
+            "factor_attribution.csv"
         ]
     },
 
     {
-        "script": "execution_engine.py",
+        "script": "rebalance_engine.py",
         "requires": [
-            "portfolio_allocation.csv",
-            "portfolio_risk_report.csv"
+            "optimised_portfolio.csv"
         ],
         "produces": [
-            "execution_simulation.csv"
+            "rebalance_plan.csv"
         ]
     },
 
     {
-        "script": "walk_forward_optimizer.py",
+        "script": "portfolio_lifecycle_engine.py",
         "requires": [
-            "cross_sectional_rankings.csv"
+            "optimised_portfolio.csv"
         ],
         "produces": [
-            "walk_forward_equity_curve.csv"
+            "portfolio_lifecycle.csv"
+        ]
+    },
+
+    {
+        "script": "final_execution_engine.py",
+        "requires": [
+            "rebalance_plan.csv"
         ],
-        "optional": True
+        "produces": [
+            "execution_plan.csv"
+        ]
+    },
+
+    {
+        "script": "portfolio_monitor.py",
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio_monitor.csv"
+        ]
     }
 ]
-
 from datetime import datetime
 
 # =========================================================
