@@ -265,21 +265,6 @@ page = st.sidebar.radio(
     visible_pages
 )
 
-from st_aggrid import GridOptionsBuilder
-
-gb = GridOptionsBuilder.from_dataframe(df)
-
-for col in df.columns:
-    gb.configure_column(
-        col,
-        autoSize=True
-    )
-
-AgGrid(
-    df,
-    gridOptions=gb.build(),
-    fit_columns_on_grid_load=True
-)
 # =========================================================
 # DASHBOARD
 # =========================================================
@@ -467,8 +452,9 @@ if page == "Dashboard":
     ]
     
     st.dataframe(
-        top_df[display_cols],
-        use_container_width=True
+        df,
+        use_container_width=True,
+        hide_index=True
     )
         
 # =========================================================
@@ -499,8 +485,9 @@ elif page == "Market Regime":
     else:
 
         st.dataframe(
-            regime_df,
-            use_container_width=True
+            df,
+            use_container_width=True,
+            hide_index=True
         )
 
         # -----------------------------------------
@@ -645,8 +632,9 @@ elif page == "Live Signals":
     st.title("📡 Live Trading Signals")
 
     st.dataframe(
-        signals_df,
-        use_container_width=True
+        df,
+        use_container_width=True,
+        hide_index=True
     )
 
     st.subheader("Top Signals")
@@ -720,8 +708,9 @@ elif page == "Portfolio Intelligence":
     )
 
     st.dataframe(
-        portfolio_df,
-        use_container_width=True
+        df,
+        use_container_width=True,
+        hide_index=True
     )
 
 # =========================================================
