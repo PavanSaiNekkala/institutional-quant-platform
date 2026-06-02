@@ -708,33 +708,6 @@ elif page == "Meta Strategy":
         )
     )
     
-    top_decile_df = factor_df[
-        factor_df["MULTI_FACTOR_SCORE"]
-        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.95)
-    ]
-
-    st.subheader(
-        "🏆 Top Decile Stocks"
-    )
-
-    st.dataframe(
-        top_decile_df[
-            [
-                "Symbol",
-                "Sector",
-                "MULTI_FACTOR_SCORE",
-                "Sharpe",
-                "Momentum"
-            ]
-        ]
-        .sort_values(
-            "MULTI_FACTOR_SCORE",
-            ascending=False
-        )
-        .head(25),
-        use_container_width=True
-    )
-    
     st.divider()
 
     display_cols = [
@@ -780,6 +753,28 @@ elif page == "Meta Strategy":
         use_container_width=True
     )
 
+# =========================================================
+# TOP DECILE STOCKS
+# =========================================================
+elif page == "Top Decile Stocks":
+
+    st.title(
+        "🏆 Top Decile Stocks"
+    )
+
+    top_decile_df = factor_df[
+        factor_df["MULTI_FACTOR_SCORE"]
+        >= factor_df["MULTI_FACTOR_SCORE"].quantile(0.90)
+    ]
+
+    st.dataframe(
+        top_decile_df.sort_values(
+            "MULTI_FACTOR_SCORE",
+            ascending=False
+        ),
+        use_container_width=True
+    )
+    
 # =========================================================
 # RL PORTFOLIO
 # =========================================================
