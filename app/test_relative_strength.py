@@ -8,7 +8,7 @@ sys.path.append(str(ROOT_DIR))
 import pandas as pd
 import yfinance as yf
 
-from data.downloader import (
+from analytics.downloader import (
     load_symbols,
     prefilter_symbols,
     batch_download

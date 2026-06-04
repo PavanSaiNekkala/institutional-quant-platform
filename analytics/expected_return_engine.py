@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 INPUT_FILE = (
     BASE_DIR
     / "data"
-    / "factor_model_rankings.csv"
+    / "conviction_scores.csv"
 )
 
 OUTPUT_FILE = (
@@ -42,110 +42,62 @@ df = pd.read_csv(INPUT_FILE)
 print("✅ Data Loaded")
 
 # =========================================================
-# LOAD NEWS
+# NEWS VALIDATION
 # =========================================================
 
-if NEWS_FILE.exists():
-
-    print(
-        "\n📰 Loading News Rankings..."
-    )
-
-    news_df = pd.read_csv(
-        NEWS_FILE
-    )
-
-    df = df.merge(
-
-        news_df[
-            [
-                "Symbol",
-                "NEWS_ALPHA",
-                "NEWS_SCORE"
-            ]
-        ],
-
-        on="Symbol",
-
-        how="left"
-
-    )
-
-else:
-
-    print(
-        "\n⚠ news_rankings.csv not found"
-    )
+if "NEWS_ALPHA" not in df.columns:
 
     df["NEWS_ALPHA"] = 50
+
+if "NEWS_SCORE" not in df.columns:
+
     df["NEWS_SCORE"] = 0
 
 df["NEWS_ALPHA"] = (
-    df["NEWS_ALPHA"]
+    pd.to_numeric(
+        df["NEWS_ALPHA"],
+        errors="coerce"
+    )
     .fillna(50)
 )
 
 df["NEWS_SCORE"] = (
-    df["NEWS_SCORE"]
+    pd.to_numeric(
+        df["NEWS_SCORE"],
+        errors="coerce"
+    )
     .fillna(0)
 )
-
-print("\n===== INPUT CHECK =====")
-
-required_cols = [
-    "Symbol",
-    "Momentum",
-    "Sharpe",
-    "RS_30D",
-    "RS_60D",
-    "ALPHA_SCORE",
-    "MULTI_FACTOR_SCORE",
-]
-
-missing = [
-    c for c in required_cols
-    if c not in df.columns
-]
-
-if missing:
-    raise ValueError(
-        f"Missing Columns: {missing}"
-    )
-
-print(
-    df[
-        [
-            "Symbol",
-            "Momentum",
-            "Sharpe",
-            "ALPHA_SCORE",
-            "MULTI_FACTOR_SCORE",
-        ]
-    ].head(10)
-)
-
 # =========================================================
 # NUMERIC CLEAN
 # =========================================================
 
 numeric_cols = [
-    "Momentum",
-    "Sharpe",
-    "RS_30D",
-    "RS_60D",
-    "ALPHA_SCORE",
+
     "MULTI_FACTOR_SCORE",
+
+    "ENTRY_SCORE",
+
+    "CONVICTION_SCORE",
+
+    "NEWS_ALPHA"
+
 ]
 
 for col in numeric_cols:
 
+    if col not in df.columns:
+
+        df[col] = 0
+
     df[col] = pd.to_numeric(
+
         df[col],
+
         errors="coerce"
-    )
 
-    df[col] = df[col].fillna(0)
-
+    ).fillna(0)
+    
 # =========================================================
 # PREDICTION SCORE
 # =========================================================
@@ -156,17 +108,13 @@ print(
 
 df["PREDICTION_SCORE"] = (
 
-      df["ALPHA_SCORE"] * 0.30
+      df["MULTI_FACTOR_SCORE"] * 0.40
 
-    + df["MULTI_FACTOR_SCORE"] * 0.30
+    + df["CONVICTION_SCORE"] * 0.25
 
-    + df["RS_30D"] * 0.15
+    + df["ENTRY_SCORE"] * 3
 
-    + df["RS_60D"] * 0.10
-
-    + df["Momentum"] * 0.05
-
-    + df["NEWS_ALPHA"] * 0.10
+    + df["NEWS_ALPHA"] * 0.15
 
 )
 

@@ -5,7 +5,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.append(str(ROOT_DIR))
 
-from data.live_data import (
+from signals.live_data import (
     market_snapshot
 )
 

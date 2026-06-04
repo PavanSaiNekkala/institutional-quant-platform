@@ -494,18 +494,41 @@ df[
 # =========================================================
 
 output_cols = [
+
     "Symbol",
+
     "MULTI_FACTOR_SCORE",
+
+    "LIQUIDITY_SCORE",
+
+    "FACTOR_MOMENTUM",
+
+    "FACTOR_SHARPE",
+
+    "FACTOR_ALPHA",
+
+    "RS_COMPOSITE",
+
     "NEWS_ALPHA",
+
     "NEWS_SCORE",
+
     "NEWS_BIAS",
+
     "NEWS_IMPACT",
+
     "NEWS_FLAG",
+
     "ENTRY_SCORE",
+
     "EXPECTED_RETURN_30D",
+
     "CONVICTION",
+
     "CONVICTION_SCORE",
+
     "CONVICTION_RANK"
+
 ]
 
 df[

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from data.live_data import (
+from signals.live_data import (
     fetch_stock_data
 )
 

@@ -5,7 +5,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.append(str(ROOT_DIR))
 
-from data.downloader import (
+from analytics.downloader import (
     load_symbols,
     prefilter_symbols,
     batch_download
