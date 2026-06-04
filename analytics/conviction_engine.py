@@ -394,6 +394,16 @@ return_max = max(
     1
 )
 
+df["RETURN_NORM"] = (
+
+    return_range
+
+    /
+
+    return_max
+
+)
+
 df["NEWS_NORM"] = (
     df["NEWS_ALPHA"]
     .clip(0, 100)
