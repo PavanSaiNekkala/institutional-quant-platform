@@ -245,7 +245,7 @@ PIPELINE = [
         ],
         "optional": True
     },
-
+]
     
 from datetime import datetime
 
