@@ -92,41 +92,41 @@ candidate_symbols = set(
 )
 
 # =========================================================
-# MARKET REGIME
+# MARKET 
 # =========================================================
 
-REGIME_FILE = (
+_FILE = (
     DATA_DIR
-    / "market_regime.csv"
+    / "market_.csv"
 )
 
-if REGIME_FILE.exists():
+if _FILE.exists():
 
-    regime_df = pd.read_csv(
-        REGIME_FILE
+    _df = pd.read_csv(
+        _FILE
     )
 
-    market_regime = str(
-        regime_df["REGIME"].iloc[0]
+    market_ = str(
+        _df["MARKET_"].iloc[0]
     ).upper()
 
 else:
 
-    market_regime = "SIDEWAYS"
+    market_ = "SIDEWAYS"
 
 print(
-    f"\n📊 Market Regime: {market_regime}"
+    f"\n📊 Market : {market_}"
 )
 
-if market_regime == "BULL":
+if market_ == "BULL":
 
     MAX_PORTFOLIO_SIZE = 30
 
-elif market_regime == "SIDEWAYS":
+elif market_ == "SIDEWAYS":
 
     MAX_PORTFOLIO_SIZE = 20
 
-elif market_regime == "BEAR":
+elif market_ == "BEAR":
 
     MAX_PORTFOLIO_SIZE = 10
 
