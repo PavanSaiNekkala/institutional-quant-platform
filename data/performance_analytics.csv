@@ -1,12 +1,12 @@
 Metric,Value
-Total Return,1.1582
-CAGR,2.5801
-Volatility,0.2517
-Sharpe Ratio,10.0105
-Sortino Ratio,19.1662
-Calmar Ratio,24.5929
+Total Return,1.1019
+CAGR,2.4546
+Volatility,0.251
+Sharpe Ratio,9.5399
+Sortino Ratio,18.2134
+Calmar Ratio,23.4069
 Max Drawdown,-0.1049
-Win Rate,63.16
+Win Rate,62.91
 Beta,
 Alpha,
 Information Ratio,
