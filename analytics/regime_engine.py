@@ -9,9 +9,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+DATA_DIR = ROOT / "data"
+
 OUTPUT_FILE = (
-    ROOT
-    / "data"
+    DATA_DIR
     / "market_regime.csv"
 )
 
@@ -20,12 +21,27 @@ BREADTH_FILE = (
     / "market_breadth.csv"
 )
 
-breadth = pd.read_csv(BREADTH_FILE)
+if BREADTH_FILE.exists():
 
-breadth_score = float(
-    breadth["BREADTH_SCORE"].iloc[0]
-)
+    breadth = pd.read_csv(
+        BREADTH_FILE
+    )
 
+    breadth_score = float(
+
+        breadth[
+            "BREADTH_SCORE"
+        ].iloc[0]
+
+    )
+
+else:
+
+    print(
+        "\n⚠ Breadth file not found"
+    )
+
+    breadth_score = 50
 # =========================================================
 # SETTINGS
 # =========================================================
@@ -330,40 +346,48 @@ latest = df.iloc[-1]
 
 market_score = 50
 
+# Breadth Contribution
+# 40% Weight
+
+market_score += (
+
+    breadth_score
+
+    - 50
+
+) * 0.40
+
 # Trend
 
 market_score += np.clip(
 
-    latest["TREND_STRENGTH"],
+    latest["TREND_STRENGTH"]
+    * 0.40,
 
-    -15,
-
-    15
-
+    -10,
+    10
 )
 
 # Momentum
 
 market_score += np.clip(
 
-    momentum_score / 2,
+    momentum_score
+    * 0.25,
 
-    -15,
-
-    15
-
+    -10,
+    10
 )
 
 # Volatility penalty
 
 market_score -= np.clip(
 
-    latest_vol * 100,
+    latest_vol
+    * 50,
 
     0,
-
-    20
-
+    10
 )
 
 # Drawdown penalty
@@ -488,6 +512,13 @@ regime_df = pd.DataFrame({
         vol_regime
     ],
 
+    "BREADTH_SCORE": [
+        round(
+            breadth_score,
+            2
+        )
+    ],
+
     "MOMENTUM_1M": [
         round(
             mom_1m,
@@ -579,6 +610,10 @@ print(
 
 print(
     f"Risk Regime   : {risk_regime}"
+)
+
+print(
+    f"Breadth Score : {round(breadth_score,2)}"
 )
 
 print(
