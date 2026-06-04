@@ -579,7 +579,7 @@ if page == "Dashboard":
     )
 
     st.dataframe(
-        top_df[display_cols],
+        top_df,
         use_container_width=True,
         hide_index=True
     )
