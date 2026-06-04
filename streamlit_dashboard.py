@@ -288,37 +288,40 @@ if page == "Dashboard":
     # MARKET REGIME BANNER
     # =====================================
 
-    if regime_df is not None and len(regime_df):
+    latest = regime_df.iloc[0]
 
-        latest = regime_df.iloc[0]
+    market_regime = latest.get(
+        "MARKET_REGIME",
+        "UNKNOWN"
+    )
 
-        market_regime = latest.get(
-            "MARKET_REGIME",
-            "UNKNOWN"
+    risk_regime = latest.get(
+        "RISK_REGIME",
+        "UNKNOWN"
+    )
+
+    market_score = latest.get(
+        "MARKET_SCORE",
+        0
+    )
+
+    breadth_score = float(
+
+        latest.get(
+            "BREADTH_SCORE",
+            50
         )
+    )
 
-        risk_regime = latest.get(
-            "RISK_REGIME",
-            "UNKNOWN"
-        )
+    vol_regime = latest.get(
+        "VOL_REGIME",
+        "UNKNOWN"
+    )
 
-        market_score = latest.get(
-            "MARKET_SCORE",
-            0
-        )
-
-        breadth_score = float(
-
-            latest.get(
-                "BREADTH_SCORE",
-                50
-            )
-        )
-
-        vol_regime = latest.get(
-            "VOL_REGIME",
-            "UNKNOWN"
-        )
+    vix_regime = latest.get(
+        "VIX_REGIME",
+        "UNKNOWN"
+    )
 
         # ---------------------------------
         # Regime Banner
@@ -414,7 +417,7 @@ if page == "Dashboard":
             "📊 Market Intelligence"
         )
     
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
 
@@ -435,6 +438,13 @@ if page == "Dashboard":
             st.info(
                 f"🌐 Breadth: "
                 f"{breadth_score:.1f}"
+            )
+
+        with col4:
+
+            st.info(
+                f"📊 VIX: "
+                f"{vix_regime}"
             )
 
         st.markdown("---")
