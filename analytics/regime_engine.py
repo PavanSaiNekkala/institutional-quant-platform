@@ -4,7 +4,7 @@ import yfinance as yf
 from pathlib import Path
 
 # =========================================================
-# FILES
+# PATHS
 # =========================================================
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -27,22 +27,36 @@ SLOW_MA = 200
 VOL_LOOKBACK = 20
 
 LOW_VOL_THRESHOLD = 0.15
-HIGH_VOL_THRESHOLD = 0.20
+HIGH_VOL_THRESHOLD = 0.25
+
+MOM_1M = 21
+MOM_3M = 63
+MOM_6M = 126
 
 # =========================================================
-# DOWNLOAD INDEX
+# DOWNLOAD DATA
 # =========================================================
 
 print("\n📡 Downloading NIFTY Data...")
 
-data = yf.download(
-    INDEX_SYMBOL,
-    period="3y",
-    auto_adjust=True,
-    progress=False
-)
+try:
+
+    data = yf.download(
+        INDEX_SYMBOL,
+        period="3y",
+        auto_adjust=True,
+        progress=False,
+        threads=False
+    )
+
+except Exception as e:
+
+    raise RuntimeError(
+        f"Failed downloading NIFTY data: {e}"
+    )
 
 if data.empty:
+
     raise ValueError(
         "Unable to download NIFTY data."
     )
@@ -51,9 +65,15 @@ if data.empty:
 # CLOSE SERIES
 # =========================================================
 
-if isinstance(data.columns, pd.MultiIndex):
+if isinstance(
+    data.columns,
+    pd.MultiIndex
+):
+
     close = data["Close"].iloc[:, 0]
+
 else:
+
     close = data["Close"]
 
 df = pd.DataFrame()
@@ -65,15 +85,23 @@ df["Close"] = close
 # =========================================================
 
 df["MA50"] = (
+
     df["Close"]
+
     .rolling(FAST_MA)
+
     .mean()
+
 )
 
 df["MA200"] = (
+
     df["Close"]
+
     .rolling(SLOW_MA)
+
     .mean()
+
 )
 
 # =========================================================
@@ -87,10 +115,15 @@ returns = df["Close"].pct_change()
 # =========================================================
 
 df["VOLATILITY"] = (
+
     returns
+
     .rolling(VOL_LOOKBACK)
+
     .std()
+
     * np.sqrt(252)
+
 )
 
 # =========================================================
@@ -98,164 +131,302 @@ df["VOLATILITY"] = (
 # =========================================================
 
 df["TREND_STRENGTH"] = (
+
     (
+
         df["MA50"]
+
         - df["MA200"]
+
     )
+
     /
+
     df["MA200"]
+
 ) * 100
 
 # =========================================================
-# REGIME CLASSIFICATION
+# MOMENTUM
 # =========================================================
 
-def classify(row):
+mom_1m = (
 
-    if pd.isna(row["MA200"]):
-        return "UNKNOWN"
+    close.iloc[-1]
 
-    trend = row["TREND_STRENGTH"]
+    /
 
-    high_vol = (
-        row["VOLATILITY"]
-        >= HIGH_VOL_THRESHOLD
+    close.iloc[-MOM_1M]
+
+    - 1
+
+) * 100
+
+mom_3m = (
+
+    close.iloc[-1]
+
+    /
+
+    close.iloc[-MOM_3M]
+
+    - 1
+
+) * 100
+
+mom_6m = (
+
+    close.iloc[-1]
+
+    /
+
+    close.iloc[-MOM_6M]
+
+    - 1
+
+) * 100
+
+momentum_score = (
+
+      mom_1m * 0.40
+
+    + mom_3m * 0.30
+
+    + mom_6m * 0.30
+
+)
+
+# =========================================================
+# DRAWDOWN
+# =========================================================
+
+rolling_high = (
+
+    close
+
+    .rolling(252)
+
+    .max()
+
+)
+
+drawdown = (
+
+    close
+
+    /
+
+    rolling_high
+
+    - 1
+
+) * 100
+
+current_drawdown = (
+
+    drawdown.iloc[-1]
+
+)
+
+# =========================================================
+# LIQUIDITY
+# =========================================================
+
+liquidity_ratio = np.nan
+
+liquidity_regime = "UNKNOWN"
+
+try:
+
+    if isinstance(
+        data.columns,
+        pd.MultiIndex
+    ):
+
+        volume = data["Volume"].iloc[:, 0]
+
+    else:
+
+        volume = data["Volume"]
+
+    avg_volume = (
+
+        volume
+
+        .rolling(20)
+
+        .mean()
+
     )
 
-    if high_vol:
-        return "HIGH_VOLATILITY"
+    liquidity_ratio = (
 
-    # Strong Bull
+        volume.iloc[-1]
 
-    if (
-        row["Close"] > row["MA50"]
-        and row["MA50"] > row["MA200"]
-        and trend > 5
-    ):
-        return "STRONG_BULL"
+        /
 
-    # Bull
+        avg_volume.iloc[-1]
 
-    if (
-        row["Close"] > row["MA50"]
-        and row["MA50"] > row["MA200"]
-    ):
-        return "BULL"
+    )
 
-    # Strong Bear
+    if liquidity_ratio > 1.20:
 
-    if (
-        row["Close"] < row["MA50"]
-        and row["MA50"] < row["MA200"]
-        and trend < -5
-    ):
-        return "STRONG_BEAR"
+        liquidity_regime = "HIGH"
 
-    # Bear
+    elif liquidity_ratio > 0.80:
 
-    if (
-        row["Close"] < row["MA50"]
-        and row["MA50"] < row["MA200"]
-    ):
-        return "BEAR"
+        liquidity_regime = "NORMAL"
 
-    return "SIDEWAYS"
+    else:
 
+        liquidity_regime = "LOW"
 
-df["MARKET_REGIME"] = df.apply(
-    classify,
-    axis=1
-)
+except:
+
+    liquidity_ratio = np.nan
+
+    liquidity_regime = "UNKNOWN"
 
 # =========================================================
-# VOLATILITY REGIME
+# VOL REGIME
 # =========================================================
 
-def vol_bucket(vol):
+latest_vol = (
 
-    if vol < LOW_VOL_THRESHOLD:
-        return "LOW_VOL"
-
-    elif vol < HIGH_VOL_THRESHOLD:
-        return "NORMAL_VOL"
-
-    return "HIGH_VOL"
-
-
-df["VOL_REGIME"] = (
     df["VOLATILITY"]
-    .apply(vol_bucket)
+
+    .iloc[-1]
+
 )
 
-# =========================================================
-# LATEST
-# =========================================================
+if latest_vol < LOW_VOL_THRESHOLD:
 
-latest = df.iloc[-1]
+    vol_regime = "LOW_VOL"
+
+elif latest_vol < HIGH_VOL_THRESHOLD:
+
+    vol_regime = "NORMAL_VOL"
+
+else:
+
+    vol_regime = "HIGH_VOL"
 
 # =========================================================
 # MARKET SCORE
 # =========================================================
 
-market_score = 0
+latest = df.iloc[-1]
 
-# Price vs MA50
+market_score = 50
+
+# Trend
 
 market_score += np.clip(
 
-    (
-        latest["Close"]
-        /
-        latest["MA50"]
-        - 1
-    ) * 100,
+    latest["TREND_STRENGTH"],
 
-    -20,
-    20
+    -15,
+
+    15
+
 )
 
-# MA50 vs MA200
+# Momentum
 
 market_score += np.clip(
 
-    (
-        latest["MA50"]
-        /
-        latest["MA200"]
-        - 1
-    ) * 100,
+    momentum_score / 2,
 
-    -20,
-    20
+    -15,
+
+    15
+
 )
 
 # Volatility penalty
 
-market_score -= (
-    latest["VOLATILITY"]
-    * 50
+market_score -= np.clip(
+
+    latest_vol * 100,
+
+    0,
+
+    20
+
 )
 
-market_score = round(
-    market_score,
-    2
+# Drawdown penalty
+
+market_score += np.clip(
+
+    current_drawdown / 2,
+
+    -15,
+
+    0
+
 )
+
+# Liquidity adjustment
+
+if liquidity_regime == "HIGH":
+
+    market_score += 5
+
+elif liquidity_regime == "LOW":
+
+    market_score -= 5
+
+market_score = max(
+    0,
+    min(
+        100,
+        round(
+            market_score,
+            2
+        )
+    )
+)
+
+# =========================================================
+# MARKET REGIME
+# =========================================================
+
+if market_score >= 80:
+
+    market_regime = "STRONG_BULL"
+
+elif market_score >= 60:
+
+    market_regime = "BULL"
+
+elif market_score >= 40:
+
+    market_regime = "SIDEWAYS"
+
+elif market_score >= 20:
+
+    market_regime = "BEAR"
+
+else:
+
+    market_regime = "STRONG_BEAR"
 
 # =========================================================
 # RISK REGIME
 # =========================================================
 
-if market_score > 10:
+if market_score >= 70:
 
     risk_regime = "RISK_ON"
 
-elif market_score < -10:
+elif market_score >= 40:
 
-    risk_regime = "RISK_OFF"
+    risk_regime = "NEUTRAL"
 
 else:
 
-    risk_regime = "NEUTRAL"
+    risk_regime = "RISK_OFF"
 
 # =========================================================
 # OUTPUT
@@ -288,7 +459,7 @@ regime_df = pd.DataFrame({
         )
     ],
 
-    "TREND_STRENGTH_%": [
+    "TREND_STRENGTH_PCT": [
         round(
             latest["TREND_STRENGTH"],
             2
@@ -297,26 +468,75 @@ regime_df = pd.DataFrame({
 
     "VOLATILITY": [
         round(
-            latest["VOLATILITY"],
+            latest_vol,
             4
         )
     ],
 
     "VOL_REGIME": [
-        latest["VOL_REGIME"]
+        vol_regime
     ],
 
-    "MARKET_REGIME": [
-        latest["MARKET_REGIME"]
+    "MOMENTUM_1M": [
+        round(
+            mom_1m,
+            2
+        )
+    ],
+
+    "MOMENTUM_3M": [
+        round(
+            mom_3m,
+            2
+        )
+    ],
+
+    "MOMENTUM_6M": [
+        round(
+            mom_6m,
+            2
+        )
+    ],
+
+    "MOMENTUM_SCORE": [
+        round(
+            momentum_score,
+            2
+        )
+    ],
+
+    "CURRENT_DRAWDOWN": [
+        round(
+            current_drawdown,
+            2
+        )
+    ],
+
+    "LIQUIDITY_RATIO": [
+        round(
+            liquidity_ratio,
+            2
+        )
+        if pd.notna(liquidity_ratio)
+        else np.nan
+    ],
+
+    "LIQUIDITY_REGIME": [
+        liquidity_regime
     ],
 
     "MARKET_SCORE": [
         market_score
     ],
 
+    "MARKET_REGIME": [
+        market_regime
+    ],
+
     "RISK_REGIME": [
         risk_regime
     ]
+
 })
 
 # =========================================================
@@ -332,24 +552,24 @@ regime_df.to_csv(
 # REPORT
 # =========================================================
 
-print("\n✅ Regime Detection Complete")
+print("\n✅ Market Regime Engine Complete")
 
-print("\n📁 Saved:")
+print(
+    f"\n📁 Saved:\n{OUTPUT_FILE}"
+)
 
-print(OUTPUT_FILE)
-
-print("\n🏆 Current Market Regime:\n")
+print("\n🏆 CURRENT REGIME\n")
 
 print(regime_df)
 
 print(
-    f"\nMarket State : {latest['MARKET_REGIME']}"
+    f"\nMarket Regime : {market_regime}"
 )
 
 print(
-    f"Risk Regime  : {risk_regime}"
+    f"Risk Regime   : {risk_regime}"
 )
 
 print(
-    f"Market Score : {market_score}"
+    f"Market Score  : {market_score}"
 )
