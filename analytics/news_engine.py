@@ -29,7 +29,7 @@ HISTORY_FILE = (
     / "news_history.parquet"
 )
 
-MAX_WORKERS = 40
+MAX_WORKERS = 20
 
 # =====================================================
 # LOAD STOCKS
@@ -48,7 +48,37 @@ stocks = (
     .unique()
     .tolist()
 )
+PORTFOLIO_FILE = (
+    ROOT
+    / "data"
+    / "optimised_portfolio.csv"
+)
 
+portfolio_symbols = []
+
+if PORTFOLIO_FILE.exists():
+
+    portfolio_df = pd.read_csv(
+        PORTFOLIO_FILE
+    )
+
+    portfolio_symbols = (
+
+        portfolio_df["Symbol"]
+
+        .astype(str)
+
+        .str.replace(
+            ".NS",
+            "",
+            regex=False
+        )
+
+        .str.upper()
+
+        .tolist()
+
+    )
 # =====================================================
 # SENTIMENT DICTIONARIES
 # =====================================================
@@ -232,6 +262,8 @@ def get_news_score(symbol):
 
         entries = feed.entries[:10]
 
+        news_count = len(entries)
+
         headline_hash = (
             generate_hash(entries)
         )
@@ -243,7 +275,8 @@ def get_news_score(symbol):
                 "NONE",
                 "LOW",
                 "GENERAL",
-                ""
+                "",
+                0
             )
         total_score = 0
 
@@ -299,7 +332,8 @@ def get_news_score(symbol):
             bias,
             impact,
             dominant_category,
-            headline_hash
+            headline_hash,
+            news_count
         )
 
     except Exception as e:
@@ -313,7 +347,8 @@ def get_news_score(symbol):
             "NONE",
             "LOW",
             "GENERAL",
-            ""
+            "",
+            0
         )
 
 if CACHE_FILE.exists():
@@ -330,6 +365,7 @@ else:
             "HEADLINE_HASH",
             "LAST_FETCH_TIME",
             "NEWS_SCORE",
+            "NEWS_COUNT",
             "NEWS_BIAS",
             "NEWS_IMPACT",
             "NEWS_CATEGORY"
@@ -360,6 +396,18 @@ for stock in stocks:
 
     cached = cache_lookup.get(stock)
 
+    clean_stock = (
+        stock
+        .replace(".NS", "")
+        .upper()
+    )
+
+    if clean_stock in portfolio_symbols:
+
+        fresh_stocks.append(stock)
+
+        continue
+
     if cached:
 
         age_hours = (
@@ -374,15 +422,29 @@ for stock in stocks:
 
         ).total_seconds() / 3600
 
-        if age_hours < 12:
+        if age_hours < 2:
 
             rows.append({
 
                 "Symbol": stock,
-                "NEWS_SCORE": cached["NEWS_SCORE"],
-                "NEWS_BIAS": cached["NEWS_BIAS"],
-                "NEWS_IMPACT": cached["NEWS_IMPACT"],
-                "NEWS_CATEGORY": cached["NEWS_CATEGORY"]
+
+                "NEWS_SCORE":
+                    cached["NEWS_SCORE"],
+
+                "NEWS_COUNT":
+                        cached.get(
+                            "NEWS_COUNT",
+                            10
+                        ),
+
+                "NEWS_BIAS":
+                    cached["NEWS_BIAS"],
+
+                "NEWS_IMPACT":
+                    cached["NEWS_IMPACT"],
+
+                "NEWS_CATEGORY":
+                    cached["NEWS_CATEGORY"]
 
             })
 
@@ -398,6 +460,12 @@ for stock in stocks:
 
                 "NEWS_SCORE":
                     cached["NEWS_SCORE"],
+
+                "NEWS_COUNT":
+                    cached.get(
+                        "NEWS_COUNT",
+                        10
+                    ),
 
                 "NEWS_BIAS":
                     cached["NEWS_BIAS"],
@@ -432,7 +500,7 @@ from concurrent.futures import (
 )
 
 with ThreadPoolExecutor(
-    max_workers=100
+    max_workers=MAX_WORKERS
 ) as executor:
 
     futures = {
@@ -470,7 +538,8 @@ with ThreadPoolExecutor(
                 "NONE",
                 "LOW",
                 "GENERAL",
-                ""
+                "",
+                0
             )
 
         results.append(
@@ -479,7 +548,7 @@ with ThreadPoolExecutor(
 
         completed += 1
 
-        if completed % 25 == 0:
+        if completed % 100 == 0:
 
             print(
                 f"Completed "
@@ -491,7 +560,7 @@ for idx, (stock, result) in enumerate(
     start=1
 ):
 
-    score, bias, impact, category, headline_hash = result
+    score, bias, impact, category, headline_hash, news_count = result
 
     cached = cache_lookup.get(stock)
 
@@ -536,6 +605,9 @@ for idx, (stock, result) in enumerate(
         "NEWS_SCORE":
             score,
 
+        "NEWS_COUNT":
+            news_count,
+
         "NEWS_BIAS":
             bias,
 
@@ -559,6 +631,7 @@ for idx, (stock, result) in enumerate(
     rows.append({
         "Symbol": stock,
         "NEWS_SCORE": score,
+        "NEWS_COUNT": news_count,
         "NEWS_BIAS": bias,
         "NEWS_IMPACT": impact,
         "NEWS_CATEGORY": category
@@ -582,16 +655,25 @@ df = pd.DataFrame(rows)
 
 df["NEWS_ALPHA"] = (
 
-    df["NEWS_SCORE"]
+      df["NEWS_SCORE"] * 8
 
-    .rank(
-        pct=True
+    + df["NEWS_COUNT"] * 2
+
+)
+
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+df["NEWS_ALPHA"] = (
+
+    scaler.fit_transform(
+        df[["NEWS_ALPHA"]]
     )
 
     * 100
 
 ).round(2)
-
 df = df.sort_values(
 
     "NEWS_ALPHA",
@@ -749,6 +831,30 @@ alert_df = df[
     !=
     "STABLE"
 ]
+
+output_cols = [
+
+    "Symbol",
+
+    "NEWS_SCORE",
+
+    "NEWS_COUNT",
+
+    "NEWS_BIAS",
+
+    "NEWS_IMPACT",
+
+    "NEWS_CATEGORY",
+
+    "NEWS_ALPHA",
+
+    "NEWS_DELTA",
+
+    "EVENT_SIGNAL"
+
+]
+
+df = df[output_cols]
 
 # =====================================================
 # REPORT
