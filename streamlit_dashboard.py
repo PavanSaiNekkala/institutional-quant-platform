@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -246,6 +247,7 @@ ALL_PAGES = [
 
 DEFAULT_PAGES = [
     "Dashboard",
+    "Market Regime",
     "Live Signals",
     "Expected Returns",
     "Execution Analytics",
@@ -288,28 +290,154 @@ if page == "Dashboard":
 
     if regime_df is not None and len(regime_df):
 
-        regime = regime_df.iloc[0].get(
+        latest = regime_df.iloc[0]
+
+        market_regime = latest.get(
             "MARKET_REGIME",
             "UNKNOWN"
         )
 
-        if regime.upper() == "BULL":
+        risk_regime = latest.get(
+            "RISK_REGIME",
+            "UNKNOWN"
+        )
+
+        market_score = latest.get(
+            "MARKET_SCORE",
+            0
+        )
+
+        breadth_score = float(
+
+            latest.get(
+                "BREADTH_SCORE",
+                50
+            )
+        )
+
+        vol_regime = latest.get(
+            "VOL_REGIME",
+            "UNKNOWN"
+        )
+
+        # ---------------------------------
+        # Regime Banner
+        # ---------------------------------
+
+        if risk_regime == "RISK_ON":
 
             st.success(
-                f"🟢 Current Market Regime: {regime}"
+                f"🟢 {market_regime} | "
+                f"Risk-On Environment"
             )
 
-        elif regime.upper() == "BEAR":
+        elif risk_regime == "RISK_OFF":
 
             st.error(
-                f"🔴 Current Market Regime: {regime}"
+                f"🔴 {market_regime} | "
+                f"Risk-Off Environment"
             )
 
         else:
 
             st.warning(
-                f"🟡 Current Market Regime: {regime}"
+                f"🟡 {market_regime} | "
+                f"Neutral Environment"
             )
+
+        # ---------------------------------
+        # Market Score Color
+        # ---------------------------------
+
+        if market_score >= 75:
+
+            score_color = "🟢"
+
+        elif market_score >= 60:
+
+            score_color = "🟢"
+
+        elif market_score >= 40:
+
+            score_color = "🟡"
+
+        elif market_score >= 20:
+
+            score_color = "🟠"
+
+        else:
+
+            score_color = "🔴"
+
+        st.markdown(
+            f"### {score_color} Market Score: "
+            f"{market_score:.1f}"
+        )
+
+        # ---------------------------------
+        # Metrics Row
+        # ---------------------------------
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+
+            st.metric(
+                "Market Score",
+                f"{market_score:.1f}"
+            )
+
+        with c2:
+
+            st.metric(
+                "Breadth Score",
+                f"{breadth_score:.1f}"
+            )
+
+        with c3:
+
+            st.metric(
+                "Risk Regime",
+                risk_regime
+            )
+
+        with c4:
+
+            st.metric(
+                "Volatility",
+                vol_regime
+            )
+
+        st.markdown("---")
+
+        st.subheader(
+            "📊 Market Intelligence"
+        )
+    
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+
+            st.info(
+                f"📈 Regime: "
+                f"{market_regime}"
+            )
+
+        with col2:
+
+            st.info(
+                f"⚠ Risk: "
+                f"{risk_regime}"
+            )
+
+        with col3:
+
+            st.info(
+                f"🌐 Breadth: "
+                f"{breadth_score:.1f}"
+            )
+
+        st.markdown("---")
 
     st.title(
         "🏦 Institutional Quant Dashboard"
@@ -440,17 +568,6 @@ if page == "Dashboard":
         .head(25)
     )
 
-    display_cols = [
-
-        "Symbol",
-
-        "Sector",
-
-        "MULTI_FACTOR_SCORE",
-
-        "Sharpe"
-    ]
-    
     st.dataframe(
         top_df,
         use_container_width=True,
