@@ -15,6 +15,17 @@ OUTPUT_FILE = (
     / "market_regime.csv"
 )
 
+BREADTH_FILE = (
+    DATA_DIR
+    / "market_breadth.csv"
+)
+
+breadth = pd.read_csv(BREADTH_FILE)
+
+breadth_score = float(
+    breadth["BREADTH_SCORE"].iloc[0]
+)
+
 # =========================================================
 # SETTINGS
 # =========================================================
