@@ -12,14 +12,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = ROOT / "data"
 
-REPORT_DIR = ROOT / "reports"
-
-REPORT_DIR.mkdir(
-    exist_ok=True
-)
-
 OUTPUT_FILE = (
-    REPORT_DIR
+    DATA_DIR
     / "monthly_factsheet.xlsx"
 )
 
@@ -53,7 +47,6 @@ def safe_load(file_name):
 
         return None
 
-
 # =========================================================
 # LOAD FILES
 # =========================================================
@@ -75,7 +68,7 @@ risk_df = safe_load(
 )
 
 factor_df = safe_load(
-    "factor_attribution.csv"
+    "performance_attribution.csv"
 )
 
 rebalance_df = safe_load(
@@ -101,7 +94,7 @@ cover = wb.active
 cover.title = "Factsheet"
 
 # =========================================================
-# COVER
+# COVER PAGE
 # =========================================================
 
 cover["A1"] = (
@@ -118,10 +111,6 @@ cover["A3"] = (
     f"{datetime.now():%Y-%m-%d %H:%M}"
 )
 
-# =========================================================
-# REGIME
-# =========================================================
-
 regime = "UNKNOWN"
 
 if (
@@ -136,6 +125,21 @@ if (
 
 cover["A5"] = (
     f"Current Regime: {regime}"
+)
+
+cover["A7"] = (
+    f"Portfolio Holdings: "
+    f"{len(portfolio_df) if portfolio_df is not None else 0}"
+)
+
+cover["A8"] = (
+    f"Risk Records: "
+    f"{len(risk_df) if risk_df is not None else 0}"
+)
+
+cover["A9"] = (
+    f"Rebalance Actions: "
+    f"{len(rebalance_df) if rebalance_df is not None else 0}"
 )
 
 # =========================================================
@@ -156,25 +160,32 @@ perf_sheet["A1"].font = Font(
 
 if stats_df is not None:
 
-    for r, row in enumerate(
-
-        stats_df.values,
-
-        start=3
-
+    for c, col in enumerate(
+        stats_df.columns,
+        start=1
     ):
 
         perf_sheet.cell(
-            r,
-            1,
-            row[0]
+            2,
+            c,
+            col
         )
 
-        perf_sheet.cell(
-            r,
-            2,
-            row[1]
-        )
+    for r, row in enumerate(
+        stats_df.values,
+        start=3
+    ):
+
+        for c, value in enumerate(
+            row,
+            start=1
+        ):
+
+            perf_sheet.cell(
+                r,
+                c,
+                value
+            )
 
 # =========================================================
 # PORTFOLIO
@@ -194,17 +205,32 @@ portfolio_sheet["A1"].font = Font(
 
 if portfolio_df is not None:
 
+    weight_col = None
+
+    if "OPTIMAL_WEIGHT" in portfolio_df.columns:
+
+        weight_col = "OPTIMAL_WEIGHT"
+
+    elif "FINAL_WEIGHT" in portfolio_df.columns:
+
+        weight_col = "FINAL_WEIGHT"
+
     cols = [
 
-        c for c in
-        [
+        c
+
+        for c in [
+
             "Symbol",
-            "FINAL_WEIGHT",
+            weight_col,
             "EXPECTED_RETURN_30D",
             "CONVICTION_SCORE"
+
         ]
 
-        if c in portfolio_df.columns
+        if c is not None
+        and c in portfolio_df.columns
+
     ]
 
     if cols:
@@ -258,6 +284,17 @@ risk_sheet["A1"].font = Font(
 
 if risk_df is not None:
 
+    for c, col in enumerate(
+        risk_df.columns,
+        start=1
+    ):
+
+        risk_sheet.cell(
+            2,
+            c,
+            col
+        )
+
     for r, row in enumerate(
         risk_df.values,
         start=3
@@ -292,6 +329,17 @@ factor_sheet["A1"].font = Font(
 
 if factor_df is not None:
 
+    for c, col in enumerate(
+        factor_df.columns,
+        start=1
+    ):
+
+        factor_sheet.cell(
+            2,
+            c,
+            col
+        )
+
     for r, row in enumerate(
         factor_df.values,
         start=3
@@ -324,17 +372,12 @@ rebalance_sheet["A1"].font = Font(
     bold=True
 )
 
+rebalance_sheet.freeze_panes = "A4"
+
 if rebalance_df is not None:
 
-    cols = [
-
-        c for c in
-        rebalance_df.columns
-
-    ]
-
     for c, col in enumerate(
-        cols,
+        rebalance_df.columns,
         start=1
     ):
 
@@ -376,12 +419,12 @@ stop_sheet["A1"].font = Font(
     bold=True
 )
 
+stop_sheet.freeze_panes = "A4"
+
 if stoploss_df is not None:
 
-    cols = stoploss_df.columns
-
     for c, col in enumerate(
-        cols,
+        stoploss_df.columns,
         start=1
     ):
 
@@ -428,8 +471,8 @@ for sheet in wb.worksheets:
         sheet.column_dimensions[
             col[0].column_letter
         ].width = min(
-            width + 4,
-            40
+            max(width + 4, 12),
+            60
         )
 
 # =========================================================

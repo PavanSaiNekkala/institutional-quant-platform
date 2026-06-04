@@ -1,11 +1,11 @@
 Metric,Value
-Portfolio Volatility,24.5
-Sharpe,4.7
-VaR95,-2.2
+Portfolio Volatility,24.69
+Sharpe,4.86
+VaR95,-2.19
 CVaR95,-2.58
 Current Drawdown,0.0
 Max Drawdown,-11.7
 Largest Position,12.14
 Top5 Exposure,52.46
 Top10 Exposure,89.83
-Health Score,87.52
+Health Score,87.33

@@ -139,20 +139,71 @@ PIPELINE = [
     },
 
     {
-        "script": "portfolio_monitor.py",
-        "requires": ["optimised_portfolio.csv"],
+        "script": "portfolio_monitor_engine.py",
+        "requires": [
+            "optimised_portfolio.csv",
+            "current_positions.csv"
+        ],
         "produces": [
-                "portfolio_alerts.csv",
-                "portfolio_risk_summary.csv",
-                "portfolio_risk_report.csv"
+            "portfolio_monitor.csv"
+        ],
+        "optional": True
+    },
+
+    {
+        "script": "portfolio_returns_engine.py",
+        "requires": [
+            "portfolio_monitor.csv"
+        ],
+        "produces": [
+            "portfolio_returns.csv"
+        ],
+        "optional": True
+    },
+
+    {
+    "script": "portfolio_monitor_engine.py",
+    "requires": [
+        "optimised_portfolio.csv",
+        "current_positions.csv"
+    ],
+    "produces": [
+        "portfolio_monitor.csv"
+    ],
+    "optional": True
+    },
+
+    {
+        "script": "portfolio_returns_engine.py",
+        "requires": [
+            "portfolio_monitor.csv"
+        ],
+        "produces": [
+            "portfolio_returns.csv"
+        ],
+        "optional": True
+    },
+
+    {
+        "script": "performance_analytics_engine.py",
+        "requires": [
+            "portfolio_returns.csv"
+        ],
+        "produces": [
+            "performance_analytics.csv"
         ],
         "optional": True
     },
 
     {
         "script": "monthly_factsheet_generator.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["monthly_factsheet.xlsx"],
+        "requires": [
+            "optimised_portfolio.csv",
+            "portfolio_risk_report.csv"
+        ],
+        "produces": [
+            "monthly_factsheet.xlsx"
+        ],
         "optional": True
     },
 

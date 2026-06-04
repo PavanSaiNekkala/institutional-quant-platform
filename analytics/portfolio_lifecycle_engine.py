@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
 
 # =========================================================
 # FILES
@@ -37,7 +36,11 @@ LIFECYCLE_FILE = (
     / "data"
     / "portfolio_lifecycle.csv"
 )
-
+EXIT_HISTORY_FILE = (
+    ROOT
+    / "data"
+    / "exit_history.csv"
+)
 # =========================================================
 # LOAD PORTFOLIO
 # =========================================================
@@ -56,69 +59,39 @@ portfolio["Symbol"] = (
 )
 
 # =========================================================
-# LOAD TRADE HISTORY
+# POSITION REGISTRY
 # =========================================================
 
-if Path(
-    TRADE_HISTORY_FILE
-).exists():
+POSITION_REGISTRY_FILE = (
+    ROOT
+    / "data"
+    / "position_registry.csv"
+)
 
-    trades = pd.read_csv(
-        TRADE_HISTORY_FILE
+if POSITION_REGISTRY_FILE.exists():
+
+    registry = pd.read_csv(
+        POSITION_REGISTRY_FILE
+    )
+
+    registry["Entry_Date"] = pd.to_datetime(
+        registry["Entry_Date"]
+    )
+
+    previous_symbols = set(
+        registry["Symbol"]
     )
 
 else:
 
-    trades = pd.DataFrame(
+    registry = pd.DataFrame(
         columns=[
-            "DATE",
             "Symbol",
-            "ACTION",
-            "PRICE"
+            "Entry_Date"
         ]
     )
-    
-print("\nTRADE HISTORY ROWS")
-print(len(trades))
 
-print("\nTRADE ACTIONS")
-print(
-    trades["ACTION"]
-    .value_counts(dropna=False)
-)
-print("\nTRADE SYMBOLS SAMPLE")
-print(
-    trades["Symbol"]
-    .head(20)
-)
-# =========================================================
-# CLEAN
-# =========================================================
-
-if not trades.empty:
-
-    trades["Symbol"] = (
-
-        trades["Symbol"]
-
-        .astype(str)
-
-        .str.replace(
-            ".NS",
-            "",
-            regex=False
-        )
-
-        .str.upper()
-
-        .str.strip()
-
-    )
-
-    trades["DATE"] = pd.to_datetime(
-        trades["DATE"],
-        errors="coerce"
-    )
+    previous_symbols = set()
 
 # =========================================================
 # CURRENT POSITIONS
@@ -127,52 +100,163 @@ if not trades.empty:
 current_symbols = set(
     portfolio["Symbol"]
 )
+exited_symbols = list(
 
+    previous_symbols
+
+    -
+
+    current_symbols
+
+)
 # =========================================================
-# ENTRY DATES
+# UPDATE REGISTRY
 # =========================================================
 
-if not trades.empty:
+existing_symbols = set(
+    registry["Symbol"]
+)
 
-    entries = trades[
+today = pd.Timestamp.today().normalize()
 
-        trades["ACTION"]
+for symbol in current_symbols:
 
-        .astype(str)
+    if symbol not in existing_symbols:
 
-        .str.upper()
+        registry.loc[
+            len(registry)
+        ] = [
 
-        .str.contains(
-            "BUY",
-            na=False
-        )
+            symbol,
 
-    ]
+            today
 
-else:
-
-    entries = pd.DataFrame()
-
-entry_dates = {}
-
-if not entries.empty:
-
-    entries = entries.sort_values(
-        "DATE"
-    )
-
-    for symbol in current_symbols:
-
-        subset = entries[
-            entries["Symbol"]
-            == symbol
         ]
 
-        if len(subset):
+# =========================================================
+# EXIT HISTORY
+# =========================================================
 
-            entry_dates[symbol] = (
-                subset.iloc[0]["DATE"]
-            )
+exit_rows = []
+
+for symbol in exited_symbols:
+
+    row = registry[
+        registry["Symbol"]
+        == symbol
+    ]
+
+    if len(row):
+
+        entry_date = row.iloc[0][
+            "Entry_Date"
+        ]
+
+        exit_date = pd.Timestamp.today()
+
+        holding_days = (
+            exit_date
+            - entry_date
+        ).days
+
+        exit_rows.append({
+
+            "Symbol":
+                symbol,
+
+            "Entry_Date":
+                entry_date,
+
+            "Exit_Date":
+                exit_date,
+
+            "Holding_Days":
+                holding_days
+
+        })
+
+if len(exit_rows):
+
+    exit_df = pd.DataFrame(
+        exit_rows
+    )
+
+    if Path(
+        EXIT_HISTORY_FILE
+    ).exists():
+
+        old_exit = pd.read_csv(
+            EXIT_HISTORY_FILE
+        )
+
+        exit_df = pd.concat(
+
+            [
+                old_exit,
+                exit_df
+            ],
+
+            ignore_index=True
+
+        )
+
+    exit_df.to_csv(
+
+        EXIT_HISTORY_FILE,
+
+        index=False
+
+    )
+registry.to_csv(
+    POSITION_REGISTRY_FILE,
+    index=False
+)
+print("\n📊 Registry Stats")
+
+print(
+    f"Tracked Positions: "
+    f"{len(registry)}"
+)
+
+print(
+    f"New Positions: "
+    f"{len(current_symbols - previous_symbols)}"
+)
+
+print(
+    f"Exited Positions: "
+    f"{len(exited_symbols)}"
+)
+
+entry_dates = dict(
+
+    zip(
+
+        registry["Symbol"],
+
+        registry["Entry_Date"]
+
+    )
+
+)
+
+registry = registry[
+
+    registry["Symbol"]
+
+    .isin(current_symbols)
+
+]
+exited_df = pd.DataFrame(
+    {
+        "Symbol":
+            exited_symbols,
+
+        "Status":
+            "EXITED"
+    }
+)
+
 
 # =========================================================
 # CURRENT POSITIONS TABLE
@@ -188,7 +272,7 @@ for _, row in portfolio.iterrows():
 
     entry_date = entry_dates.get(
         symbol,
-        pd.Nat
+        pd.NaT
     )
         
     if pd.notna(entry_date):
@@ -227,66 +311,6 @@ for _, row in portfolio.iterrows():
 
 current_df = pd.DataFrame(
     current_rows
-)
-
-# =========================================================
-# EXITED POSITIONS
-# =========================================================
-
-historical_symbols = set()
-
-if not trades.empty:
-
-    historical_symbols = set(
-        trades["Symbol"]
-    )
-
-exited_symbols = list(
-
-    historical_symbols
-
-    -
-
-    current_symbols
-
-)
-
-exit_rows = []
-
-for symbol in exited_symbols:
-
-    subset = trades[
-        trades["Symbol"]
-        == symbol
-    ]
-
-    last_trade = (
-
-        subset
-
-        .sort_values("DATE")
-
-        .iloc[-1]
-
-    )
-
-    exit_rows.append({
-
-        "Symbol":
-            symbol,
-
-        "Last_Trade_Date":
-            last_trade["DATE"],
-
-        "Last_Action":
-            last_trade["ACTION"],
-
-        "Status":
-            "EXITED"
-    })
-
-exited_df = pd.DataFrame(
-    exit_rows
 )
 
 # =========================================================
@@ -376,7 +400,9 @@ print(
 print(
     LIFECYCLE_FILE
 )
-
+print(
+    EXIT_HISTORY_FILE
+)
 print(
     f"\n📊 Active Positions: "
     f"{len(current_df)}"
