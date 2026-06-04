@@ -520,22 +520,52 @@ elif page == "Market Regime":
         # REGIME INTERPRETATION
         # -----------------------------------------
 
-        if score >= 2:
+        risk_regime = regime_df.iloc[0].get(
+            "RISK_REGIME",
+            "UNKNOWN"
+        )
+
+        if regime in [
+
+            "STRONG_BULL",
+            "BULL"
+
+        ]:
 
             st.success(
-                "Bullish Regime Detected"
+                f"🟢 {regime} Regime Detected"
             )
 
-        elif score <= -2:
+        elif regime == "SIDEWAYS":
 
-            st.error(
-                "Bearish Regime Detected"
+            st.warning(
+                f"🟡 {regime} Regime Detected"
             )
 
         else:
 
+            st.error(
+                f"🔴 {regime} Regime Detected"
+            )
+
+        st.divider()
+
+        if risk_regime == "RISK_ON":
+
+            st.success(
+                "🟢 Risk-On Environment"
+            )
+
+        elif risk_regime == "NEUTRAL":
+
             st.warning(
-                "Neutral Market Regime"
+                "🟡 Neutral Environment"
+            )
+
+        else:
+
+            st.error(
+                "🔴 Risk-Off Environment"
             )
 
 # =========================================================
