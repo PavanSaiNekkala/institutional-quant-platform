@@ -1,83 +1,79 @@
 name: Full Institutional Pipeline
 
 on:
+  workflow_dispatch:
 
-workflow_dispatch:
+  schedule:
+    # 05:00 IST
+    - cron: '30 23 * * 0-4'
 
-schedule:
+    # 21:00 IST
+    - cron: '30 15 * * 1-5'
 
-```
-# 05:00 IST
-- cron: '30 23 * * 0-4'
-
-# 21:00 IST
-- cron: '30 15 * * 1-5'
-
-# 01:00 IST
-- cron: '30 19 * * 0-4'
-```
+    # 01:00 IST
+    - cron: '30 19 * * 0-4'
 
 permissions:
-contents: write
+  contents: write
+
+concurrency:
+  group: institutional-pipeline
+  cancel-in-progress: false
 
 jobs:
+  full-pipeline:
 
-full-pipeline:
+    runs-on: ubuntu-latest
 
-```
-runs-on: ubuntu-latest
+    timeout-minutes: 360
 
-timeout-minutes: 360
+    steps:
 
-steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  - name: Checkout Repository
-    uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Setup Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: "3.11"
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
 
-  - name: Install Dependencies
-    run: |
-      python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
 
-      if [ -f requirements.txt ]; then
-        pip install -r requirements.txt
-      fi
+      - name: Run Full Institutional Pipeline
+        run: |
+          python run_full_pipeline.py
 
-  - name: Run Full Institutional Pipeline
-    run: |
-      python run_full_pipeline.py
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: institutional-results
+          path: |
+            data/*.csv
+            data/*.xlsx
+            data/*.parquet
 
-  - name: Upload Artifacts
-    uses: actions/upload-artifact@v4
-    with:
-      name: institutional-results
-      path: |
-        data/*.csv
-        data/*.xlsx
-        data/*.parquet
+      - name: Commit Results
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
 
-  - name: Commit Results
-    run: |
+          git add data/
 
-      git config --global user.name "github-actions"
-      git config --global user.email "actions@github.com"
+          if git diff --cached --quiet; then
+            echo "No changes detected"
+            exit 0
+          fi
 
-      git add data/
+          git pull --rebase origin main
 
-      if git diff --cached --quiet; then
-        echo "No changes detected"
-        exit 0
-      fi
+          git commit -m "Automated Institutional Pipeline Update"
 
-      git commit -m "Automated Institutional Pipeline Update"
-
-      git pull --rebase origin main
-
-      git push origin HEAD:main
-```
+          git push origin HEAD:main
