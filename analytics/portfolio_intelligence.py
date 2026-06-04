@@ -38,7 +38,7 @@ SECTOR_FILE = (
 REGIME_FILE = (
     ROOT_DIR
     / "data"
-    / "market_regime_v2.csv"
+    / "market_regime.csv"
 )
 
 OUTPUT_FILE = (
