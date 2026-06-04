@@ -162,7 +162,7 @@ def classify(row):
     return "SIDEWAYS"
 
 
-df["REGIME"] = df.apply(
+df["MARKET_REGIME"] = df.apply(
     classify,
     axis=1
 )
@@ -306,8 +306,8 @@ regime_df = pd.DataFrame({
         latest["VOL_REGIME"]
     ],
 
-    "REGIME": [
-        latest["REGIME"]
+    "MARKET_REGIME": [
+        latest["MARKET_REGIME"]
     ],
 
     "MARKET_SCORE": [
@@ -343,7 +343,7 @@ print("\n🏆 Current Market Regime:\n")
 print(regime_df)
 
 print(
-    f"\nMarket State : {latest['REGIME']}"
+    f"\nMarket State : {latest['MARKET_REGIME']}"
 )
 
 print(
