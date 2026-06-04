@@ -449,9 +449,9 @@ if page == "Dashboard":
 
     st.markdown("---")
 
-st.title(
-    "🏦 Institutional Quant Dashboard"
- )
+    st.title(
+        "🏦 Institutional Quant Dashboard"
+     )
 
     # -----------------------------------------------------
     # INSTITUTIONAL KPI CARDS
