@@ -26,11 +26,11 @@ DATA_DIR = ROOT_DIR / "data"
 PIPELINE = [
 
     {
-        "script": "regime_engine.py",
+        "script": "news_engine.py",
         "requires": [],
-        "produces": ["market_regime.csv"]
+        "produces": ["news_rankings.csv"]
     },
-
+    
     {
         "script": "factor_model.py",
         "requires": [],
@@ -38,21 +38,33 @@ PIPELINE = [
     },
 
     {
-        "script": "news_engine.py",
+        "script": "entry_quality_engine.py",
         "requires": [],
-        "produces": ["news_rankings.csv"]
+        "produces": ["entry_quality_scores.csv"]
     },
 
+    {
+        "script": "market_breadth_engine.py",
+        "requires": [
+            "factor_model_rankings.csv"
+        ],
+        "produces": [
+            "market_breadth.csv"
+        ]
+    },
+
+    {
+        "script": "regime_engine.py",
+        "requires": [
+            "market_breadth.csv"
+        ],
+        "produces": ["market_regime.csv"]
+    },
+    
     {
         "script": "expected_return_engine.py",
         "requires": ["factor_model_rankings.csv"],
         "produces": ["expected_returns.csv"]
-    },
-
-    {
-        "script": "entry_quality_engine.py",
-        "requires": [],
-        "produces": ["entry_quality_scores.csv"]
     },
 
     {
@@ -162,29 +174,6 @@ PIPELINE = [
     },
 
     {
-    "script": "portfolio_monitor_engine.py",
-    "requires": [
-        "optimised_portfolio.csv",
-        "current_positions.csv"
-    ],
-    "produces": [
-        "portfolio_monitor.csv"
-    ],
-    "optional": True
-    },
-
-    {
-        "script": "portfolio_returns_engine.py",
-        "requires": [
-            "portfolio_monitor.csv"
-        ],
-        "produces": [
-            "portfolio_returns.csv"
-        ],
-        "optional": True
-    },
-
-    {
         "script": "performance_analytics_engine.py",
         "requires": [
             "portfolio_returns.csv"
@@ -257,18 +246,7 @@ PIPELINE = [
         "optional": True
     },
 
-    {
-        "script": "performance_analytics_engine.py",
-        "requires": [
-            "portfolio_returns.csv"
-        ],
-        "produces": [
-            "performance_analytics.csv"
-        ],
-        "optional": True
-    }
-]
-
+    
 from datetime import datetime
 
 # =========================================================
