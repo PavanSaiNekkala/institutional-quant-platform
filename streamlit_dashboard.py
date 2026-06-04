@@ -323,30 +323,30 @@ if page == "Dashboard":
         "UNKNOWN"
     )
 
-        # ---------------------------------
-        # Regime Banner
-        # ---------------------------------
+    # ---------------------------------
+    # Regime Banner
+    # ---------------------------------
 
-        if risk_regime == "RISK_ON":
+    if risk_regime == "RISK_ON":
 
-            st.success(
-                f"🟢 {market_regime} | "
-                f"Risk-On Environment"
-            )
+        st.success(
+            f"🟢 {market_regime} | "
+            f"Risk-On Environment"
+        )
 
-        elif risk_regime == "RISK_OFF":
+    elif risk_regime == "RISK_OFF":
 
-            st.error(
-                f"🔴 {market_regime} | "
-                f"Risk-Off Environment"
-            )
+        st.error(
+            f"🔴 {market_regime} | "
+            f"Risk-Off Environment"
+        )
 
-        else:
+    else:
 
-            st.warning(
-                f"🟡 {market_regime} | "
-                f"Neutral Environment"
-            )
+        st.warning(
+            f"🟡 {market_regime} | "
+            f"Neutral Environment"
+         )
 
         # ---------------------------------
         # Market Score Color
