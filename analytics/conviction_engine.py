@@ -384,25 +384,37 @@ df["ENTRY_NORM"] = (
     entry_max
 )
 
-return_range = (
+return_min = (
     df["EXPECTED_RETURN_30D"]
-    - df["EXPECTED_RETURN_30D"].min()
+    .min()
 )
 
-return_max = max(
-    return_range.max(),
-    1
+return_max = (
+    df["EXPECTED_RETURN_30D"]
+    .max()
 )
 
-df["RETURN_NORM"] = (
+if return_max == return_min:
 
-    return_range
+    df["RETURN_NORM"] = 0.5
 
-    /
+else:
 
-    return_max
+    df["RETURN_NORM"] = (
 
-)
+        (
+            df["EXPECTED_RETURN_30D"]
+            - return_min
+        )
+
+        /
+
+        (
+            return_max
+            - return_min
+        )
+
+    )
 
 df["NEWS_NORM"] = (
     df["NEWS_ALPHA"]
