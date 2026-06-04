@@ -433,7 +433,7 @@ if page == "Dashboard":
             f"{risk_regime}"
          )
 
-     with col3:
+    with col3:
 
           st.info(
               f"🌐 Breadth: "
