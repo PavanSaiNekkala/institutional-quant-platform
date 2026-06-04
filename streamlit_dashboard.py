@@ -61,7 +61,7 @@ rl_df = load_csv(
 )
 
 regime_df = load_csv(
-    "market_regime_v2.csv"
+    "market_regime.csv"
 )
 
 execution_df = load_csv(
@@ -101,7 +101,7 @@ required_files = {
     "portfolio_risk_summary.csv": risk_summary,
     "meta_strategy_portfolio.csv": meta_df,
     "reinforcement_portfolio.csv": rl_df,
-    "market_regime_v2.csv": regime_df,
+    "market_regime.csv": regime_df,
     "execution_simulation.csv": execution_df,
     "ml_alpha_predictions.csv": ml_df 
 }
@@ -479,7 +479,7 @@ elif page == "Market Regime":
     if regime_df is None or len(regime_df) == 0:
 
         st.error(
-            "market_regime_v2.csv not found or empty"
+            "market_regime.csv not found or empty"
         )
 
     else:
