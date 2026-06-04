@@ -38,11 +38,6 @@ portfolio_df = pd.read_csv(
 
 df = portfolio_df.copy()
 
-print("\nPORTFOLIO COLUMNS")
-
-print(
-    df.columns.tolist()
-)
 # =========================================================
 # FILL MISSING
 # =========================================================
