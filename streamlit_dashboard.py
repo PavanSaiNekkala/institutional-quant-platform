@@ -348,110 +348,110 @@ if page == "Dashboard":
             f"Neutral Environment"
          )
 
-        # ---------------------------------
-        # Market Score Color
-        # ---------------------------------
+    # ---------------------------------
+    # Market Score Color
+    # ---------------------------------
 
-        if market_score >= 75:
+    if market_score >= 75:
 
-            score_color = "🟢"
+        score_color = "🟢"
 
-        elif market_score >= 60:
+    elif market_score >= 60:
 
-            score_color = "🟢"
+        score_color = "🟢"
 
-        elif market_score >= 40:
+    elif market_score >= 40:
 
-            score_color = "🟡"
+        score_color = "🟡"
 
-        elif market_score >= 20:
+    elif market_score >= 20:
 
-            score_color = "🟠"
+        score_color = "🟠"
 
-        else:
+    else:
 
-            score_color = "🔴"
+        score_color = "🔴"
 
-        st.markdown(
-            f"### {score_color} Market Score: "
-            f"{market_score:.1f}"
-        )
-
-        # ---------------------------------
-        # Metrics Row
-        # ---------------------------------
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        with c1:
-
-            st.metric(
-                "Market Score",
-                f"{market_score:.1f}"
-            )
-
-        with c2:
-
-            st.metric(
-                "Breadth Score",
-                f"{breadth_score:.1f}"
-            )
-
-        with c3:
-
-            st.metric(
-                "Risk Regime",
-                risk_regime
-            )
-
-        with c4:
-
-            st.metric(
-                "Volatility",
-                vol_regime
-            )
-
-        st.markdown("---")
-
-        st.subheader(
-            "📊 Market Intelligence"
-        )
-    
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-
-            st.info(
-                f"📈 Regime: "
-                f"{market_regime}"
-            )
-
-        with col2:
-
-            st.info(
-                f"⚠ Risk: "
-                f"{risk_regime}"
-            )
-
-        with col3:
-
-            st.info(
-                f"🌐 Breadth: "
-                f"{breadth_score:.1f}"
-            )
-
-        with col4:
-
-            st.info(
-                f"📊 VIX: "
-                f"{vix_regime}"
-            )
-
-        st.markdown("---")
-
-    st.title(
-        "🏦 Institutional Quant Dashboard"
+    st.markdown(
+        f"### {score_color} Market Score: "
+        f"{market_score:.1f}"
     )
+
+    # ---------------------------------
+    # Metrics Row
+    # ---------------------------------
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+
+        st.metric(
+            "Market Score",
+            f"{market_score:.1f}"
+         )
+
+    with c2:
+
+        st.metric(
+            "Breadth Score",
+             f"{breadth_score:.1f}"
+         )
+
+    with c3:
+
+        st.metric(
+             "Risk Regime",
+             risk_regime
+        )
+
+    with c4:
+
+        st.metric(
+            "Volatility",
+              vol_regime
+         )
+
+    st.markdown("---")
+
+    st.subheader(
+        "📊 Market Intelligence"
+    )
+    
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+
+        st.info(
+            f"📈 Regime: "
+            f"{market_regime}"
+         )
+
+    with col2:
+
+          st.info(
+             f"⚠ Risk: "
+            f"{risk_regime}"
+         )
+
+     with col3:
+
+          st.info(
+              f"🌐 Breadth: "
+              f"{breadth_score:.1f}"
+         )
+
+    with col4:
+
+        st.info(
+            f"📊 VIX: "
+             f"{vix_regime}"
+         )
+
+    st.markdown("---")
+
+st.title(
+    "🏦 Institutional Quant Dashboard"
+ )
 
     # -----------------------------------------------------
     # INSTITUTIONAL KPI CARDS
@@ -579,7 +579,7 @@ if page == "Dashboard":
     )
 
     st.dataframe(
-        top_df,
+        top_df[display_cols],
         use_container_width=True,
         hide_index=True
     )
