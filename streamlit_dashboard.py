@@ -429,7 +429,7 @@ if page == "Dashboard":
     with col2:
 
           st.info(
-             f"⚠ Risk: "
+            f"⚠ Risk: "
             f"{risk_regime}"
          )
 
@@ -444,7 +444,7 @@ if page == "Dashboard":
 
         st.info(
             f"📊 VIX: "
-             f"{vix_regime}"
+            f"{vix_regime}"
          )
 
     st.markdown("---")
