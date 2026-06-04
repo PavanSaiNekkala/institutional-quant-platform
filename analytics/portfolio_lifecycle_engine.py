@@ -77,7 +77,20 @@ else:
             "PRICE"
         ]
     )
+    
+print("\nTRADE HISTORY ROWS")
+print(len(trades))
 
+print("\nTRADE ACTIONS")
+print(
+    trades["ACTION"]
+    .value_counts(dropna=False)
+)
+print("\nTRADE SYMBOLS SAMPLE")
+print(
+    trades["Symbol"]
+    .head(20)
+)
 # =========================================================
 # CLEAN
 # =========================================================
@@ -85,10 +98,21 @@ else:
 if not trades.empty:
 
     trades["Symbol"] = (
+
         trades["Symbol"]
+
         .astype(str)
+
+        .str.replace(
+            ".NS",
+            "",
+            regex=False
+        )
+
         .str.upper()
+
         .str.strip()
+
     )
 
     trades["DATE"] = pd.to_datetime(
@@ -108,11 +132,26 @@ current_symbols = set(
 # ENTRY DATES
 # =========================================================
 
-entries = trades[
-    trades["ACTION"]
-    .str.upper()
-    .eq("BUY")
-] if not trades.empty else pd.DataFrame()
+if not trades.empty:
+
+    entries = trades[
+
+        trades["ACTION"]
+
+        .astype(str)
+
+        .str.upper()
+
+        .str.contains(
+            "BUY",
+            na=False
+        )
+
+    ]
+
+else:
+
+    entries = pd.DataFrame()
 
 entry_dates = {}
 
@@ -149,9 +188,9 @@ for _, row in portfolio.iterrows():
 
     entry_date = entry_dates.get(
         symbol,
-        pd.NaT
+        pd.Nat
     )
-
+        
     if pd.notna(entry_date):
 
         holding_days = (
