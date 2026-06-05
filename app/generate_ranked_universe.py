@@ -15,7 +15,7 @@ import yfinance as yf
 
 universe = pd.read_excel(
 
-    "valid_stocks.xlsx"
+    "updated_stocks.xlsx"
 )
 
 symbols = (
