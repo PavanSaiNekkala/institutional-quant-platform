@@ -11,7 +11,7 @@ from concurrent.futures import (
 # CONFIG
 # =====================================================
 
-INPUT_FILE = "data/valid_stocks.xlsx"
+INPUT_FILE = "data/updated_stocks.xlsx"
 OUTPUT_FILE = "data/stock_metadata.csv"
 
 MAX_WORKERS = 3
