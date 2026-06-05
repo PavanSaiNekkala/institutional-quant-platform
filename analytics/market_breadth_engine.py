@@ -37,6 +37,15 @@ universe = pd.read_csv(
     INPUT_FILE
 )
 
+universe = (
+    universe
+    .sort_values(
+        "MULTI_FACTOR_SCORE",
+        ascending=False
+    )
+    .head(2500)
+)
+
 # =========================================================
 # SYMBOL COLUMN
 # =========================================================
@@ -82,16 +91,15 @@ symbols = [
     if isinstance(s, str)
 ]
 
-print(
-    f"\n📊 Universe Size: {len(symbols)}"
-)
 
 if len(symbols) == 0:
 
     raise ValueError(
         "No valid symbols found."
     )
-
+print(
+    f"\n📊 Stocks Selected: {len(symbols)}"
+)
 # =========================================================
 # DOWNLOAD
 # =========================================================
@@ -100,74 +108,119 @@ print(
     "\n📡 Downloading Market Breadth Data..."
 )
 
-try:
+all_closes = []
 
-    prices = yf.download(
+BATCH_SIZE = 100
 
-        tickers=symbols,
+for i in range(
+    0,
+    len(symbols),
+    BATCH_SIZE
+):
 
-        period="1y",
+    batch = symbols[
+        i:i+BATCH_SIZE
+    ]
 
-        auto_adjust=True,
-
-        progress=False,
-
-        threads=True,
-
-        group_by="ticker"
-
+    print(
+        f"Downloading batch "
+        f"{i+1} "
+        f"to "
+        f"{min(i+BATCH_SIZE,len(symbols))}"
     )
-
-except Exception as e:
-
-    raise RuntimeError(
-        f"Yahoo download failed: {e}"
-    )
-
-if prices.empty:
-
-    raise ValueError(
-        "No market data downloaded."
-    )
-
-# =========================================================
-# EXTRACT CLOSES
-# =========================================================
-
-close_frames = []
-
-for symbol in symbols:
 
     try:
 
-        if symbol not in prices.columns.levels[0]:
-
-            continue
-
-        close = prices[
-            symbol
-        ]["Close"]
-
-        close.name = symbol
-
-        close_frames.append(
-            close
+        data = yf.download(
+            batch,
+            period="1y",
+            auto_adjust=True,
+            progress=False,
+            threads=False,
+            group_by="ticker"
         )
 
-    except:
+        if data.empty:
+            continue
 
-        continue
+        close_frames = []
 
-if len(close_frames) == 0:
+        for symbol in batch:
+
+            try:
+
+                close = (
+                    data[symbol]["Close"]
+                )
+
+                close.name = symbol
+
+                close_frames.append(
+                    close
+                )
+
+            except:
+                pass
+
+        if close_frames:
+
+            all_closes.append(
+
+                pd.concat(
+                    close_frames,
+                    axis=1
+                )
+
+            )
+
+    except Exception as e:
+
+        print(e)
+
+
+if len(all_closes) == 0:
 
     raise ValueError(
-        "No valid close series found."
+        "No price data downloaded."
     )
 
 close_df = pd.concat(
-    close_frames,
+    all_closes,
     axis=1
 )
+
+close_df = close_df.ffill()
+
+valid_history = (
+
+    close_df
+
+    .count()
+
+    >=
+
+    200
+
+)
+
+close_df = close_df.loc[
+    :,
+    valid_history
+]
+
+print(
+    f"\nStocks with 200d history: "
+    f"{close_df.shape[1]}"
+)
+
+print("\nClose DF Shape:")
+print(close_df.shape)
+
+print("\nColumns:")
+print(close_df.columns[:10])
+
+print("\nLast Rows:")
+print(close_df.tail())
 
 # =========================================================
 # MOVING AVERAGES
@@ -181,84 +234,156 @@ ma50 = (
 
 ma200 = (
     close_df
-    .rolling(200)
+    .rolling(
+        200,
+        min_periods=100
+    )
     .mean()
 )
 
+print("\nMA50 Shape:")
+print(ma50.shape)
+
+print("\nMA200 Shape:")
+print(ma200.shape)
+
+print("\nLatest MA200:")
+print(ma200.iloc[-1].head(20))
 # =========================================================
 # LATEST VALUES
 # =========================================================
 
 latest_close = close_df.iloc[-1]
 
+if len(close_df) < 252:
+
+    raise ValueError(
+        "Insufficient history for breadth calculations."
+    )
+
+previous_close = close_df.iloc[-2]
+
+advancers = (
+    latest_close
+    >
+    previous_close
+).sum()
+
+decliners = (
+    latest_close
+    <
+    previous_close
+).sum()
+
+ad_ratio = (
+    advancers
+    /
+    max(
+        advancers + decliners,
+        1
+    )
+) * 100
+
 latest_ma50 = ma50.iloc[-1]
 
 latest_ma200 = ma200.iloc[-1]
+
+
+# =========================================================
+# 52 WEEK HIGH PARTICIPATION
+# =========================================================
+
+high_52w = (
+
+    close_df
+
+    .rolling(252)
+
+    .max()
+
+)
+
+valid_highs = (
+    latest_close.notna()
+    &
+    high_52w.iloc[-1].notna()
+)
+
+pct_new_highs = (
+    (
+        latest_close[valid_highs]
+        >=
+        high_52w.iloc[-1][valid_highs]
+    ).sum()
+    /
+    max(valid_highs.sum(), 1)
+) * 100
 
 # =========================================================
 # BREADTH 50DMA
 # =========================================================
 
-above_50 = (
+valid_50 = (
+    latest_close.notna()
+    &
+    latest_ma50.notna()
+)
 
-    latest_close
-
-    >
-
-    latest_ma50
-
-).sum()
+valid_200 = (
+    latest_close.notna()
+    &
+    latest_ma200.notna()
+)
 
 pct_above_50 = (
-
-    above_50
-
+    (
+        latest_close[valid_50]
+        >
+        latest_ma50[valid_50]
+    ).sum()
     /
-
-    len(latest_close)
-
+    max(valid_50.sum(), 1)
 ) * 100
 
-# =========================================================
-# BREADTH 200DMA
-# =========================================================
-
-above_200 = (
-
-    latest_close
-
-    >
-
-    latest_ma200
-
-).sum()
-
 pct_above_200 = (
-
-    above_200
-
+    (
+        latest_close[valid_200]
+        >
+        latest_ma200[valid_200]
+    ).sum()
     /
-
-    len(latest_close)
-
+    max(valid_200.sum(), 1)
 ) * 100
 
 # =========================================================
 # BREADTH SCORE
 # =========================================================
 
+ad_score = ad_ratio
+
 breadth_score = (
 
-      pct_above_50 * 0.40
+      pct_above_200 * 0.40
 
-    + pct_above_200 * 0.60
+    + pct_above_50 * 0.30
+
+    + ad_score * 0.20
+
+    + pct_new_highs * 0.10
 
 )
 
 breadth_score = round(
-    breadth_score,
+    min(
+        100,
+        max(
+            0,
+            breadth_score
+        )
+    ),
     2
 )
+
 
 # =========================================================
 # REGIME
@@ -300,6 +425,20 @@ output = pd.DataFrame({
         )
     ],
 
+    "ADVANCE_PERCENTAGE": [
+        round(
+            ad_ratio,
+            2
+        )
+    ],
+
+    "PCT_NEW_52W_HIGHS": [
+        round(
+            pct_new_highs,
+            2
+        )
+    ],
+
     "BREADTH_SCORE": [
         breadth_score
     ],
@@ -309,7 +448,9 @@ output = pd.DataFrame({
     ],
 
     "STOCKS_ANALYSED": [
-        len(latest_close)
+        int(
+            valid_200.sum()
+        )
     ]
 
 })
@@ -347,6 +488,18 @@ print(
 
 print(
     f"Above 200DMA: {pct_above_200:.2f}%"
+)
+
+print(
+    f"Advance %      : {ad_ratio:.2f}"
+)
+
+print(
+    f"52W Highs %   : {pct_new_highs:.2f}%"
+)
+
+print(
+    f"Stocks Used   : {int(valid_200.sum())}"
 )
 
 print(

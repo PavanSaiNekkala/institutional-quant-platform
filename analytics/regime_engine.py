@@ -22,23 +22,14 @@ BREADTH_FILE = (
     / "market_breadth.csv"
 )
 
-breadth_score = 50
+breadth = pd.read_csv(
+    BREADTH_FILE
+)
 
-if BREADTH_FILE.exists():
+breadth_score = float(
+    breadth["BREADTH_SCORE"].iloc[0]
+)
 
-    breadth = pd.read_csv(
-        BREADTH_FILE
-    )
-
-    if (
-        "BREADTH_SCORE"
-        in breadth.columns
-        and len(breadth)
-    ):
-
-        breadth_score = float(
-            breadth["BREADTH_SCORE"].iloc[0]
-        )
 # =========================================================
 # SETTINGS
 # =========================================================
@@ -341,98 +332,136 @@ else:
 
 latest = df.iloc[-1]
 
-market_score = 50
+# -----------------------------------------
+# TREND COMPONENT (40%)
+# -----------------------------------------
 
-# Breadth Contribution
-# 40% Weight
+trend_component = np.clip(
 
-market_score += (
+    latest["TREND_STRENGTH"] * 2,
+
+    -40,
+
+    40
+
+)
+
+# -----------------------------------------
+# BREADTH COMPONENT (25%)
+# -----------------------------------------
+
+breadth_component = (
 
     breadth_score
 
-    - 50
+    * 0.25
 
-) * 0.40
-
-# Trend
-
-market_score += np.clip(
-
-    latest["TREND_STRENGTH"]
-    * 0.40,
-
-    -10,
-    10
 )
 
-# Momentum
+# -----------------------------------------
+# MOMENTUM COMPONENT (20%)
+# -----------------------------------------
 
-market_score += np.clip(
+momentum_component = np.clip(
 
-    momentum_score
-    * 0.25,
+    momentum_score,
 
-    -10,
-    10
+    -20,
+
+    20
+
 )
 
-# Volatility penalty
+# -----------------------------------------
+# VOLATILITY COMPONENT (15%)
+# -----------------------------------------
 
-market_score -= np.clip(
-
-    latest_vol
-    * 50,
+vol_component = max(
 
     0,
-    10
-)
 
-# Drawdown penalty
+    15
 
-market_score += np.clip(
+    -
 
-    current_drawdown / 2,
-
-    -15,
-
-    0
+    latest_vol * 50
 
 )
 
-# Liquidity adjustment
+# -----------------------------------------
+# LIQUIDITY BONUS
+# -----------------------------------------
+
+liquidity_bonus = 0
 
 if liquidity_regime == "HIGH":
 
-    market_score += 5
+    liquidity_bonus = 5
 
 elif liquidity_regime == "LOW":
 
-    market_score -= 5
+    liquidity_bonus = -5
 
-market_score = max(
-    0,
-    min(
-        100,
-        round(
-            market_score,
-            2
-        )
-    )
+# -----------------------------------------
+# FINAL SCORE
+# -----------------------------------------
+
+market_score = 50
+
+market_score += trend_component * 0.5
+market_score += momentum_component * 0.5
+market_score += (breadth_score - 50) * 0.5
+market_score += (vol_component - 7.5)
+market_score += liquidity_bonus
+
+market_score = round(
+    np.clip(
+        market_score,
+        0,
+        100
+    ),
+    2
+)
+
+print("\n===== COMPONENTS =====")
+
+print(
+    f"Trend Component     : {trend_component:.2f}"
+)
+
+print(
+    f"Breadth Component   : {breadth_component:.2f}"
+)
+
+print(
+    f"Momentum Component  : {momentum_component:.2f}"
+)
+
+print(
+    f"Volatility Component: {vol_component:.2f}"
+)
+
+print(
+    f"Liquidity Bonus     : {liquidity_bonus:.2f}"
+)
+
+print(
+    f"Market Score        : {market_score:.2f}"
 )
 
 # =========================================================
 # MARKET REGIME
 # =========================================================
 
-if market_score >= 80:
+if market_score >= 70:
 
     market_regime = "STRONG_BULL"
 
-elif market_score >= 60:
+elif market_score >= 55:
 
     market_regime = "BULL"
 
-elif market_score >= 40:
+elif market_score >= 35:
 
     market_regime = "SIDEWAYS"
 
@@ -448,11 +477,11 @@ else:
 # RISK REGIME
 # =========================================================
 
-if market_score >= 70:
+if market_score >= 60:
 
     risk_regime = "RISK_ON"
 
-elif market_score >= 40:
+elif market_score >= 30:
 
     risk_regime = "NEUTRAL"
 
@@ -533,6 +562,34 @@ regime_df = pd.DataFrame({
     "MOMENTUM_6M": [
         round(
             mom_6m,
+            2
+        )
+    ],
+
+    "TREND_COMPONENT": [
+        round(
+            trend_component,
+            2
+        )
+    ],
+
+    "BREADTH_COMPONENT": [
+        round(
+            breadth_component,
+            2
+        )
+    ],
+
+    "MOMENTUM_COMPONENT": [
+        round(
+            momentum_component,
+            2
+        )
+    ],
+
+    "VOLATILITY_COMPONENT": [
+        round(
+            vol_component,
             2
         )
     ],
