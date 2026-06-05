@@ -472,7 +472,7 @@ equity_curve = pd.DataFrame({
 # =========================================================
 # VALIDATION
 # =========================================================
-valid_stocks = [
+updated_stocks = [
 
     c
 
@@ -480,7 +480,7 @@ valid_stocks = [
 
     if c != BENCHMARK
 ]
-if len(valid_stocks) < 20:
+if len(updated_stocks) < 20:
 
     print(
         "\n⚠ Too few valid stocks."
