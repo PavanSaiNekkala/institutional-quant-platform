@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-VALID_STOCKS_FILE = "data/valid_stocks.xlsx"
+updated_stocks_FILE = "data/updated_stocks.xlsx"
 
 OUTPUT_FILE = "data/news_rankings.csv"
 
@@ -38,7 +38,7 @@ MAX_WORKERS = 20
 print("\nLoading Valid Stocks...")
 
 valid_df = pd.read_excel(
-    VALID_STOCKS_FILE
+    updated_stocks_FILE
 )
 
 stocks = (
