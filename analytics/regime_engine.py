@@ -17,9 +17,12 @@ OUTPUT_FILE = (
 )
 
 BREADTH_FILE = (
-    DATA_DIR
+    ROOT
+    / "data"
     / "market_breadth.csv"
 )
+
+breadth_score = 50
 
 if BREADTH_FILE.exists():
 
@@ -27,21 +30,15 @@ if BREADTH_FILE.exists():
         BREADTH_FILE
     )
 
-    breadth_score = float(
+    if (
+        "BREADTH_SCORE"
+        in breadth.columns
+        and len(breadth)
+    ):
 
-        breadth[
-            "BREADTH_SCORE"
-        ].iloc[0]
-
-    )
-
-else:
-
-    print(
-        "\n⚠ Breadth file not found"
-    )
-
-    breadth_score = 50
+        breadth_score = float(
+            breadth["BREADTH_SCORE"].iloc[0]
+        )
 # =========================================================
 # SETTINGS
 # =========================================================
