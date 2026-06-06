@@ -10,7 +10,7 @@ import time
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
-INPUT_FILE = ROOT_DIR / "data" / "valid_stocks.xlsx"
+INPUT_FILE = ROOT_DIR / "data" / "updated_stocks.xlsx"
 
 OUTPUT_FILE = ROOT_DIR / "data" / "stock_metadata.csv"
 
