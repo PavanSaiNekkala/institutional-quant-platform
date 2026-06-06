@@ -1,46 +1,18 @@
+# Runtime
+logs/
+*.log
+
+# Data
+data/raw/
+data/cache/
+
 # Python
 __pycache__/
 *.pyc
 
-# Virtual Environments
-venv/
-.venv/
-env/
-
-# Jupyter
-.ipynb_checkpoints/
+# IDE
+.vscode/
+.idea/
 
 # Streamlit
-.streamlit/cache/
-
-# Logs
-*.log
-logs/
-
-# OS Files
-.DS_Store
-Thumbs.db
-
-# Temporary Data
-tmp/
-temp/
-downloads/
-
-# Database
-*.db
-*.sqlite3
-
-# ML Models
-*.pkl
-*.joblib
-*.h5
-
-# Reports
-reports/
-outputs/
-exports/
-
-*.egg-info/
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
+.streamlit/secrets.toml

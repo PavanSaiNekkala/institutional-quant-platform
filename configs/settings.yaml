@@ -1,0 +1,12 @@
+platform:
+  environment: development
+
+market_data:
+  refresh_interval: 3600
+
+portfolio:
+  rebalance_days: 30
+
+risk:
+  max_position_size: 0.05
+  max_sector_exposure: 0.20
