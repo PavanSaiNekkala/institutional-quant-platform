@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
-NSE_FILE = ROOT_DIR / "data" / "valid_stocks.xlsx"
+NSE_FILE = ROOT_DIR / "data" / "updated_stocks.xlsx"
 
 OUTPUT_FILE = ROOT_DIR / "data" / "market_caps.csv"
 
