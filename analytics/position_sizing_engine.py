@@ -23,8 +23,8 @@ OUTPUT_FILE = (
 # SETTINGS
 # =========================================================
 
-MAX_WEIGHT = 0.10
-MIN_WEIGHT = 0.02
+MAX_WEIGHT = 0.08
+MIN_WEIGHT = 0.00
 
 # =========================================================
 # LOAD DATA
@@ -39,39 +39,19 @@ portfolio_df = pd.read_csv(
 df = portfolio_df.copy()
 
 # =========================================================
-# FILL MISSING
+# POSITION SCORE
 # =========================================================
-
-df["CONVICTION_SCORE"] = (
-    df["CONVICTION_SCORE"]
-    .fillna(0)
-)
-
-df["EXPECTED_RETURN_30D"] = (
-    df["EXPECTED_RETURN_30D"]
-    .fillna(0)
-)
 
 df["ENTRY_SCORE"] = (
     df["ENTRY_SCORE"]
     .fillna(0)
 )
 
-# =========================================================
-# POSITION SCORE
-# =========================================================
-
 df["POSITION_SCORE"] = (
 
-    df["CONVICTION_SCORE"] * 0.50
+      (df["MULTI_FACTOR_SCORE"] ** 2)
 
-    +
-
-    df["EXPECTED_RETURN_30D"] * 3.00
-
-    +
-
-    df["ENTRY_SCORE"] * 2.00
+    * (1 + df["ENTRY_SCORE"] / 10)
 
 )
 
@@ -106,7 +86,6 @@ df["TARGET_WEIGHT"] = (
     df["TARGET_WEIGHT"]
 
     .clip(
-        lower=MIN_WEIGHT,
         upper=MAX_WEIGHT
     )
 )
@@ -167,9 +146,9 @@ print(
     df[
         [
             "Symbol",
-            "TARGET_WEIGHT_%",
-            "CONVICTION_SCORE",
-            "EXPECTED_RETURN_30D"
+                "MULTI_FACTOR_SCORE",
+                "ENTRY_SCORE",
+                "TARGET_WEIGHT_%"
         ]
     ]
 

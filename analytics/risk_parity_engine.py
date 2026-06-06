@@ -175,22 +175,18 @@ df["VOLATILITY"] = (
 # =========================================================
 # RISK SCORE
 # =========================================================
-
 df["RISK_SCORE"] = (
 
     df["MULTI_FACTOR_SCORE"]
 
     *
 
-    df["EXPECTED_RETURN_30D"]
-
-    *
-
-    df["ENTRY_SCORE"]
+    (1 + df["ENTRY_SCORE"])
 
     /
 
     df["VOLATILITY"]
+
 )
 # =========================================================
 # NORMALIZE
@@ -252,7 +248,8 @@ print(
     df[
         [
             "Symbol",
-            "CONVICTION_SCORE",
+            "MULTI_FACTOR_SCORE",
+            "ENTRY_SCORE",
             "VOLATILITY",
             "FINAL_WEIGHT_%"
         ]

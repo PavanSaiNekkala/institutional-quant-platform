@@ -42,7 +42,7 @@ valid_df = pd.read_excel(
 )
 
 stocks = (
-    valid_df["Stock"]
+    valid_df["Symbol"]
     .dropna()
     .astype(str)
     .unique()

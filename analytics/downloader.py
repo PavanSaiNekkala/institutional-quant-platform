@@ -5,7 +5,7 @@ import yfinance as yf
 # CONFIG
 # =========================================================
 
-INPUT_FILE = "valid_stocks.xlsx"
+INPUT_FILE = "updated_stocks.xlsx"
 
 DOWNLOAD_PERIOD = "2y"
 

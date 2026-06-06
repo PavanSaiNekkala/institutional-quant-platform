@@ -25,9 +25,17 @@ DATA_DIR = ROOT_DIR / "data"
 
 PIPELINE = [
 
+    #{
+       #"script": "updated_stocks.py",
+       #"requires": [],
+       #"produces": ["updated_stocks.xlsx"]
+    #},
+   
     {
         "script": "news_engine.py",
-        "requires": [],
+        "requires": [
+                "updated_stocks.xlsx"
+            ],
         "produces": ["news_rankings.csv"]
     },
     

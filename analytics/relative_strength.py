@@ -46,7 +46,7 @@ DATA_DIR = ROOT_DIR / "data"
 
 INPUT_FILE = (
     DATA_DIR
-    / "valid_stocks.xlsx"
+    / "updated_stocks.xlsx"
 )
 
 # =========================================================

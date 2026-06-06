@@ -16,7 +16,7 @@ OUTPUT_FILE = "data/stock_metadata.csv"
 
 MAX_WORKERS = 3
 BATCH_SIZE = 25
-BATCH_DELAY = 5
+BATCH_DELAY = 3
 
 # =====================================================
 # LOAD STOCKS

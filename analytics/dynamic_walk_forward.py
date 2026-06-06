@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 UNIVERSE_FILE = (
     ROOT
-    / "valid_stocks.xlsx"
+    / "data"
+    / "updated_stocks.xlsx"
 )
 
 EQUITY_FILE = (
@@ -50,7 +51,7 @@ universe = pd.read_excel(
 
 symbols = []
 
-for sym in universe["Stock"]:
+for sym in universe["Symbol"]:
 
     sym = str(sym).upper().strip()
 

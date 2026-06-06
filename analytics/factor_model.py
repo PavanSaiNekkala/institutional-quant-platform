@@ -114,6 +114,42 @@ if ENTRY_FILE.exists():
         ENTRY_FILE
     )
 
+    # =====================================
+    # NORMALIZE SYMBOLS
+    # =====================================
+
+    df["Symbol"] = (
+
+        df["Symbol"]
+
+        .astype(str)
+
+        .str.upper()
+
+        .str.replace(
+            ".NS",
+            "",
+            regex=False
+        )
+
+    )
+
+    entry_df["Symbol"] = (
+
+        entry_df["Symbol"]
+
+        .astype(str)
+
+        .str.upper()
+
+        .str.replace(
+            ".NS",
+            "",
+            regex=False
+        )
+
+    )
+
     df = df.merge(
 
         entry_df[
@@ -126,6 +162,24 @@ if ENTRY_FILE.exists():
         on="Symbol",
 
         how="left"
+    )
+
+    print("\nAFTER MERGE")
+
+    print(
+        df[
+            ["Symbol","ENTRY_SCORE"]
+        ]
+        .head(20)
+    )
+
+    print(
+        "\nNon Zero After Merge:",
+        (
+            df["ENTRY_SCORE"]
+            .fillna(0)
+            > 0
+        ).sum()
     )
 
     df["ENTRY_SCORE"] = (
@@ -179,7 +233,39 @@ if LIQUIDITY_FILE.exists():
 else:
 
     df["LIQUIDITY_SCORE"] = 0
-    
+
+print("\nBEFORE FACTOR ENGINE")
+
+print(
+    df[
+        ["Symbol","ENTRY_SCORE"]
+    ]
+    .head(20)
+)
+
+print(
+    "\nNon Zero Before Factor Engine:",
+    (
+        df["ENTRY_SCORE"]
+        .fillna(0)
+        > 0
+    ).sum()
+)
+
+print(
+    "\nMatched ENTRY_SCORE:",
+    df["ENTRY_SCORE"].notna().sum()
+)
+
+print(
+    "Non-Zero ENTRY_SCORE:",
+    (
+        df["ENTRY_SCORE"]
+        .fillna(0)
+        > 0
+    ).sum()
+)
+
 # =========================================================
 # FACTOR ENGINE
 # =========================================================

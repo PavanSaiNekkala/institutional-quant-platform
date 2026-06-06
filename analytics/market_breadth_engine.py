@@ -43,7 +43,11 @@ universe = (
         "MULTI_FACTOR_SCORE",
         ascending=False
     )
-    .head(2500)
+)
+
+print(
+    f"\n📊 Total Universe Stocks: "
+    f"{len(universe)}"
 )
 
 # =========================================================
@@ -133,10 +137,10 @@ for i in range(
 
         data = yf.download(
             batch,
-            period="1y",
+            period="18mo",
             auto_adjust=True,
             progress=False,
-            threads=False,
+            threads=True,
             group_by="ticker"
         )
 
@@ -189,7 +193,7 @@ close_df = pd.concat(
     axis=1
 )
 
-close_df = close_df.ffill()
+close_df = close_df.ffill(limit=5)
 
 valid_history = (
 
@@ -234,10 +238,7 @@ ma50 = (
 
 ma200 = (
     close_df
-    .rolling(
-        200,
-        min_periods=100
-    )
+    .rolling(200)
     .mean()
 )
 
@@ -255,7 +256,7 @@ print(ma200.iloc[-1].head(20))
 
 latest_close = close_df.iloc[-1]
 
-if len(close_df) < 252:
+if len(close_df) < 200:
 
     raise ValueError(
         "Insufficient history for breadth calculations."
@@ -293,11 +294,18 @@ latest_ma200 = ma200.iloc[-1]
 # 52 WEEK HIGH PARTICIPATION
 # =========================================================
 
+lookback_days = min(
+    252,
+    len(close_df)
+)
+
 high_52w = (
 
     close_df
 
-    .rolling(252)
+    .rolling(
+        lookback_days
+    )
 
     .max()
 

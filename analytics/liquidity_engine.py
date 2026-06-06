@@ -12,9 +12,9 @@ from concurrent.futures import (
 # CONFIG
 # =========================================================
 
-DOWNLOAD_PERIOD = "3mo"
+DOWNLOAD_PERIOD = "6mo"
 
-MAX_WORKERS = 5
+MAX_WORKERS = 10
 
 # =========================================================
 # PATHS

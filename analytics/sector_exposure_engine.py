@@ -7,12 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-PORTFOLIO_FILE = (
-    ROOT
-    / "data"
-    / "risk_parity_portfolio.csv"
-)
-
 MASTER_FILE = (
     ROOT
     / "data"
@@ -29,19 +23,16 @@ OUTPUT_FILE = (
 # SETTINGS
 # =========================================================
 
-MAX_SECTOR_STOCKS = 5
+MAX_SECTOR_STOCKS = 3
+TOP_STOCKS = 40
 
 # =========================================================
 # LOAD DATA
 # =========================================================
 
-print("\n📥 Loading Portfolio...")
+print("\n📥 Loading Factor Rankings...")
 
-portfolio = pd.read_csv(
-    PORTFOLIO_FILE
-)
-
-master = pd.read_csv(
+df = pd.read_csv(
     MASTER_FILE
 )
 
@@ -49,21 +40,9 @@ master = pd.read_csv(
 # SYMBOL CLEANUP
 # =========================================================
 
-portfolio["Symbol"] = (
+df["Symbol"] = (
 
-    portfolio["Symbol"]
-
-    .astype(str)
-
-    .str.upper()
-
-    .str.strip()
-
-)
-
-master["Symbol"] = (
-
-    master["Symbol"]
+    df["Symbol"]
 
     .astype(str)
 
@@ -77,22 +56,9 @@ master["Symbol"] = (
 # REMOVE DUPLICATES
 # =========================================================
 
-portfolio = (
+df = (
 
-    portfolio
-
-    .drop_duplicates(
-        subset=["Symbol"],
-        keep="first"
-    )
-
-    .reset_index(drop=True)
-
-)
-
-master = (
-
-    master
+    df
 
     .drop_duplicates(
         subset=["Symbol"],
@@ -100,95 +66,6 @@ master = (
     )
 
     .reset_index(drop=True)
-
-)
-
-# =========================================================
-# ADD SECTOR DATA IF REQUIRED
-# =========================================================
-
-if "Sector" in portfolio.columns:
-
-    print(
-        "\n✅ Sector column already available"
-    )
-
-    df = portfolio.copy()
-
-else:
-
-    print(
-        "\n📡 Merging Sector Information..."
-    )
-
-    df = portfolio.merge(
-
-        master[
-            [
-                "Symbol",
-                "Sector",
-                "Industry"
-            ]
-        ],
-
-        on="Symbol",
-
-        how="left"
-    )
-
-# =========================================================
-# HANDLE MERGE SUFFIXES
-# =========================================================
-
-if "Sector_x" in df.columns:
-
-    df["Sector"] = df["Sector_x"]
-
-elif "Sector_y" in df.columns:
-
-    df["Sector"] = df["Sector_y"]
-
-if "Industry_x" in df.columns:
-
-    df["Industry"] = df["Industry_x"]
-
-elif "Industry_y" in df.columns:
-
-    df["Industry"] = df["Industry_y"]
-
-# =========================================================
-# CLEAN TEMP COLUMNS
-# =========================================================
-
-drop_cols = [
-
-    c
-
-    for c in df.columns
-
-    if c.endswith("_x")
-    or c.endswith("_y")
-
-]
-
-df = df.drop(
-    columns=drop_cols,
-    errors="ignore"
-)
-
-# =========================================================
-# FILL MISSING SECTORS
-# =========================================================
-
-df["Sector"] = (
-
-    df["Sector"]
-
-    .fillna(
-        "UNKNOWN"
-    )
-
-    .astype(str)
 
 )
 
@@ -202,7 +79,7 @@ required_cols = [
 
     "Sector",
 
-    "FINAL_WEIGHT"
+    "MULTI_FACTOR_SCORE"
 
 ]
 
@@ -223,12 +100,26 @@ if missing:
     )
 
 # =========================================================
-# SORT BY WEIGHT
+# CLEAN SECTOR
+# =========================================================
+
+df["Sector"] = (
+
+    df["Sector"]
+
+    .fillna("UNKNOWN")
+
+    .astype(str)
+
+)
+
+# =========================================================
+# SORT BY FACTOR SCORE
 # =========================================================
 
 df = df.sort_values(
 
-    by="FINAL_WEIGHT",
+    by="MULTI_FACTOR_SCORE",
 
     ascending=False
 
@@ -272,30 +163,46 @@ final_df = pd.DataFrame(
 )
 
 # =========================================================
-# NORMALIZE WEIGHTS
+# INITIAL WEIGHT
 # =========================================================
 
-weight_sum = (
-    final_df["FINAL_WEIGHT"]
+score_sum = (
+
+    final_df["MULTI_FACTOR_SCORE"]
+
     .sum()
+
 )
 
-if weight_sum > 0:
+final_df["INITIAL_WEIGHT"] = (
 
-    final_df["FINAL_WEIGHT"] = (
+    final_df["MULTI_FACTOR_SCORE"]
 
-        final_df["FINAL_WEIGHT"]
+    /
 
-        / weight_sum
-    )
+    score_sum
 
-final_df["FINAL_WEIGHT_%"] = (
+)
 
-    final_df["FINAL_WEIGHT"]
+final_df["INITIAL_WEIGHT_%"] = (
+
+    final_df["INITIAL_WEIGHT"]
 
     * 100
 
 ).round(2)
+
+# =========================================================
+# SORT
+# =========================================================
+
+final_df = final_df.sort_values(
+
+    by="MULTI_FACTOR_SCORE",
+
+    ascending=False
+
+)
 
 # =========================================================
 # SAVE
@@ -346,7 +253,8 @@ print(
         [
             "Symbol",
             "Sector",
-            "FINAL_WEIGHT_%"
+            "MULTI_FACTOR_SCORE",
+            "INITIAL_WEIGHT_%"
         ]
     ]
 
@@ -359,7 +267,7 @@ print(
     "\nTotal Weight:",
 
     round(
-        final_df["FINAL_WEIGHT_%"].sum(),
+        final_df["INITIAL_WEIGHT_%"].sum(),
         2
     ),
 

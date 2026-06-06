@@ -1,17 +1,5 @@
-from fastapi import FastAPI
 from pathlib import Path
 import pandas as pd
-
-# =========================================================
-# APP
-# =========================================================
-
-app = FastAPI(
-
-    title="Institutional Quant API",
-
-    version="1.0.0"
-)
 
 # =========================================================
 # PATHS
