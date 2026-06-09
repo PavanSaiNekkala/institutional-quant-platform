@@ -9,9 +9,18 @@ import yfinance as yf
 
 ROOT = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT / "data" / "factor_model_rankings.csv"
+INPUT_FILE = ROOT / "data" / "processed" / "factor_model_rankings.csv"
 
-OUTPUT_FILE = ROOT / "data" / "market_breadth.csv"
+OUTPUT_FILE = ROOT / "data" / "processed" / "market_breadth.csv"
+
+# =========================================================
+# CACHE
+# =========================================================
+
+CACHE_DIR = ROOT / "data" / "cache"
+CACHE_DIR.mkdir(exist_ok=True)
+
+PRICE_CACHE_FILE = CACHE_DIR / "breadth_prices.parquet"
 
 # =========================================================
 # LOAD UNIVERSE
@@ -58,55 +67,116 @@ symbols = [s for s in symbols if isinstance(s, str)]
 if len(symbols) == 0:
     raise ValueError("No valid symbols found.")
 print(f"\n📊 Stocks Selected: {len(symbols)}")
+
+symbols = sorted(list(set(symbols)))
+
 # =========================================================
 # DOWNLOAD
 # =========================================================
 
-print("\n📡 Downloading Market Breadth Data...")
+print("\n📡 Loading Breadth Cache...")
 
-all_closes = []
+close_df = None
 
-BATCH_SIZE = 100
+# =========================================================
+# LOAD CACHE
+# =========================================================
 
-for i in range(0, len(symbols), BATCH_SIZE):
-    batch = symbols[i : i + BATCH_SIZE]
-
-    print(f"Downloading batch {i + 1} to {min(i + BATCH_SIZE, len(symbols))}")
-
+if PRICE_CACHE_FILE.exists():
     try:
-        data = yf.download(
-            batch, period="18mo", auto_adjust=True, progress=False, threads=True, group_by="ticker"
-        )
+        close_df = pd.read_parquet(PRICE_CACHE_FILE)
+        cached_symbols = set(close_df.columns)
 
-        if data.empty:
-            continue
+        required_symbols = set(symbols)
 
-        close_frames = []
+        missing_symbols = list(required_symbols - cached_symbols)
 
-        for symbol in batch:
-            try:
-                close = data[symbol]["Close"]
+        print(f"\nCached Symbols : {len(cached_symbols)}")
+        print(f"Missing Symbols: {len(missing_symbols)}")
 
-                close.name = symbol
+        close_df.index = pd.to_datetime(close_df.index)
 
-                close_frames.append(close)
+        if close_df is not None:
+            last_date = close_df.index.max()
 
-            except Exception:
-                pass
+            days_old = (pd.Timestamp.today().normalize() - last_date.normalize()).days
 
-        if close_frames:
-            all_closes.append(pd.concat(close_frames, axis=1))
+            print(f"\nCache Age: {days_old} days")
+
+            if days_old > 3:
+                print("\n⚠ Cache Stale - Refresh Required")
+                close_df = None
+
+        print(f"\n✅ Cache Loaded: {close_df.shape[0]} rows x {close_df.shape[1]} symbols")
 
     except Exception as e:
-        print(e)
+        print(f"\nCache load failed: {e}")
 
+        close_df = None
 
-if len(all_closes) == 0:
-    raise ValueError("No price data downloaded.")
+# =========================================================
+# FULL DOWNLOAD IF CACHE MISSING
+# =========================================================
 
-close_df = pd.concat(all_closes, axis=1)
+if close_df is None or len(missing_symbols) > 0:
+    print("\n⚡ No Cache Found - Full Download")
+
+    all_closes = []
+
+    BATCH_SIZE = 100
+
+    for i in range(0, len(symbols), BATCH_SIZE):
+        batch = symbols[i : i + BATCH_SIZE]
+
+        print(f"Downloading batch {i + 1}-{min(i + BATCH_SIZE, len(symbols))}")
+
+        try:
+            data = yf.download(
+                batch,
+                period="18mo",
+                auto_adjust=True,
+                progress=False,
+                threads=True,
+                group_by="ticker",
+            )
+
+            if data.empty:
+                continue
+
+            frames = []
+
+            for symbol in batch:
+                try:
+                    close = data[symbol]["Close"]
+
+                    close.name = symbol
+
+                    frames.append(close)
+
+                except Exception:
+                    pass
+
+            if frames:
+                all_closes.append(pd.concat(frames, axis=1))
+
+        except Exception as e:
+            print(e)
+
+    if len(all_closes) == 0:
+        raise ValueError("No price data downloaded.")
+
+    close_df = pd.concat(all_closes, axis=1)
+
+    close_df.to_parquet(PRICE_CACHE_FILE, index=True)
+
+    print("\n💾 Price Cache Saved")
+
+else:
+    print("\n⚡ Using Cached Prices")
 
 close_df = close_df.ffill(limit=5)
+
+close_df.to_parquet(PRICE_CACHE_FILE, index=True)
 
 valid_history = close_df.count() >= 200
 

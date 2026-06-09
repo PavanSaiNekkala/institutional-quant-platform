@@ -22,9 +22,12 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT_DIR / "data"
 
-INPUT_FILE = DATA_DIR / "updated_stocks.xlsx"
+INPUT_FILE = DATA_DIR / "raw" / "updated_stocks.xlsx"
 
-OUTPUT_FILE = DATA_DIR / "entry_quality_scores.csv"
+OUTPUT_FILE = DATA_DIR / "processed" / "entry_quality_scores.csv"
+
+CACHE_FILE = DATA_DIR / "cache" / "entry_quality_cache.parquet"
+CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -181,7 +184,7 @@ def calculate_entry_score(symbol):
 
         # Near 52W High
 
-        if distance_to_high >= 0.95:
+        if distance_to_high >= -5:
             score += 3
 
         return {
@@ -204,6 +207,49 @@ def calculate_entry_score(symbol):
 # RUN
 # =========================================================
 
+# =========================================================
+# CACHE
+# =========================================================
+
+if CACHE_FILE.exists():
+    cache_df = pd.read_parquet(CACHE_FILE)
+
+    cache_df["LAST_UPDATED"] = pd.to_datetime(cache_df["LAST_UPDATED"])
+
+else:
+    cache_df = pd.DataFrame()
+
+symbols_to_refresh = []
+
+cached_results = []
+
+REFRESH_DAYS = 1
+
+for symbol in symbols:
+    if cache_df.empty:
+        symbols_to_refresh.append(symbol)
+
+        continue
+
+    cached = cache_df[cache_df["Symbol"] == f"{symbol}.NS"]
+
+    if cached.empty:
+        symbols_to_refresh.append(symbol)
+
+        continue
+
+    age_days = (pd.Timestamp.now() - cached.iloc[0]["LAST_UPDATED"]).days
+
+    if age_days >= REFRESH_DAYS:
+        symbols_to_refresh.append(symbol)
+
+    else:
+        cached_results.append(cached.iloc[0].to_dict())
+
+print(f"\nUsing Cache: {len(cached_results)}")
+
+print(f"Refreshing: {len(symbols_to_refresh)}")
+
 print("\n🚀 Calculating Entry Scores...")
 
 results = []
@@ -213,7 +259,9 @@ print("\n🧪 Testing first symbol...")
 print(calculate_entry_score(symbols[0]))
 
 with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-    futures = {executor.submit(calculate_entry_score, symbol): symbol for symbol in symbols}
+    futures = {
+        executor.submit(calculate_entry_score, symbol): symbol for symbol in symbols_to_refresh
+    }
 
     total = len(futures)
 
@@ -229,10 +277,21 @@ with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 # DATAFRAME
 # =========================================================
 
-entry_df = pd.DataFrame(results)
+new_df = pd.DataFrame(results)
+
+if not new_df.empty:
+    new_df["LAST_UPDATED"] = pd.Timestamp.now()
+
+entry_df = pd.concat([pd.DataFrame(cached_results), new_df], ignore_index=True)
+
+entry_df = entry_df.drop_duplicates(subset="Symbol", keep="last")
 
 if entry_df.empty:
     raise Exception("\n❌ No stocks processed")
+
+# Save Cache
+
+entry_df.to_parquet(CACHE_FILE, index=False)
 
 # =========================================================
 # RANK

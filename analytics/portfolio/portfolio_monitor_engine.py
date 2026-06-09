@@ -9,13 +9,13 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
-POSITIONS_FILE = ROOT / "data" / "current_positions.csv"
-CONVICTION_FILE = ROOT / "data" / "conviction_scores.csv"
-EXPECTED_FILE = ROOT / "data" / "expected_returns.csv"
-NEWS_FILE = ROOT / "data" / "news_rankings.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
+POSITIONS_FILE = ROOT / "data" / "processed" / "current_positions.csv"
+CONVICTION_FILE = ROOT / "data" / "processed" / "conviction_scores.csv"
+EXPECTED_FILE = ROOT / "data" / "processed" / "expected_returns.csv"
+NEWS_FILE = ROOT / "data" / "processed" / "news_rankings.csv"
 
-OUTPUT_FILE = ROOT / "data" / "portfolio_monitor.csv"
+OUTPUT_FILE = ROOT / "data" / "portfolio" / "portfolio_monitor.csv"
 
 # =========================================================
 # LOAD

@@ -8,16 +8,17 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
-TRADE_HISTORY_FILE = ROOT / "data" / "trade_history.csv"
+TRADE_HISTORY_FILE = ROOT / "data" / "processed" / "trade_history.csv"
 
-CURRENT_POSITIONS_FILE = ROOT / "data" / "current_positions.csv"
+CURRENT_POSITIONS_FILE = ROOT / "data" / "processed" / "current_positions.csv"
 
-EXITED_POSITIONS_FILE = ROOT / "data" / "exited_positions.csv"
+EXITED_POSITIONS_FILE = ROOT / "data" / "processed" / "exited_positions.csv"
 
-LIFECYCLE_FILE = ROOT / "data" / "portfolio_lifecycle.csv"
-EXIT_HISTORY_FILE = ROOT / "data" / "exit_history.csv"
+LIFECYCLE_FILE = ROOT / "data" / "portfolio" / "portfolio_lifecycle.csv"
+
+EXIT_HISTORY_FILE = ROOT / "data" / "processed" / "exit_history.csv"
 # =========================================================
 # LOAD PORTFOLIO
 # =========================================================
@@ -32,7 +33,7 @@ portfolio["Symbol"] = portfolio["Symbol"].astype(str).str.upper().str.strip()
 # POSITION REGISTRY
 # =========================================================
 
-POSITION_REGISTRY_FILE = ROOT / "data" / "position_registry.csv"
+POSITION_REGISTRY_FILE = ROOT / "data" / "processed" / "position_registry.csv"
 
 if POSITION_REGISTRY_FILE.exists():
     registry = pd.read_csv(POSITION_REGISTRY_FILE)

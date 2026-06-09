@@ -23,15 +23,15 @@ TOP_N = 20
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-RANKINGS_FILE = ROOT_DIR / "data" / "cross_sectional_rankings.csv"
+RANKINGS_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
-SECTOR_FILE = ROOT_DIR / "data" / "sector_relative_strength.csv"
+SECTOR_FILE = ROOT_DIR / "data" / "processed" / "sector_relative_strength.csv"
 
-REGIME_FILE = ROOT_DIR / "data" / "market_regime.csv"
+REGIME_FILE = ROOT_DIR / "data" / "processed" / "market_regime.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "portfolio_intelligence.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "portfolio_intelligence.csv"
 
-EXPECTED_FILE = ROOT_DIR / "data" / "expected_returns.csv"
+EXPECTED_FILE = ROOT_DIR / "data" / "processed" / "expected_returns.csv"
 
 expected_df = pd.read_csv(EXPECTED_FILE)
 # =========================================================

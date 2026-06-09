@@ -10,11 +10,11 @@ import yfinance as yf
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
-OUTPUT_SUMMARY = ROOT / "data" / "portfolio_risk_summary.csv"
+OUTPUT_SUMMARY = ROOT / "data" / "portfolio" / "portfolio_risk_summary.csv"
 
-OUTPUT_ALERTS = ROOT / "data" / "portfolio_alerts.csv"
+OUTPUT_ALERTS = ROOT / "data" / "portfolio" / "portfolio_alerts.csv"
 
 # =========================================================
 # SETTINGS

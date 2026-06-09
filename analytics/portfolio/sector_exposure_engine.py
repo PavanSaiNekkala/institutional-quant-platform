@@ -8,9 +8,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-MASTER_FILE = ROOT / "data" / "factor_model_rankings.csv"
+MASTER_FILE = ROOT / "data" / "processed" / "factor_model_rankings.csv"
 
-OUTPUT_FILE = ROOT / "data" / "sector_controlled_portfolio.csv"
+OUTPUT_FILE = ROOT / "data" / "processed" / "sector_controlled_portfolio.csv"
 
 # =========================================================
 # SETTINGS

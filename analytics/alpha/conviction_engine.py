@@ -10,15 +10,13 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT_DIR / "data"
 
-FACTOR_FILE = DATA_DIR / "factor_model_rankings.csv"
+FACTOR_FILE = DATA_DIR / "processed" / "factor_model_rankings.csv"
 
-ENTRY_FILE = DATA_DIR / "entry_quality_scores.csv"
+ENTRY_FILE = DATA_DIR / "processed" / "entry_quality_scores.csv"
 
-EXPECTED_FILE = DATA_DIR / "expected_returns.csv"
+OUTPUT_FILE = DATA_DIR / "processed" / "conviction_scores.csv"
 
-OUTPUT_FILE = DATA_DIR / "conviction_scores.csv"
-
-NEWS_FILE = ROOT_DIR / "data" / "news_rankings.csv"
+NEWS_FILE = DATA_DIR / "processed" / "news_rankings.csv"
 
 if NEWS_FILE.exists():
     news_df = pd.read_csv(NEWS_FILE)
@@ -42,13 +40,11 @@ factor_df = pd.read_csv(FACTOR_FILE)
 
 entry_df = pd.read_csv(ENTRY_FILE)
 
-expected_df = pd.read_csv(EXPECTED_FILE)
-
 # =========================================================
 # NORMALIZE SYMBOLS
 # =========================================================
 
-for df_ in [factor_df, entry_df, expected_df]:
+for df_ in [factor_df, entry_df]:
     df_["Symbol"] = (
         df_["Symbol"].astype(str).str.replace(".NS", "", regex=False).str.strip().str.upper()
     )
@@ -59,8 +55,6 @@ print(factor_df["Symbol"].head())
 print("\nENTRY SYMBOLS")
 print(entry_df["Symbol"].head())
 
-print("\nEXPECTED SYMBOLS")
-print(expected_df["Symbol"].head())
 # =========================================================
 # VALIDATION
 # =========================================================
@@ -75,18 +69,12 @@ required_factor_cols = ["Symbol", "MULTI_FACTOR_SCORE"]
 
 required_entry_cols = ["Symbol", "ENTRY_SCORE"]
 
-required_expected_cols = ["Symbol", "EXPECTED_RETURN_30D"]
-
 for col in required_factor_cols:
     if col not in factor_df.columns:
         raise Exception(f"❌ Missing column: {col}")
 
 for col in required_entry_cols:
     if col not in entry_df.columns:
-        raise Exception(f"❌ Missing column: {col}")
-
-for col in required_expected_cols:
-    if col not in expected_df.columns:
         raise Exception(f"❌ Missing column: {col}")
 
 news_df["Symbol"] = (
@@ -111,17 +99,12 @@ print(df.columns.tolist())
 print("\nMatched ENTRY_SCORE:", df["ENTRY_SCORE"].notna().sum())
 
 print("Total Rows:", len(df))
-df = df.merge(expected_df[["Symbol", "EXPECTED_RETURN_30D"]], on="Symbol", how="left")
-
-print("\nMatched EXPECTED_RETURN_30D:", df["EXPECTED_RETURN_30D"].notna().sum())
 
 print("\nDF COLUMNS AFTER EXPECTED RETURN MERGE")
 
 print(df.columns.tolist())
 
 df["ENTRY_SCORE"] = df["ENTRY_SCORE"].fillna(0)
-
-df["EXPECTED_RETURN_30D"] = df["EXPECTED_RETURN_30D"].fillna(0)
 
 df["NEWS_ALPHA"] = df["NEWS_ALPHA"].fillna(50)
 
@@ -137,11 +120,9 @@ print(df["ENTRY_SCORE"].describe())
 
 print("\nEXPECTED RETURN 30D STATS")
 
-print(df["EXPECTED_RETURN_30D"].describe())
-
 print("\nTOP 20")
 
-print(df[["Symbol", "MULTI_FACTOR_SCORE", "ENTRY_SCORE", "EXPECTED_RETURN_30D"]].head(20))
+print(df[["Symbol", "MULTI_FACTOR_SCORE", "ENTRY_SCORE"]].head(20))
 
 
 def catalyst(row):
@@ -175,21 +156,9 @@ entry_max = max(df["ENTRY_SCORE"].max(), 1)
 
 df["ENTRY_NORM"] = df["ENTRY_SCORE"] / entry_max
 
-return_min = df["EXPECTED_RETURN_30D"].min()
-
-return_max = df["EXPECTED_RETURN_30D"].max()
-
-if return_max == return_min:
-    df["RETURN_NORM"] = 0.5
-
-else:
-    df["RETURN_NORM"] = (df["EXPECTED_RETURN_30D"] - return_min) / (return_max - return_min)
-
 df["NEWS_NORM"] = df["NEWS_ALPHA"].clip(0, 100) / 100
 
-df["CONVICTION_SCORE"] = (
-    df["FACTOR_NORM"] * 40 + df["RETURN_NORM"] * 25 + df["ENTRY_NORM"] * 20 + df["NEWS_NORM"] * 15
-)
+df["CONVICTION_SCORE"] = df["FACTOR_NORM"] * 55 + df["ENTRY_NORM"] * 25 + df["NEWS_NORM"] * 20
 
 df["CONVICTION_SCORE"] = df["CONVICTION_SCORE"].round(2)
 
@@ -229,7 +198,6 @@ output_cols = [
     "NEWS_IMPACT",
     "NEWS_FLAG",
     "ENTRY_SCORE",
-    "EXPECTED_RETURN_30D",
     "CONVICTION",
     "CONVICTION_SCORE",
     "CONVICTION_RANK",

@@ -1,0 +1,11 @@
+Metric,Value
+CAGR,86.09
+Annual Volatility,23.02
+Sharpe Ratio,3.48
+Max Drawdown,-16.25
+Benchmark CAGR,"Ticker
+^NSEI    32.18
+Name: 2026-06-09 00:00:00, dtype: float64"
+Alpha,"Ticker
+^NSEI    53.91
+Name: 2026-06-09 00:00:00, dtype: float64"

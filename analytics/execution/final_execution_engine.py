@@ -8,9 +8,9 @@ import yfinance as yf
 # =========================================================
 
 ROOT = Path(__file__).resolve().parents[2]
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
-OUTPUT_FILE = ROOT / "data" / "execution_orders.csv"
+OUTPUT_FILE = ROOT / "data" / "portfolio" / "execution_orders.csv"
 
 # =========================================================
 # SETTINGS

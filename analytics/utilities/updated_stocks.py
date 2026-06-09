@@ -1,9 +1,6 @@
-import logging
-import time
 from pathlib import Path
 
 import pandas as pd
-import yfinance as yf
 
 # =====================================================
 # INPUT / OUTPUT
@@ -15,17 +12,18 @@ DATA_DIR = ROOT / "data"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-CACHE_DIR = ROOT / "cache"
-
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-yf.set_tz_cache_location(str(CACHE_DIR))
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
 INPUT_FILE = ROOT / "data" / "raw" / "valid_stocks.xlsx"
 
 OUTPUT_FILE = ROOT / "data" / "raw" / "updated_stocks.xlsx"
+
+# =====================================================
+# PRICE CACHE
+# =====================================================
+
+PRICE_CACHE_FILE = ROOT / "data" / "cache" / "stock_prices.parquet"
+
+PRICE_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 SHEET_NAME = 0
 
@@ -60,103 +58,117 @@ symbols = [s for s in symbols if isinstance(s, str) and len(s) > 3]
 
 print(f"\nTotal Stocks: {len(symbols)}")
 
-# =====================================================
-# BATCH PROCESSING
-# =====================================================
-
-
-def download_batch(batch):
-
-    for attempt in range(2):
-        try:
-            data = yf.download(
-                batch,
-                period="250d",
-                auto_adjust=True,
-                progress=False,
-                threads=True,
-                group_by="ticker",
-            )
-
-            if not data.empty:
-                return data
-
-        except Exception as e:
-            logging.warning(f"Attempt {attempt + 1}/2 failed: {e}")
-
-        time.sleep(5)
-
-    return pd.DataFrame()
-
-
 updated_stocks = []
 
-BATCH_SIZE = 200
+close_df = None
 
-for i in range(0, len(symbols), BATCH_SIZE):
-    batch = symbols[i : i + BATCH_SIZE]
+# =====================================================
+# LOAD MASTER CACHE
+# =====================================================
 
-    print(f"\nBatch {i + 1} - {min(i + BATCH_SIZE, len(symbols))}")
+if not PRICE_CACHE_FILE.exists():
+    raise FileNotFoundError(
+        f"\nMissing cache:\n{PRICE_CACHE_FILE}\nRun update_price_cache.py first."
+    )
 
+close_df = pd.read_parquet(PRICE_CACHE_FILE)
+
+if isinstance(close_df.columns, pd.MultiIndex):
+    print("\n⚠ MultiIndex Columns Found")
+
+    print(close_df.columns.names)
+
+    if "Close" in close_df.columns.get_level_values(-1):
+        close_df = close_df.xs("Close", axis=1, level=-1)
+
+        print("\n✅ Extracted Close Prices")
+
+close_df.index = pd.to_datetime(close_df.index)
+
+last_date = close_df.index.max()
+
+days_old = (pd.Timestamp.today().normalize() - last_date.normalize()).days
+
+print(f"\n📅 Cache Age: {days_old} days")
+
+if days_old > 3:
+    print("\n⚠️ Cache older than 3 days.\nRun update_price_cache.py.")
+
+print(f"\n✅ Loaded Price Cache ({close_df.shape[0]} rows x {close_df.shape[1]} columns)")
+
+for symbol in symbols:
     try:
-        data = download_batch(batch)
-
-        if data.empty:
+        if symbol not in close_df.columns:
             continue
 
-        for symbol in batch:
-            try:
-                if symbol not in data.columns.get_level_values(0):
-                    continue
+        close_series = close_df[symbol].dropna()
 
-                close_series = data[symbol]["Close"].dropna()
+        if len(close_series) < 200:
+            continue
 
-                volume_series = data[symbol]["Volume"].dropna()
+        latest_close = float(close_series.iloc[-1])
 
-                high_series = data[symbol]["High"].dropna()
+        returns = close_series.pct_change()
 
-                low_series = data[symbol]["Low"].dropna()
+        volatility_pct = returns.abs().rolling(14).mean().iloc[-1] * 100
 
-                if len(close_series) < 200:
-                    continue
+        if latest_close < 10:
+            continue
 
-                latest_close = float(close_series.iloc[-1])
+        if volatility_pct > 6:
+            continue
 
-                avg_volume = int(volume_series.mean())
-
-                atr_pct = ((high_series - low_series) / close_series).mean() * 100
-
-                if latest_close < 10:
-                    continue
-
-                if avg_volume < 10000:
-                    continue
-
-                if atr_pct > 6:
-                    continue
-
-                updated_stocks.append(
-                    {
-                        "Symbol": symbol,
-                        "Close": round(latest_close, 2),
-                        "Avg_Volume": avg_volume,
-                        "ATR_PCT": round(atr_pct, 2),
-                        "History_Days": len(close_series),
-                    }
-                )
-
-            except Exception as e:
-                print(f"{symbol} skipped: {e}")
+        updated_stocks.append(
+            {
+                "Symbol": symbol,
+                "Close": round(latest_close, 2),
+                "VOLATILITY_PCT": round(volatility_pct, 2),
+                "History_Days": len(close_series),
+            }
+        )
 
     except Exception as e:
-        print(e)
+        print(f"{symbol} skipped: {e}")
 
-    time.sleep(0.5)
+print("\n======================")
+print("FILTER STATISTICS")
+print("======================")
 
+history_fail = 0
+price_fail = 0
+vol_fail = 0
+passed = 0
 
-# =====================================================
-# OUTPUT
-# =====================================================
+for symbol in symbols:
+    if symbol not in close_df.columns:
+        continue
+
+    close_series = close_df[symbol].dropna()
+
+    if len(close_series) < 200:
+        history_fail += 1
+        continue
+
+    latest_close = float(close_series.iloc[-1])
+
+    returns = close_series.pct_change()
+
+    volatility_pct = returns.abs().rolling(14).mean().iloc[-1] * 100
+
+    if latest_close < 10:
+        price_fail += 1
+        continue
+
+    if volatility_pct > 12:
+        vol_fail += 1
+        continue
+
+    passed += 1
+
+print(f"History Fail : {history_fail}")
+print(f"Price Fail   : {price_fail}")
+print(f"Vol Fail     : {vol_fail}")
+print(f"Passed       : {passed}")
 
 if len(updated_stocks) == 0:
     raise ValueError("No stocks passed validation filters.")
@@ -168,11 +180,30 @@ metadata_file = ROOT / "data" / "raw" / "stock_metadata.csv"
 if metadata_file.exists():
     metadata = pd.read_csv(metadata_file)
 
+    metadata.columns = metadata.columns.str.strip()
+
+    print("\nMetadata Columns:")
+    print(metadata.columns.tolist())
+
     metadata["Symbol"] = metadata["Symbol"].astype(str).str.strip().str.upper()
+
+    # Handle different naming conventions
+
+    if "Market_Cap" not in metadata.columns:
+        if "MarketCap" in metadata.columns:
+            metadata = metadata.rename(columns={"MarketCap": "Market_Cap"})
+
+        elif "Market Cap" in metadata.columns:
+            metadata = metadata.rename(columns={"Market Cap": "Market_Cap"})
+
+        else:
+            raise ValueError(
+                f"Market cap column not found. Available columns: {metadata.columns.tolist()}"
+            )
 
     updated_df = updated_df.merge(metadata[["Symbol", "Market_Cap"]], on="Symbol", how="left")
 
-    updated_df["Market_Cap"] = updated_df["Market_Cap"].fillna(0)
+    updated_df["Market_Cap"] = pd.to_numeric(updated_df["Market_Cap"], errors="coerce").fillna(0)
 
 else:
     print("\nWARNING: stock_metadata.csv not found")
@@ -184,7 +215,7 @@ updated_df = updated_df[updated_df["Market_Cap"] >= 100_000_000]
 if updated_df.empty:
     raise ValueError("No stocks survived market cap filter.")
 
-updated_df = updated_df.sort_values(["Market_Cap", "Avg_Volume"], ascending=False)
+updated_df = updated_df.sort_values(["Market_Cap"], ascending=False)
 
 print("\nLargest Market Cap:")
 

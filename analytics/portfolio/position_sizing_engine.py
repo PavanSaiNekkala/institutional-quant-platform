@@ -8,9 +8,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "sector_controlled_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "processed" / "sector_controlled_portfolio.csv"
 
-OUTPUT_FILE = ROOT / "data" / "position_sized_portfolio.csv"
+OUTPUT_FILE = ROOT / "data" / "portfolio" / "position_sized_portfolio.csv"
 
 # =========================================================
 # SETTINGS

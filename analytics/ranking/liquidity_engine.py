@@ -21,9 +21,9 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT_DIR / "data"
 
-INPUT_FILE = DATA_DIR / "updated_stocks.xlsx"
+INPUT_FILE = DATA_DIR / "raw" / "updated_stocks.xlsx"
 
-OUTPUT_FILE = DATA_DIR / "liquidity_scores.csv"
+OUTPUT_FILE = DATA_DIR / "processed" / "liquidity_scores.csv"
 
 # =========================================================
 # LOAD STOCK UNIVERSE

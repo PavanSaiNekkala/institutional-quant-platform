@@ -26,11 +26,11 @@ TRADING_DAYS = 252
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT_DIR / "data" / "portfolio_allocation.csv"
+PORTFOLIO_FILE = ROOT_DIR / "data" / "portfolio" / "portfolio_allocation.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "monte_carlo_results.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "monte_carlo_results.csv"
 
-PATHS_FILE = ROOT_DIR / "data" / "monte_carlo_paths.csv"
+PATHS_FILE = ROOT_DIR / "data" / "portfolio" / "monte_carlo_paths.csv"
 
 # =========================================================
 # LOAD PORTFOLIO

@@ -9,9 +9,9 @@ import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT_DIR / "data" / "cross_sectional_rankings.csv"
+INPUT_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "factor_model_rankings.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "factor_model_rankings.csv"
 
 # =========================================================
 # LOAD DATA
@@ -58,7 +58,7 @@ df = df.dropna(subset=required_cols)
 # ENTRY QUALITY MERGE
 # =========================================================
 
-ENTRY_FILE = ROOT_DIR / "data" / "entry_quality_scores.csv"
+ENTRY_FILE = ROOT_DIR / "data" / "processed" / "entry_quality_scores.csv"
 
 if ENTRY_FILE.exists():
     entry_df = pd.read_csv(ENTRY_FILE)
@@ -90,16 +90,25 @@ else:
 # LIQUIDITY MERGE
 # =========================================================
 
-LIQUIDITY_FILE = ROOT_DIR / "data" / "liquidity_scores.csv"
+LIQUIDITY_FILE = ROOT_DIR / "data" / "processed" / "liquidity_scores.csv"
 
-if LIQUIDITY_FILE.exists():
+try:
     liquidity_df = pd.read_csv(LIQUIDITY_FILE)
+
+    liquidity_df["Symbol"] = (
+        liquidity_df["Symbol"]
+        .astype(str)
+        .str.upper()
+        .str.replace(".NS", "", regex=False)
+        .str.strip()
+    )
 
     df = df.merge(liquidity_df[["Symbol", "LIQUIDITY_SCORE"]], on="Symbol", how="left")
 
     df["LIQUIDITY_SCORE"] = df["LIQUIDITY_SCORE"].fillna(0)
 
-else:
+except Exception as e:
+    print(f"Liquidity merge failed: {e}")
     df["LIQUIDITY_SCORE"] = 0
 
 print("\nBEFORE FACTOR ENGINE")

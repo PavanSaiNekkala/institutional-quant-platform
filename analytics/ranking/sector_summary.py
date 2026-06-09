@@ -8,11 +8,11 @@ import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-RANKINGS_FILE = ROOT_DIR / "data" / "institutional_rankings.csv"
+RANKINGS_FILE = ROOT_DIR / "data" / "processed" / "institutional_rankings.csv"
 
-METADATA_FILE = ROOT_DIR / "data" / "stock_metadata.csv"
+METADATA_FILE = ROOT_DIR / "data" / "raw" / "stock_metadata.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "sector_summary.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "sector_summary.csv"
 
 # =========================================================
 # LOAD DATA

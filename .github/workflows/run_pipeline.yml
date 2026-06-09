@@ -1,4 +1,4 @@
-name: Full Institutional Pipeline
+name: Daily Universe Pipeline
 
 on:
 
@@ -6,39 +6,23 @@ on:
 
   schedule:
 
-    # =====================================================
-    # MARKET HOURS (IST)
-    # =====================================================
-
-    - cron: '45 3 * * 1-5'    # 09:15 IST
-    - cron: '45 4 * * 1-5'    # 10:15 IST
-    - cron: '45 5 * * 1-5'    # 11:15 IST
-    - cron: '45 6 * * 1-5'    # 12:15 IST
-    - cron: '45 7 * * 1-5'    # 13:15 IST
-    - cron: '45 8 * * 1-5'    # 14:15 IST
-    - cron: '45 9 * * 1-5'    # 15:15 IST
-
-    # =====================================================
-    # AFTER MARKET (EVERY ~6 HOURS)
-    # =====================================================
-
+    # Daily after market close
     - cron: '30 15 * * 1-5'   # 21:00 IST
-    - cron: '30 21 * * 0-4'   # 03:00 IST next day
 
 permissions:
   contents: write
 
 concurrency:
-  group: institutional-pipeline
+  group: daily-universe-pipeline
   cancel-in-progress: false
 
 jobs:
 
-  full-pipeline:
+  universe-pipeline:
 
     runs-on: ubuntu-latest
 
-    timeout-minutes: 360
+    timeout-minutes: 180
 
     steps:
 
@@ -52,6 +36,14 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -60,18 +52,18 @@ jobs:
             pip install -r requirements.txt
           fi
 
-      - name: Run Full Institutional Pipeline
+      - name: Run Daily Universe Pipeline
         run: |
-          python run_full_pipeline.py
+          python run_pipeline.py
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: institutional-results
+          name: universe-data
           path: |
-            data/*.csv
-            data/*.xlsx
-            data/*.parquet
+            data/**/*.csv
+            data/**/*.xlsx
+            data/**/*.parquet
           if-no-files-found: ignore
 
       - name: Commit Results
@@ -87,7 +79,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Automated Institutional Pipeline Update"
+          git commit -m "Daily universe update"
 
           git pull --rebase origin main || true
 

@@ -12,11 +12,11 @@ from sklearn.model_selection import train_test_split
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT_DIR / "data" / "factor_model_rankings.csv"
+INPUT_FILE = ROOT_DIR / "data" / "processed" / "factor_model_rankings.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "ml_alpha_predictions.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "models" / "ml_alpha_predictions.csv"
 
-MODEL_METRICS_FILE = ROOT_DIR / "data" / "ml_model_metrics.csv"
+MODEL_METRICS_FILE = ROOT_DIR / "data" / "models" / "ml_model_metrics.csv"
 
 # =========================================================
 # LOAD DATA

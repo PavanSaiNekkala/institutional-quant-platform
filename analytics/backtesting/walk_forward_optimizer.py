@@ -31,11 +31,11 @@ MIN_STOCKS_REQUIRED = 5
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT_DIR / "data" / "cross_sectional_rankings.csv"
+INPUT_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "walk_forward_results.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "walk_forward_results.csv"
 
-EQUITY_CURVE_FILE = ROOT_DIR / "data" / "walk_forward_equity_curve.csv"
+EQUITY_CURVE_FILE = ROOT_DIR / "data" / "portfolio" / "walk_forward_equity_curve.csv"
 
 # =========================================================
 # LOAD RANKINGS

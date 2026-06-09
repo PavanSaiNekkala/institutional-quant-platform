@@ -8,8 +8,8 @@ import yfinance as yf
 # CONFIG
 # =====================================================
 
-INPUT_FILE = "data/updated_stocks.xlsx"
-OUTPUT_FILE = "data/stock_metadata.csv"
+INPUT_FILE = "data/raw/updated_stocks.xlsx"
+OUTPUT_FILE = "data/raw/stock_metadata.csv"
 
 MAX_WORKERS = 3
 BATCH_SIZE = 25
@@ -66,13 +66,13 @@ def fetch_metadata(symbol):
                 "Symbol": symbol,
                 "Sector": sector,
                 "Industry": industry,
-                "MarketCap": market_cap,
+                "Market_Cap": market_cap,
             }
 
         except Exception:
             time.sleep(2)
 
-    return {"Symbol": symbol, "Sector": "Unknown", "Industry": "Unknown", "MarketCap": 0}
+    return {"Symbol": symbol, "Sector": "Unknown", "Industry": "Unknown", "Market_Cap": 0}
 
 
 # =====================================================
@@ -131,9 +131,9 @@ metadata = pd.DataFrame(results)
 
 metadata = metadata.drop_duplicates(subset=["Symbol"])
 
-metadata["MarketCap"] = pd.to_numeric(metadata["MarketCap"], errors="coerce").fillna(0)
+metadata["Market_Cap"] = pd.to_numeric(metadata["Market_Cap"], errors="coerce").fillna(0)
 
-metadata = metadata.sort_values("MarketCap", ascending=False)
+metadata = metadata.sort_values("Market_Cap", ascending=False)
 
 metadata.to_csv(OUTPUT_FILE, index=False)
 

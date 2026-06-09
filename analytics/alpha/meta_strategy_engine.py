@@ -9,11 +9,11 @@ import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-FACTOR_FILE = ROOT_DIR / "data" / "factor_model_rankings.csv"
+FACTOR_FILE = ROOT_DIR / "data" / "processed" / "factor_model_rankings.csv"
 
-REGIME_FILE = ROOT_DIR / "data" / "market_regime.csv"
-EXPECTED_FILE = ROOT_DIR / "data" / "expected_returns.csv"
-OUTPUT_FILE = ROOT_DIR / "data" / "meta_strategy_portfolio.csv"
+REGIME_FILE = ROOT_DIR / "data" / "processed" / "market_regime.csv"
+EXPECTED_FILE = ROOT_DIR / "data" / "processed" / "expected_returns.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "meta_strategy_portfolio.csv"
 
 # =========================================================
 # LOAD DATA

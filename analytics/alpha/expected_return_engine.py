@@ -13,11 +13,11 @@ from sklearn.preprocessing import MinMaxScaler
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = BASE_DIR / "data" / "conviction_scores.csv"
+INPUT_FILE = BASE_DIR / "data" / "processed" / "conviction_scores.csv"
 
-OUTPUT_FILE = BASE_DIR / "data" / "expected_returns.csv"
+OUTPUT_FILE = BASE_DIR / "data" / "processed" / "expected_returns.csv"
 
-NEWS_FILE = BASE_DIR / "data" / "news_rankings.csv"
+NEWS_FILE = BASE_DIR / "data" / "processed" / "news_rankings.csv"
 
 # =========================================================
 # LOAD

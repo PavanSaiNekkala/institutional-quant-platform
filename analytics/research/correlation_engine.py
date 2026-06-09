@@ -21,11 +21,11 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT_DIR / "data"
 
-RANKINGS_FILE = DATA_DIR / "conviction_scores.csv"
+RANKINGS_FILE = DATA_DIR / "processed" / "conviction_scores.csv"
 
-CORRELATION_FILE = DATA_DIR / "correlation_matrix.csv"
+CORRELATION_FILE = DATA_DIR / "processed" / "correlation_matrix.csv"
 
-DIVERSIFIED_FILE = DATA_DIR / "diversified_candidates.csv"
+DIVERSIFIED_FILE = DATA_DIR / "processed" / "diversified_candidates.csv"
 
 # =========================================================
 # LOAD RANKINGS

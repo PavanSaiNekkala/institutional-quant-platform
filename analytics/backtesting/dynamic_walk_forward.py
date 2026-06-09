@@ -22,7 +22,7 @@ VOL_LOOKBACK = 126
 
 ROOT = Path(__file__).resolve().parents[2]
 
-UNIVERSE_FILE = ROOT / "data" / "updated_stocks.xlsx"
+UNIVERSE_FILE = ROOT / "data" / "raw" / "updated_stocks.xlsx"
 
 EQUITY_FILE = ROOT / "data" / "dynamic_equity_curve.csv"
 

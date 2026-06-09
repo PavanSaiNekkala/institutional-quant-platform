@@ -23,11 +23,11 @@ TOP_N = 20
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT_DIR / "data" / "ml_alpha_predictions.csv"
+INPUT_FILE = ROOT_DIR / "data" / "models" / "ml_alpha_predictions.csv"
 
-REGIME_FILE = ROOT_DIR / "data" / "market_regime.csv"
+REGIME_FILE = ROOT_DIR / "data" / "processed" / "market_regime.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "reinforcement_portfolio.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "reinforcement_portfolio.csv"
 
 QTABLE_FILE = ROOT_DIR / "data" / "reinforcement_q_table.csv"
 

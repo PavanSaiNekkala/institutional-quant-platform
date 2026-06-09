@@ -9,15 +9,15 @@ import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-RANKINGS_FILE = ROOT_DIR / "data" / "institutional_rankings.csv"
+RANKINGS_FILE = ROOT_DIR / "data" / "processed" / "institutional_rankings.csv"
 
-RS_FILE = ROOT_DIR / "data" / "institutional_rankings.csv"
+RS_FILE = ROOT_DIR / "data" / "processed" / "institutional_rankings.csv"
 
-SECTOR_RS_FILE = ROOT_DIR / "data" / "sector_relative_strength.csv"
+SECTOR_RS_FILE = ROOT_DIR / "data" / "processed" / "sector_relative_strength.csv"
 
-META_FILE = ROOT_DIR / "data" / "stock_metadata.csv"
+META_FILE = ROOT_DIR / "data" / "raw" / "stock_metadata.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "cross_sectional_rankings.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
 # =========================================================
 # LOAD DATA
@@ -68,7 +68,7 @@ print("\n===== AFTER COPY =====")
 
 print(df[["Symbol", "Momentum", "Sharpe"]].head(10))
 
-df = pd.merge(df, meta_df[["Symbol", "Sector", "Industry", "MarketCap"]], on="Symbol", how="left")
+df = pd.merge(df, meta_df[["Symbol", "Sector", "Industry", "Market_Cap"]], on="Symbol", how="left")
 
 print("\n===== AFTER META MERGE =====")
 
@@ -211,7 +211,7 @@ final_cols = [
     "Symbol",
     "Sector",
     "Industry",
-    "MarketCap",
+    "Market_Cap",
     "ALPHA_SCORE",
     "Momentum",
     "Sharpe",

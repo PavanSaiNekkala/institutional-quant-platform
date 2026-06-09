@@ -25,9 +25,9 @@ MIN_LIQUIDITY = 100000
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT_DIR / "data" / "reinforcement_portfolio.csv"
+INPUT_FILE = ROOT_DIR / "data" / "portfolio" / "reinforcement_portfolio.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "execution_simulation.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "execution_simulation.csv"
 
 # =========================================================
 # LOAD DATA

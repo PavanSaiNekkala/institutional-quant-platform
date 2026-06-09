@@ -8,15 +8,15 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
-FACTOR_FILE = ROOT / "data" / "factor_model_rankings.csv"
+FACTOR_FILE = ROOT / "data" / "processed" / "factor_model_rankings.csv"
 
-EXPECTED_FILE = ROOT / "data" / "expected_returns.csv"
+EXPECTED_FILE = ROOT / "data" / "processed" / "expected_returns.csv"
 
-OUTPUT_ATTRIBUTION = ROOT / "data" / "factor_attribution.csv"
+OUTPUT_ATTRIBUTION = ROOT / "data" / "processed" / "factor_attribution.csv"
 
-OUTPUT_STOCK_ATTRIBUTION = ROOT / "data" / "factor_attribution_by_stock.csv"
+OUTPUT_STOCK_ATTRIBUTION = ROOT / "data" / "processed" / "factor_attribution_by_stock.csv"
 
 # =========================================================
 # LOAD
@@ -41,19 +41,22 @@ for df in [portfolio, factor_df, expected_df]:
 # MERGE
 # =========================================================
 
-df = portfolio.merge(
-    factor_df[
-        [
-            "Symbol",
-            "FACTOR_MOMENTUM",
-            "FACTOR_SHARPE",
-            "FACTOR_ALPHA",
-            "FACTOR_RS",
-            "FACTOR_SECTOR",
-            "FACTOR_ENTRY",
-            "FACTOR_LIQUIDITY",
-        ]
-    ],
+factor_cols = [
+    "FACTOR_MOMENTUM",
+    "FACTOR_SHARPE",
+    "FACTOR_ALPHA",
+    "FACTOR_RS",
+    "FACTOR_SECTOR",
+    "FACTOR_ENTRY",
+    "FACTOR_LIQUIDITY",
+]
+
+# Remove existing factor columns first
+df = portfolio.drop(columns=[c for c in factor_cols if c in portfolio.columns], errors="ignore")
+
+# Merge clean copy
+df = df.merge(
+    factor_df[["Symbol"] + factor_cols],
     on="Symbol",
     how="left",
 )

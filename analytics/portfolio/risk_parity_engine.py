@@ -10,9 +10,9 @@ import yfinance as yf
 
 ROOT = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = ROOT / "data" / "position_sized_portfolio.csv"
+INPUT_FILE = ROOT / "data" / "portfolio" / "position_sized_portfolio.csv"
 
-OUTPUT_FILE = ROOT / "data" / "risk_parity_portfolio.csv"
+OUTPUT_FILE = ROOT / "data" / "portfolio" / "risk_parity_portfolio.csv"
 
 # =========================================================
 # SETTINGS
@@ -79,9 +79,6 @@ volatility = returns.std() * np.sqrt(252)
 
 vol_df = pd.DataFrame({"YF_SYMBOL": volatility.index, "VOLATILITY": volatility.values})
 
-# =========================================================
-# MERGE
-# =========================================================
 
 # =========================================================
 # REMOVE OLD VOLATILITY
@@ -98,10 +95,44 @@ df["VOLATILITY"] = df["VOLATILITY"].fillna(df["VOLATILITY"].median())
 df["VOLATILITY"] = df["VOLATILITY"].replace(0, np.nan)
 
 df["VOLATILITY"] = df["VOLATILITY"].fillna(df["VOLATILITY"].median())
+
+df["EXPECTED_RETURN_30D"] = (
+    df["Momentum"] * 0.40 + df["RS_30D"] * 0.30 + df["RS_60D"] * 0.20 + df["ALPHA_SCORE"] * 0.10
+)
+
+df["RETURN_NORM"] = df["EXPECTED_RETURN_30D"] / df["EXPECTED_RETURN_30D"].max()
+
+# =========================================================
+# CONVICTION SCORE
+# =========================================================
+
+required_cols = [
+    "MULTI_FACTOR_SCORE",
+    "ALPHA_SCORE",
+    "RS_COMPOSITE",
+    "ENTRY_SCORE",
+]
+
+for col in required_cols:
+    if col not in df.columns:
+        raise ValueError(f"Missing column: {col}")
+
+df["CONVICTION_SCORE"] = (
+    0.25 * df["MULTI_FACTOR_SCORE"]
+    + 0.20 * df["ALPHA_SCORE"]
+    + 0.15 * df["RS_COMPOSITE"]
+    + 0.15 * df["RETURN_NORM"]
+    + 0.10 * df["SECTOR_SCORE"]
+    + 0.10 * df["ENTRY_SCORE"]
+    + 0.05 * df["Sharpe"]
+)
+
 # =========================================================
 # RISK SCORE
 # =========================================================
-df["RISK_SCORE"] = df["MULTI_FACTOR_SCORE"] * (1 + df["ENTRY_SCORE"]) / df["VOLATILITY"]
+
+df["RISK_SCORE"] = df["CONVICTION_SCORE"] * (1 + df["ENTRY_SCORE"]) / df["VOLATILITY"]
+
 # =========================================================
 # NORMALIZE
 # =========================================================
@@ -134,4 +165,15 @@ print(OUTPUT_FILE)
 
 print("\n🏆 Top Risk Adjusted Holdings:\n")
 
-print(df[["Symbol", "MULTI_FACTOR_SCORE", "ENTRY_SCORE", "VOLATILITY", "FINAL_WEIGHT_%"]].head(20))
+print(
+    df[
+        [
+            "Symbol",
+            "CONVICTION_SCORE",
+            "MULTI_FACTOR_SCORE",
+            "ENTRY_SCORE",
+            "VOLATILITY",
+            "FINAL_WEIGHT_%",
+        ]
+    ].head(20)
+)

@@ -10,11 +10,11 @@ import yfinance as yf
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "risk_parity_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "risk_parity_portfolio.csv"
 
-OUTPUT_EQUITY = ROOT / "data" / "walk_forward_equity_curve.csv"
+OUTPUT_EQUITY = ROOT / "data" / "portfolio" / "walk_forward_equity_curve.csv"
 
-OUTPUT_STATS = ROOT / "data" / "walk_forward_stats.csv"
+OUTPUT_STATS = ROOT / "data" / "portfolio" / "walk_forward_stats.csv"
 
 # =========================================================
 # SETTINGS
@@ -22,7 +22,7 @@ OUTPUT_STATS = ROOT / "data" / "walk_forward_stats.csv"
 
 START_DATE = "2020-01-01"
 
-REBALANCE_FREQ = "M"
+REBALANCE_FREQ = "ME"
 
 # =========================================================
 # LOAD PORTFOLIO

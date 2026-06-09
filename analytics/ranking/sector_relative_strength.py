@@ -8,11 +8,11 @@ import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-RS_FILE = ROOT_DIR / "data" / "institutional_rankings.csv"
+RS_FILE = ROOT_DIR / "data" / "processed" / "institutional_rankings.csv"
 
-META_FILE = ROOT_DIR / "data" / "stock_metadata.csv"
+META_FILE = ROOT_DIR / "data" / "raw" / "stock_metadata.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "sector_relative_strength.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "sector_relative_strength.csv"
 
 # =========================================================
 # LOAD DATA
@@ -39,7 +39,7 @@ meta_df["Symbol"] = (
 # =========================================================
 
 df = pd.merge(
-    rs_df, meta_df[["Symbol", "Sector", "Industry", "MarketCap"]], on="Symbol", how="left"
+    rs_df, meta_df[["Symbol", "Sector", "Industry", "Market_Cap"]], on="Symbol", how="left"
 )
 
 # =========================================================

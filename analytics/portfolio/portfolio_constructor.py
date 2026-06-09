@@ -22,13 +22,13 @@ MIN_ALPHA_SCORE = 0
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-RANKINGS_FILE = ROOT_DIR / "data" / "cross_sectional_rankings.csv"
+RANKINGS_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
-EXPECTED_RETURNS_FILE = ROOT_DIR / "data" / "expected_returns.csv"
+EXPECTED_RETURNS_FILE = ROOT_DIR / "data" / "processed" / "expected_returns.csv"
 
-REGIME_FILE = ROOT_DIR / "data" / "market_regime.csv"
+REGIME_FILE = ROOT_DIR / "data" / "processed" / "market_regime.csv"
 
-OUTPUT_FILE = ROOT_DIR / "data" / "portfolio_allocation.csv"
+OUTPUT_FILE = ROOT_DIR / "data" / "portfolio" / "portfolio_allocation.csv"
 
 # =========================================================
 # LOAD DATA

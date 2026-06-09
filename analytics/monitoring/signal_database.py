@@ -9,13 +9,13 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT / "data" / "optimised_portfolio.csv"
+PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
-REGIME_FILE = ROOT / "data" / "market_regime.csv"
+REGIME_FILE = ROOT / "data" / "processed" / "market_regime.csv"
 
-PARQUET_FILE = ROOT / "data" / "historical_signals.parquet"
+PARQUET_FILE = ROOT / "data" / "cache" / "historical_signals.parquet"
 
-CSV_FILE = ROOT / "data" / "historical_signals.csv"
+CSV_FILE = ROOT / "data" / "processed" / "historical_signals.csv"
 
 # =========================================================
 # LOAD DATA
