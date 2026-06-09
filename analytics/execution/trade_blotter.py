@@ -7,95 +7,118 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-BLOTTER_FILE = (
+PORTFOLIO_FILE = (
     ROOT
     / "data"
-    / "trade_blotter.csv"
+    / "risk_parity_portfolio.csv"
+)
+
+REBALANCE_FILE = (
+    ROOT
+    / "data"
+    / "rebalance_plan.csv"
 )
 
 OUTPUT_FILE = (
     ROOT
     / "data"
-    / "trade_blotter_costed.csv"
+    / "trade_blotter.csv"
 )
 
 # =========================================================
-# COST SETTINGS
+# SETTINGS
 # =========================================================
 
-BROKERAGE = 0.0003
-STT = 0.0010
-SLIPPAGE = 0.0005
-IMPACT_COST = 0.0005
+PORTFOLIO_VALUE = 1000000
 
 # =========================================================
 # LOAD
 # =========================================================
 
-print("\n📥 Loading Trade Blotter...")
+print("\n📥 Loading Portfolio...")
 
-df = pd.read_csv(
-    BLOTTER_FILE
+portfolio = pd.read_csv(
+    PORTFOLIO_FILE
+)
+
+rebalance = pd.read_csv(
+    REBALANCE_FILE
 )
 
 # =========================================================
-# TOTAL COST %
+# TARGET WEIGHTS
 # =========================================================
 
-TOTAL_COST_RATE = (
-
-    BROKERAGE
-
-    +
-
-    STT
-
-    +
-
-    SLIPPAGE
-
-    +
-
-    IMPACT_COST
-)
+portfolio = portfolio[
+    [
+        "Symbol",
+        "FINAL_WEIGHT"
+    ]
+]
 
 # =========================================================
-# COSTS
+# TARGET VALUE
 # =========================================================
 
-df["TRANSACTION_COST"] = (
+portfolio["TARGET_VALUE"] = (
 
-    df["ORDER_VALUE"]
+    portfolio["FINAL_WEIGHT"]
 
     *
 
-    TOTAL_COST_RATE
+    PORTFOLIO_VALUE
 
-).round(2)
-
-# =========================================================
-# NET TRADE VALUE
-# =========================================================
-
-df["NET_ORDER_VALUE"] = (
-
-    df["ORDER_VALUE"]
-
-    -
-
-    df["TRANSACTION_COST"]
-
-).round(2)
+).round(0)
 
 # =========================================================
-# PORTFOLIO TOTALS
+# MERGE
 # =========================================================
 
-gross = df["ORDER_VALUE"].sum()
+df = portfolio.merge(
 
-cost = df["TRANSACTION_COST"].sum()
+    rebalance[
+        [
+            "Symbol",
+            "ACTION"
+        ]
+    ],
 
-net = df["NET_ORDER_VALUE"].sum()
+    on="Symbol",
+
+    how="left"
+)
+
+# =========================================================
+# DEFAULT ACTION
+# =========================================================
+
+df["ACTION"] = (
+
+    df["ACTION"]
+
+    .fillna("BUY")
+)
+
+# =========================================================
+# ORDER SIZE
+# =========================================================
+
+df["ORDER_VALUE"] = (
+
+    df["TARGET_VALUE"]
+
+).round(0)
+
+# =========================================================
+# SORT
+# =========================================================
+
+df = df.sort_values(
+
+    by="ORDER_VALUE",
+
+    ascending=False
+)
 
 # =========================================================
 # SAVE
@@ -110,29 +133,13 @@ df.to_csv(
 # REPORT
 # =========================================================
 
-print("\n✅ Transaction Costs Applied")
-
-print("\nGross Value :", round(gross,2))
-print("Cost Value  :", round(cost,2))
-print("Net Value   :", round(net,2))
-
-print("\nCost %")
-
-print(
-
-    round(
-        (cost / gross) * 100,
-        3
-    )
-)
+print("\n✅ Trade Blotter Created")
 
 print("\n📁 Saved:")
 
-print(
-    OUTPUT_FILE
-)
+print(OUTPUT_FILE)
 
-print("\n🏆 Highest Cost Trades:\n")
+print("\n🏆 Orders:\n")
 
 print(
 
@@ -140,15 +147,9 @@ print(
         [
             "Symbol",
             "ACTION",
-            "ORDER_VALUE",
-            "TRANSACTION_COST"
+            "ORDER_VALUE"
         ]
     ]
-
-    .sort_values(
-        by="TRANSACTION_COST",
-        ascending=False
-    )
 
     .head(20)
 )

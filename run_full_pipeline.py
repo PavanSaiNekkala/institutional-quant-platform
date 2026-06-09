@@ -19,6 +19,10 @@ ANALYTICS_DIR = ROOT_DIR / "analytics"
 
 DATA_DIR = ROOT_DIR / "data"
 
+RISK_DIR = ROOT_DIR / "risk"
+
+EXECUTION_DIR = ROOT_DIR / "execution"
+
 # =========================================================
 # PIPELINE
 # =========================================================
@@ -26,33 +30,33 @@ DATA_DIR = ROOT_DIR / "data"
 PIPELINE = [
 
     #{
-       #"script": "updated_stocks.py",
+       #"script": "utilities/updated_stocks.py",
        #"requires": [],
-       #"produces": ["updated_stocks.xlsx"]
+       #"produces": ["raw/updated_stocks.xlsx"]
     #},
-   
+
     {
-        "script": "news_engine.py",
+        "script": "research/news_engine.py",
         "requires": [
-                "updated_stocks.xlsx"
+                "raw/updated_stocks.xlsx"
             ],
         "produces": ["news_rankings.csv"]
     },
-    
+
     {
-        "script": "factor_model.py",
+        "script": "ranking/factor_model.py",
         "requires": [],
         "produces": ["factor_model_rankings.csv"]
     },
 
     {
-        "script": "entry_quality_engine.py",
+        "script": "ranking/entry_quality_engine.py",
         "requires": [],
         "produces": ["entry_quality_scores.csv"]
     },
 
     {
-        "script": "market_breadth_engine.py",
+        "script": "regime/market_breadth_engine.py",
         "requires": [
             "factor_model_rankings.csv"
         ],
@@ -62,21 +66,21 @@ PIPELINE = [
     },
 
     {
-        "script": "regime_engine.py",
+        "script": "regime/regime_engine.py",
         "requires": [
             "market_breadth.csv"
         ],
         "produces": ["market_regime.csv"]
     },
-    
+
     {
-        "script": "expected_return_engine.py",
+        "script": "alpha/expected_return_engine.py",
         "requires": ["factor_model_rankings.csv"],
         "produces": ["expected_returns.csv"]
     },
 
     {
-        "script": "conviction_engine.py",
+        "script": "alpha/conviction_engine.py",
         "requires": [
             "factor_model_rankings.csv",
             "entry_quality_scores.csv",
@@ -86,61 +90,61 @@ PIPELINE = [
     },
 
     {
-        "script": "turnover_control.py",
+        "script": "portfolio/turnover_control.py",
         "requires": ["conviction_scores.csv"],
         "produces": ["target_portfolio.csv"]
     },
 
     {
-        "script": "position_sizing_engine.py",
+        "script": "portfolio/position_sizing_engine.py",
         "requires": ["target_portfolio.csv"],
         "produces": ["position_sized_portfolio.csv"]
     },
 
     {
-        "script": "risk_parity_engine.py",
+        "script": "portfolio/risk_parity_engine.py",
         "requires": ["position_sized_portfolio.csv"],
         "produces": ["risk_parity_portfolio.csv"]
     },
 
     {
-        "script": "sector_exposure_engine.py",
+        "script": "portfolio/sector_exposure_engine.py",
         "requires": ["risk_parity_portfolio.csv"],
         "produces": ["sector_controlled_portfolio.csv"]
     },
 
     {
-        "script": "portfolio_optimiser.py",
+        "script": "portfolio/portfolio_optimiser.py",
         "requires": ["sector_controlled_portfolio.csv"],
         "produces": ["optimised_portfolio.csv"]
     },
 
     {
-        "script": "risk_engine.py",
+        "script": "risk/risk_engine.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": ["portfolio_risk_report.csv"]
     },
 
     {
-        "script": "factor_attribution_engine.py",
+        "script": "attribution/factor_attribution_engine.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": ["factor_attribution.csv"]
     },
 
     {
-        "script": "rebalance_engine.py",
+        "script": "portfolio/rebalance_engine.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": ["rebalance_plan.csv"]
     },
 
     {
-        "script": "stop_loss_engine.py",
+        "script": "execution/stop_loss_engine.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": ["stoploss_signals.csv"]
     },
 
     {
-        "script": "portfolio_lifecycle_engine.py",
+        "script": "portfolio/portfolio_lifecycle_engine.py",
         "requires": ["optimised_portfolio.csv"],
         "produces": [
             "portfolio_lifecycle.csv",
@@ -150,7 +154,7 @@ PIPELINE = [
     },
 
     {
-        "script": "final_execution_engine.py",
+        "script": "execution/final_execution_engine.py",
         "requires": [
             "rebalance_plan.csv",
             "stoploss_signals.csv"
@@ -159,7 +163,7 @@ PIPELINE = [
     },
 
     {
-        "script": "portfolio_monitor_engine.py",
+        "script": "portfolio/portfolio_monitor_engine.py",
         "requires": [
             "optimised_portfolio.csv",
             "current_positions.csv"
@@ -171,7 +175,7 @@ PIPELINE = [
     },
 
     {
-        "script": "portfolio_returns_engine.py",
+        "script": "portfolio/portfolio_returns_engine.py",
         "requires": [
             "portfolio_monitor.csv"
         ],
@@ -182,7 +186,7 @@ PIPELINE = [
     },
 
     {
-        "script": "performance_analytics_engine.py",
+        "script": "monitoring/performance_analytics_engine.py",
         "requires": [
             "portfolio_returns.csv"
         ],
@@ -193,7 +197,7 @@ PIPELINE = [
     },
 
     {
-        "script": "monthly_factsheet_generator.py",
+        "script": "utilities/monthly_factsheet_generator.py",
         "requires": [
             "optimised_portfolio.csv",
             "portfolio_risk_report.csv"
@@ -205,7 +209,7 @@ PIPELINE = [
     },
 
     {
-        "script": "experiment_tracker.py",
+        "script": "utilities/experiment_tracker.py",
         "requires": [
             "walk_forward_stats.csv",
             "market_regime.csv",
@@ -216,9 +220,9 @@ PIPELINE = [
         ],
         "optional": True
     },
-    
+
     {
-        "script": "capacity_analysis_engine.py",
+        "script": "research/capacity_analysis_engine.py",
         "requires": [
             "optimised_portfolio.csv",
             "factor_model_rankings.csv"
@@ -228,9 +232,9 @@ PIPELINE = [
         ],
         "optional": True
     },
-    
+
     {
-        "script": "signal_database.py",
+        "script": "monitoring/signal_database.py",
         "requires": [
             "optimised_portfolio.csv"
         ],
@@ -242,7 +246,7 @@ PIPELINE = [
     },
 
     {
-        "script": "strategy_version_control.py",
+        "script": "utilities/strategy_version_control.py",
         "requires": [
             "walk_forward_stats.csv",
             "market_regime.csv",
@@ -254,7 +258,7 @@ PIPELINE = [
         "optional": True
     },
 ]
-    
+
 from datetime import datetime
 
 # =========================================================
@@ -303,7 +307,14 @@ def run_script(config):
 
     produces = config["produces"]
 
-    script_path = ANALYTICS_DIR / script
+    if script.startswith("risk/"):
+        script_path = ROOT_DIR / script
+
+    elif script.startswith("execution/"):
+        script_path = ROOT_DIR / script
+
+    else:
+        script_path = ANALYTICS_DIR / script
 
     print("\n" + "=" * 80)
     print(f"🚀 RUNNING: {script}")
@@ -326,11 +337,11 @@ def run_script(config):
             )
 
             return True
-    
+
         return False
 
     start = time.time()
-    
+
     if not script_path.exists():
 
         print(
@@ -348,7 +359,7 @@ def run_script(config):
             text=True,
             timeout=3600
         )
-        
+
         runtime = round(
             time.time() - start,
             2
@@ -428,7 +439,7 @@ def run_script(config):
             )
 
         return True
-        
+
     except subprocess.TimeoutExpired:
 
         with open(
@@ -467,7 +478,7 @@ def run_script(config):
         print(
             f"{type(e).__name__}: {e}"
         )
-        
+
         if config.get("optional", False):
 
             print(
@@ -477,7 +488,7 @@ def run_script(config):
             return True
 
         return False
-        
+
 # =========================================================
 # MAIN
 # =========================================================
@@ -557,14 +568,14 @@ print(
 print("\nGenerated Files:")
 
 for file in sorted(
-    DATA_DIR.glob("*.csv")
+    DATA_DIR.rglob("*.csv")
 ):
 
     print(
         f"{file.name:<40}"
         f"{round(file.stat().st_size/1024,2)} KB"
     )
-    
+
 health_file = DATA_DIR / "pipeline_health.csv"
 
 new_row = pd.DataFrame({

@@ -16,3 +16,19 @@ __pycache__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# yfinance cache
+cache/
+*.db
+*.db-shm
+*.db-wal
+
+# generated data
+data/*.csv
+data/*.xlsx
+data/duckdb/
+
+*.parquet
+
+data/news_cache.parquet
+data/news_history.parquet

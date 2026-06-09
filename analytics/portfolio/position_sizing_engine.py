@@ -7,95 +7,120 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-BLOTTER_FILE = (
+PORTFOLIO_FILE = (
     ROOT
     / "data"
-    / "trade_blotter.csv"
+    / "sector_controlled_portfolio.csv"
 )
 
 OUTPUT_FILE = (
     ROOT
     / "data"
-    / "trade_blotter_costed.csv"
+    / "position_sized_portfolio.csv"
 )
 
 # =========================================================
-# COST SETTINGS
+# SETTINGS
 # =========================================================
 
-BROKERAGE = 0.0003
-STT = 0.0010
-SLIPPAGE = 0.0005
-IMPACT_COST = 0.0005
+MAX_WEIGHT = 0.08
+MIN_WEIGHT = 0.00
 
 # =========================================================
-# LOAD
+# LOAD DATA
 # =========================================================
 
-print("\n📥 Loading Trade Blotter...")
+print("\n📥 Loading Portfolio...")
 
-df = pd.read_csv(
-    BLOTTER_FILE
+portfolio_df = pd.read_csv(
+    PORTFOLIO_FILE
+)
+
+df = portfolio_df.copy()
+
+# =========================================================
+# POSITION SCORE
+# =========================================================
+
+df["ENTRY_SCORE"] = (
+    df["ENTRY_SCORE"]
+    .fillna(0)
+)
+
+df["POSITION_SCORE"] = (
+
+      (df["MULTI_FACTOR_SCORE"] ** 2)
+
+    * (1 + df["ENTRY_SCORE"] / 10)
+
 )
 
 # =========================================================
-# TOTAL COST %
+# NORMALIZED WEIGHTS
 # =========================================================
 
-TOTAL_COST_RATE = (
+total_score = (
+    df["POSITION_SCORE"]
+    .sum()
+)
+if total_score <= 0:
 
-    BROKERAGE
+    raise ValueError(
+        "POSITION_SCORE total is zero."
+    )
+df["TARGET_WEIGHT"] = (
 
-    +
+    df["POSITION_SCORE"]
 
-    STT
+    /
 
-    +
-
-    SLIPPAGE
-
-    +
-
-    IMPACT_COST
+    total_score
 )
 
 # =========================================================
-# COSTS
+# APPLY LIMITS
 # =========================================================
 
-df["TRANSACTION_COST"] = (
+df["TARGET_WEIGHT"] = (
 
-    df["ORDER_VALUE"]
+    df["TARGET_WEIGHT"]
 
-    *
+    .clip(
+        upper=MAX_WEIGHT
+    )
+)
 
-    TOTAL_COST_RATE
+df["TARGET_WEIGHT"] = (
+
+    df["TARGET_WEIGHT"]
+
+    /
+
+    df["TARGET_WEIGHT"].sum()
+)
+
+# =========================================================
+# PERCENT FORMAT
+# =========================================================
+
+df["TARGET_WEIGHT_%"] = (
+
+    df["TARGET_WEIGHT"]
+
+    * 100
 
 ).round(2)
 
 # =========================================================
-# NET TRADE VALUE
+# SORT
 # =========================================================
 
-df["NET_ORDER_VALUE"] = (
+df = df.sort_values(
 
-    df["ORDER_VALUE"]
+    by="TARGET_WEIGHT",
 
-    -
-
-    df["TRANSACTION_COST"]
-
-).round(2)
-
-# =========================================================
-# PORTFOLIO TOTALS
-# =========================================================
-
-gross = df["ORDER_VALUE"].sum()
-
-cost = df["TRANSACTION_COST"].sum()
-
-net = df["NET_ORDER_VALUE"].sum()
+    ascending=False
+)
 
 # =========================================================
 # SAVE
@@ -106,25 +131,7 @@ df.to_csv(
     index=False
 )
 
-# =========================================================
-# REPORT
-# =========================================================
-
-print("\n✅ Transaction Costs Applied")
-
-print("\nGross Value :", round(gross,2))
-print("Cost Value  :", round(cost,2))
-print("Net Value   :", round(net,2))
-
-print("\nCost %")
-
-print(
-
-    round(
-        (cost / gross) * 100,
-        3
-    )
-)
+print("\n✅ Position Sizing Complete")
 
 print("\n📁 Saved:")
 
@@ -132,23 +139,18 @@ print(
     OUTPUT_FILE
 )
 
-print("\n🏆 Highest Cost Trades:\n")
+print("\n🏆 Portfolio Weights:\n")
 
 print(
 
     df[
         [
             "Symbol",
-            "ACTION",
-            "ORDER_VALUE",
-            "TRANSACTION_COST"
+                "MULTI_FACTOR_SCORE",
+                "ENTRY_SCORE",
+                "TARGET_WEIGHT_%"
         ]
     ]
-
-    .sort_values(
-        by="TRANSACTION_COST",
-        ascending=False
-    )
 
     .head(20)
 )
