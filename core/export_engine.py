@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 from datetime import datetime
 
 # =========================================================
@@ -8,111 +7,67 @@ from datetime import datetime
 
 EXPORT_DIR = "exports"
 
-os.makedirs(
-
-    EXPORT_DIR,
-
-    exist_ok=True
-)
+os.makedirs(EXPORT_DIR, exist_ok=True)
 
 # =========================================================
 # GENERATE TIMESTAMP
 # =========================================================
 
+
 def timestamp():
 
-    return datetime.now().strftime(
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        "%Y%m%d_%H%M%S"
-    )
 
 # =========================================================
 # EXPORT DATAFRAME
 # =========================================================
 
-def export_dataframe(
 
-    df,
+def export_dataframe(df, filename):
 
-    filename
-):
+    file_path = os.path.join(EXPORT_DIR, f"{filename}_{timestamp()}.csv")
 
-    file_path = os.path.join(
-
-        EXPORT_DIR,
-
-        f"{filename}_{timestamp()}.csv"
-    )
-
-    df.to_csv(
-
-        file_path,
-
-        index=True
-    )
+    df.to_csv(file_path, index=True)
 
     return file_path
+
 
 # =========================================================
 # EXPORT RANKINGS
 # =========================================================
 
-def export_rankings(
 
-    rankings_df
-):
+def export_rankings(rankings_df):
 
-    return export_dataframe(
+    return export_dataframe(rankings_df, "institutional_rankings")
 
-        rankings_df,
-
-        "institutional_rankings"
-    )
 
 # =========================================================
 # EXPORT RISK REPORT
 # =========================================================
 
-def export_risk_report(
 
-    risk_df
-):
+def export_risk_report(risk_df):
 
-    return export_dataframe(
+    return export_dataframe(risk_df, "risk_report")
 
-        risk_df,
-
-        "risk_report"
-    )
 
 # =========================================================
 # EXPORT REGIME REPORT
 # =========================================================
 
-def export_regime_report(
 
-    regime_df
-):
+def export_regime_report(regime_df):
 
-    return export_dataframe(
+    return export_dataframe(regime_df, "regime_report")
 
-        regime_df,
-
-        "regime_report"
-    )
 
 # =========================================================
 # EXPORT PORTFOLIO
 # =========================================================
 
-def export_portfolio(
 
-    portfolio_df
-):
+def export_portfolio(portfolio_df):
 
-    return export_dataframe(
-
-        portfolio_df,
-
-        "portfolio_report"
-    )
+    return export_dataframe(portfolio_df, "portfolio_report")

@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 # =========================================================
 # FILES
@@ -7,23 +8,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = (
-    ROOT
-    / "data"
-    / "risk_parity_portfolio.csv"
-)
+PORTFOLIO_FILE = ROOT / "data" / "risk_parity_portfolio.csv"
 
-REBALANCE_FILE = (
-    ROOT
-    / "data"
-    / "rebalance_plan.csv"
-)
+REBALANCE_FILE = ROOT / "data" / "rebalance_plan.csv"
 
-OUTPUT_FILE = (
-    ROOT
-    / "data"
-    / "trade_blotter.csv"
-)
+OUTPUT_FILE = ROOT / "data" / "trade_blotter.csv"
 
 # =========================================================
 # SETTINGS
@@ -37,97 +26,51 @@ PORTFOLIO_VALUE = 1000000
 
 print("\n📥 Loading Portfolio...")
 
-portfolio = pd.read_csv(
-    PORTFOLIO_FILE
-)
+portfolio = pd.read_csv(PORTFOLIO_FILE)
 
-rebalance = pd.read_csv(
-    REBALANCE_FILE
-)
+rebalance = pd.read_csv(REBALANCE_FILE)
 
 # =========================================================
 # TARGET WEIGHTS
 # =========================================================
 
-portfolio = portfolio[
-    [
-        "Symbol",
-        "FINAL_WEIGHT"
-    ]
-]
+portfolio = portfolio[["Symbol", "FINAL_WEIGHT"]]
 
 # =========================================================
 # TARGET VALUE
 # =========================================================
 
-portfolio["TARGET_VALUE"] = (
-
-    portfolio["FINAL_WEIGHT"]
-
-    *
-
-    PORTFOLIO_VALUE
-
-).round(0)
+portfolio["TARGET_VALUE"] = (portfolio["FINAL_WEIGHT"] * PORTFOLIO_VALUE).round(0)
 
 # =========================================================
 # MERGE
 # =========================================================
 
-df = portfolio.merge(
-
-    rebalance[
-        [
-            "Symbol",
-            "ACTION"
-        ]
-    ],
-
-    on="Symbol",
-
-    how="left"
-)
+df = portfolio.merge(rebalance[["Symbol", "ACTION"]], on="Symbol", how="left")
 
 # =========================================================
 # DEFAULT ACTION
 # =========================================================
 
-df["ACTION"] = (
-
-    df["ACTION"]
-
-    .fillna("BUY")
-)
+df["ACTION"] = df["ACTION"].fillna("BUY")
 
 # =========================================================
 # ORDER SIZE
 # =========================================================
 
-df["ORDER_VALUE"] = (
-
-    df["TARGET_VALUE"]
-
-).round(0)
+df["ORDER_VALUE"] = (df["TARGET_VALUE"]).round(0)
 
 # =========================================================
 # SORT
 # =========================================================
 
-df = df.sort_values(
-
-    by="ORDER_VALUE",
-
-    ascending=False
-)
+df = df.sort_values(by="ORDER_VALUE", ascending=False)
 
 # =========================================================
 # SAVE
 # =========================================================
 
-df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+df.to_csv(OUTPUT_FILE, index=False)
 
 # =========================================================
 # REPORT
@@ -141,15 +84,4 @@ print(OUTPUT_FILE)
 
 print("\n🏆 Orders:\n")
 
-print(
-
-    df[
-        [
-            "Symbol",
-            "ACTION",
-            "ORDER_VALUE"
-        ]
-    ]
-
-    .head(20)
-)
+print(df[["Symbol", "ACTION", "ORDER_VALUE"]].head(20))

@@ -1,33 +1,30 @@
 import sqlite3
-import pandas as pd
-
 from pathlib import Path
+
+import pandas as pd
 
 # =========================================================
 # DATABASE
 # =========================================================
 
-DB_PATH = Path(
-
-    "paper_trading/paper_portfolio.db"
-)
+DB_PATH = Path("paper_trading/paper_portfolio.db")
 
 # =========================================================
 # CONNECTION
 # =========================================================
 
+
 def get_connection():
 
-    DB_PATH.parent.mkdir(
-
-        exist_ok=True
-    )
+    DB_PATH.parent.mkdir(exist_ok=True)
 
     return sqlite3.connect(DB_PATH)
+
 
 # =========================================================
 # INITIALIZE DATABASE
 # =========================================================
+
 
 def initialize_database():
 
@@ -40,7 +37,6 @@ def initialize_database():
     # =====================================================
 
     cursor.execute(
-
         """
 
         CREATE TABLE IF NOT EXISTS positions (
@@ -59,7 +55,6 @@ def initialize_database():
     # =====================================================
 
     cursor.execute(
-
         """
 
         CREATE TABLE IF NOT EXISTS trades (
@@ -86,7 +81,6 @@ def initialize_database():
     # =====================================================
 
     cursor.execute(
-
         """
 
         CREATE TABLE IF NOT EXISTS cash (
@@ -104,9 +98,11 @@ def initialize_database():
 
     conn.close()
 
+
 # =========================================================
 # SAVE CASH
 # =========================================================
+
 
 def save_cash(balance):
 
@@ -115,7 +111,6 @@ def save_cash(balance):
     cursor = conn.cursor()
 
     cursor.execute(
-
         """
 
         INSERT OR REPLACE INTO cash
@@ -125,17 +120,18 @@ def save_cash(balance):
         VALUES (1, ?)
 
         """,
-
-        (balance,)
+        (balance,),
     )
 
     conn.commit()
 
     conn.close()
 
+
 # =========================================================
 # LOAD CASH
 # =========================================================
+
 
 def load_cash():
 
@@ -143,38 +139,30 @@ def load_cash():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-
-        "SELECT balance FROM cash WHERE id = 1"
-    )
+    cursor.execute("SELECT balance FROM cash WHERE id = 1")
 
     result = cursor.fetchone()
 
     conn.close()
 
     if result:
-
         return result[0]
 
     return 100000
+
 
 # =========================================================
 # SAVE POSITION
 # =========================================================
 
-def save_position(
 
-    symbol,
-
-    quantity
-):
+def save_position(symbol, quantity):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
     cursor.execute(
-
         """
 
         INSERT OR REPLACE INTO positions
@@ -184,73 +172,51 @@ def save_position(
         VALUES (?, ?)
 
         """,
-
-        (
-
-            symbol,
-
-            quantity
-        )
+        (symbol, quantity),
     )
 
     conn.commit()
 
     conn.close()
 
+
 # =========================================================
 # LOAD POSITIONS
 # =========================================================
+
 
 def load_positions():
 
     conn = get_connection()
 
-    df = pd.read_sql(
-
-        "SELECT * FROM positions",
-
-        conn
-    )
+    df = pd.read_sql("SELECT * FROM positions", conn)
 
     conn.close()
 
     if df.empty:
-
         return {}
 
     return dict(
-
         zip(
-
             df["symbol"],
-
-            df["quantity"]
+            df["quantity"],
+            strict=False,
         )
     )
+
 
 # =========================================================
 # SAVE TRADE
 # =========================================================
 
-def save_trade(
 
-    action,
-
-    symbol,
-
-    quantity,
-
-    price,
-
-    value
-):
+def save_trade(action, symbol, quantity, price, value):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
     cursor.execute(
-
         """
 
         INSERT INTO trades
@@ -272,39 +238,24 @@ def save_trade(
         VALUES (?, ?, ?, ?, ?)
 
         """,
-
-        (
-
-            action,
-
-            symbol,
-
-            quantity,
-
-            price,
-
-            value
-        )
+        (action, symbol, quantity, price, value),
     )
 
     conn.commit()
 
     conn.close()
 
+
 # =========================================================
 # LOAD TRADES
 # =========================================================
+
 
 def load_trades():
 
     conn = get_connection()
 
-    df = pd.read_sql(
-
-        "SELECT * FROM trades",
-
-        conn
-    )
+    df = pd.read_sql("SELECT * FROM trades", conn)
 
     conn.close()
 

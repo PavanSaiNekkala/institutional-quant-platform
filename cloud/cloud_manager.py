@@ -1,12 +1,13 @@
 from datetime import datetime
+
 import pandas as pd
 
 # =========================================================
 # CLOUD MANAGER
 # =========================================================
 
-class CloudManager:
 
+class CloudManager:
     def __init__(self):
 
         self.nodes = {}
@@ -17,72 +18,29 @@ class CloudManager:
     # REGISTER NODE
     # =====================================================
 
-    def register_node(
-
-        self,
-
-        node_name,
-
-        cpu,
-
-        memory
-    ):
+    def register_node(self, node_name, cpu, memory):
 
         self.nodes[node_name] = {
-
-            "CPU":
-
-                cpu,
-
-            "Memory":
-
-                memory,
-
-            "Status":
-
-                "ACTIVE",
-
-            "Registered":
-
-                datetime.now()
+            "CPU": cpu,
+            "Memory": memory,
+            "Status": "ACTIVE",
+            "Registered": datetime.now(),
         }
 
     # =====================================================
     # DEPLOY WORKLOAD
     # =====================================================
 
-    def deploy_workload(
-
-        self,
-
-        workload_name,
-
-        node_name
-    ):
+    def deploy_workload(self, workload_name, node_name):
 
         deployment = {
-
-            "Workload":
-
-                workload_name,
-
-            "Node":
-
-                node_name,
-
-            "Timestamp":
-
-                datetime.now(),
-
-            "Status":
-
-                "RUNNING"
+            "Workload": workload_name,
+            "Node": node_name,
+            "Timestamp": datetime.now(),
+            "Status": "RUNNING",
         }
 
-        self.deployments.append(
-
-            deployment
-        )
+        self.deployments.append(deployment)
 
     # =====================================================
     # NODE SUMMARY
@@ -90,10 +48,7 @@ class CloudManager:
 
     def node_summary(self):
 
-        return pd.DataFrame(
-
-            self.nodes
-        ).T
+        return pd.DataFrame(self.nodes).T
 
     # =====================================================
     # DEPLOYMENT SUMMARY
@@ -101,7 +56,4 @@ class CloudManager:
 
     def deployment_summary(self):
 
-        return pd.DataFrame(
-
-            self.deployments
-        )
+        return pd.DataFrame(self.deployments)

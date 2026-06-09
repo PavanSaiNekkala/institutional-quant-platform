@@ -1,12 +1,13 @@
 from datetime import datetime
+
 import pandas as pd
 
 # =========================================================
 # AI OPERATING SYSTEM
 # =========================================================
 
-class AIOperatingSystem:
 
+class AIOperatingSystem:
     def __init__(self):
 
         self.services = {}
@@ -19,71 +20,29 @@ class AIOperatingSystem:
     # REGISTER SERVICE
     # =====================================================
 
-    def register_service(
-
-        self,
-
-        service_name,
-
-        category
-    ):
+    def register_service(self, service_name, category):
 
         self.services[service_name] = {
-
-            "Category":
-
-                category,
-
-            "Status":
-
-                "ACTIVE",
-
-            "Registered":
-
-                datetime.now()
+            "Category": category,
+            "Status": "ACTIVE",
+            "Registered": datetime.now(),
         }
 
     # =====================================================
     # START WORKFLOW
     # =====================================================
 
-    def start_workflow(
+    def start_workflow(self, workflow_name):
 
-        self,
+        workflow = {"Workflow": workflow_name, "Status": "RUNNING", "Timestamp": datetime.now()}
 
-        workflow_name
-    ):
-
-        workflow = {
-
-            "Workflow":
-
-                workflow_name,
-
-            "Status":
-
-                "RUNNING",
-
-            "Timestamp":
-
-                datetime.now()
-        }
-
-        self.workflows.append(
-
-            workflow
-        )
+        self.workflows.append(workflow)
 
     # =====================================================
     # UPDATE SYSTEM HEALTH
     # =====================================================
 
-    def update_health(
-
-        self,
-
-        status
-    ):
+    def update_health(self, status):
 
         self.system_health = status
 
@@ -93,10 +52,7 @@ class AIOperatingSystem:
 
     def service_summary(self):
 
-        return pd.DataFrame(
-
-            self.services
-        ).T
+        return pd.DataFrame(self.services).T
 
     # =====================================================
     # WORKFLOW SUMMARY
@@ -104,10 +60,7 @@ class AIOperatingSystem:
 
     def workflow_summary(self):
 
-        return pd.DataFrame(
-
-            self.workflows
-        )
+        return pd.DataFrame(self.workflows)
 
     # =====================================================
     # OS STATUS
@@ -116,16 +69,7 @@ class AIOperatingSystem:
     def os_status(self):
 
         return {
-
-            "System Health":
-
-                self.system_health,
-
-            "Services":
-
-                len(self.services),
-
-            "Workflows":
-
-                len(self.workflows)
+            "System Health": self.system_health,
+            "Services": len(self.services),
+            "Workflows": len(self.workflows),
         }

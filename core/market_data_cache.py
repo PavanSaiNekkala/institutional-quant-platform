@@ -1,30 +1,22 @@
-import yfinance as yf
-import pandas as pd
-
 from pathlib import Path
+
+import pandas as pd
+import yfinance as yf
 
 # =========================================================
 # CACHE DIRECTORY
 # =========================================================
 
-CACHE_DIR = Path(
+CACHE_DIR = Path("cache/market_data")
 
-    "cache/market_data"
-)
-
-CACHE_DIR.mkdir(
-
-    parents=True,
-
-    exist_ok=True
-)
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # =========================================================
 # MARKET DATA CACHE
 # =========================================================
 
-class MarketDataCache:
 
+class MarketDataCache:
     def __init__(self):
 
         pass
@@ -33,21 +25,9 @@ class MarketDataCache:
     # CACHE PATH
     # =====================================================
 
-    def cache_path(
+    def cache_path(self, symbol):
 
-        self,
-
-        symbol
-    ):
-
-        safe_symbol = (
-
-            symbol
-
-            .replace("^", "")
-
-            .replace("/", "_")
-        )
+        safe_symbol = symbol.replace("^", "").replace("/", "_")
 
         return CACHE_DIR / f"{safe_symbol}.parquet"
 
@@ -55,26 +35,15 @@ class MarketDataCache:
     # LOAD CACHE
     # =====================================================
 
-    def load_cache(
+    def load_cache(self, symbol):
 
-        self,
-
-        symbol
-    ):
-
-        path = self.cache_path(
-
-            symbol
-        )
+        path = self.cache_path(symbol)
 
         if path.exists():
-
             try:
-
                 return pd.read_parquet(path)
 
-            except:
-
+            except Exception:
                 return None
 
         return None
@@ -83,56 +52,30 @@ class MarketDataCache:
     # SAVE CACHE
     # =====================================================
 
-    def save_cache(
+    def save_cache(self, symbol, data):
 
-        self,
-
-        symbol,
-
-        data
-    ):
-
-        path = self.cache_path(
-
-            symbol
-        )
+        path = self.cache_path(symbol)
 
         try:
-
             data.to_parquet(path)
 
-        except:
-
+        except Exception:
             pass
 
     # =====================================================
     # GET MARKET DATA
     # =====================================================
 
-    def get_data(
-
-        self,
-
-        symbol,
-
-        period="1y",
-
-        refresh=False
-    ):
+    def get_data(self, symbol, period="1y", refresh=False):
 
         # =================================================
         # LOAD EXISTING CACHE
         # =================================================
 
         if not refresh:
-
-            cached = self.load_cache(
-
-                symbol
-            )
+            cached = self.load_cache(symbol)
 
             if cached is not None:
-
                 return cached
 
         # =================================================
@@ -140,31 +83,14 @@ class MarketDataCache:
         # =================================================
 
         try:
-
-            data = yf.download(
-
-                symbol,
-
-                period=period,
-
-                progress=False,
-
-                auto_adjust=True
-            )
+            data = yf.download(symbol, period=period, progress=False, auto_adjust=True)
 
             if data.empty:
-
                 return pd.DataFrame()
 
-            self.save_cache(
-
-                symbol,
-
-                data
-            )
+            self.save_cache(symbol, data)
 
             return data
 
-        except:
-
+        except Exception:
             return pd.DataFrame()

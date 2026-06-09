@@ -1,87 +1,41 @@
 import pandas as pd
-import numpy as np
-
-from sklearn.ensemble import (
-    RandomForestRegressor,
-    GradientBoostingRegressor
-)
-
-from sklearn.linear_model import (
-    LinearRegression
-)
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 
 # =========================================================
 # FEATURE ENGINEERING
 # =========================================================
 
-def build_features(
 
-    prices
-):
+def build_features(prices):
 
     df = pd.DataFrame()
 
-    df["returns"] = (
+    df["returns"] = prices.pct_change()
 
-        prices.pct_change()
-    )
+    df["volatility"] = df["returns"].rolling(20).std()
 
-    df["volatility"] = (
+    df["momentum"] = prices / prices.shift(20)
 
-        df["returns"]
+    df["moving_avg"] = prices.rolling(20).mean()
 
-        .rolling(20)
-
-        .std()
-    )
-
-    df["momentum"] = (
-
-        prices
-
-        / prices.shift(20)
-    )
-
-    df["moving_avg"] = (
-
-        prices
-
-        .rolling(20)
-
-        .mean()
-    )
-
-    df["target"] = (
-
-        df["returns"]
-
-        .shift(-1)
-    )
+    df["target"] = df["returns"].shift(-1)
 
     df = df.dropna()
 
     return df
 
+
 # =========================================================
 # ENSEMBLE TRAINING
 # =========================================================
 
-def train_ensemble(
 
-    prices
-):
+def train_ensemble(prices):
 
-    df = build_features(
+    df = build_features(prices)
 
-        prices
-    )
-
-    X = df[[
-
-        "volatility",
-        "momentum",
-        "moving_avg"
-    ]]
+    X = df[["volatility", "momentum", "moving_avg"]]
 
     y = df["target"]
 
@@ -89,17 +43,9 @@ def train_ensemble(
     # MODELS
     # =====================================================
 
-    rf = RandomForestRegressor(
+    rf = RandomForestRegressor(n_estimators=100, random_state=42)
 
-        n_estimators=100,
-
-        random_state=42
-    )
-
-    gb = GradientBoostingRegressor(
-
-        random_state=42
-    )
+    gb = GradientBoostingRegressor(random_state=42)
 
     lr = LinearRegression()
 
@@ -125,30 +71,11 @@ def train_ensemble(
     # WEIGHTED ENSEMBLE
     # =====================================================
 
-    ensemble_prediction = (
-
-        0.4 * rf_pred
-
-        + 0.4 * gb_pred
-
-        + 0.2 * lr_pred
-    )
+    ensemble_prediction = 0.4 * rf_pred + 0.4 * gb_pred + 0.2 * lr_pred
 
     return {
-
-        "RandomForest":
-
-            rf_pred,
-
-        "GradientBoosting":
-
-            gb_pred,
-
-        "LinearRegression":
-
-            lr_pred,
-
-        "EnsembleForecast":
-
-            ensemble_prediction
+        "RandomForest": rf_pred,
+        "GradientBoosting": gb_pred,
+        "LinearRegression": lr_pred,
+        "EnsembleForecast": ensemble_prediction,
     }

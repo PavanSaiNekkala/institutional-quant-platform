@@ -1,29 +1,21 @@
-import pandas as pd
-import numpy as np
 from pathlib import Path
+
+import pandas as pd
 
 # =========================================================
 # FEATURE DIRECTORY
 # =========================================================
 
-FEATURE_DIR = Path(
+FEATURE_DIR = Path("feature_store")
 
-    "feature_store"
-)
-
-FEATURE_DIR.mkdir(
-
-    exist_ok=True
-)
+FEATURE_DIR.mkdir(exist_ok=True)
 
 # =========================================================
 # FEATURE ENGINEERING
 # =========================================================
 
-def generate_features(
 
-    prices
-):
+def generate_features(prices):
 
     df = pd.DataFrame()
 
@@ -31,56 +23,27 @@ def generate_features(
     # RETURNS
     # =====================================================
 
-    df["returns"] = (
-
-        prices.pct_change()
-    )
+    df["returns"] = prices.pct_change()
 
     # =====================================================
     # VOLATILITY
     # =====================================================
 
-    df["volatility_20"] = (
-
-        df["returns"]
-
-        .rolling(20)
-
-        .std()
-    )
+    df["volatility_20"] = df["returns"].rolling(20).std()
 
     # =====================================================
     # MOMENTUM
     # =====================================================
 
-    df["momentum_20"] = (
-
-        prices
-
-        / prices.shift(20)
-    )
+    df["momentum_20"] = prices / prices.shift(20)
 
     # =====================================================
     # MOVING AVERAGES
     # =====================================================
 
-    df["ma_20"] = (
+    df["ma_20"] = prices.rolling(20).mean()
 
-        prices
-
-        .rolling(20)
-
-        .mean()
-    )
-
-    df["ma_50"] = (
-
-        prices
-
-        .rolling(50)
-
-        .mean()
-    )
+    df["ma_50"] = prices.rolling(50).mean()
 
     # =====================================================
     # RSI
@@ -98,30 +61,19 @@ def generate_features(
 
     rs = avg_gain / avg_loss
 
-    df["rsi_14"] = (
-
-        100
-
-        - (
-
-            100 / (1 + rs)
-        )
-    )
+    df["rsi_14"] = 100 - (100 / (1 + rs))
 
     df = df.dropna()
 
     return df
 
+
 # =========================================================
 # SAVE FEATURES
 # =========================================================
 
-def save_features(
 
-    symbol,
-
-    features
-):
+def save_features(symbol, features):
 
     path = FEATURE_DIR / f"{symbol}.parquet"
 
@@ -129,46 +81,28 @@ def save_features(
 
     return path
 
+
 # =========================================================
 # LOAD FEATURES
 # =========================================================
 
-def load_features(
 
-    symbol
-):
+def load_features(symbol):
 
     path = FEATURE_DIR / f"{symbol}.parquet"
 
     return pd.read_parquet(path)
 
+
 # =========================================================
 # FEATURE SUMMARY
 # =========================================================
 
-def feature_summary(
 
-    features
-):
+def feature_summary(features):
 
     return {
-
-        "Rows":
-
-            len(features),
-
-        "Columns":
-
-            list(features.columns),
-
-        "Missing Values":
-
-            int(
-
-                features.isna()
-
-                .sum()
-
-                .sum()
-            )
+        "Rows": len(features),
+        "Columns": list(features.columns),
+        "Missing Values": int(features.isna().sum().sum()),
     }

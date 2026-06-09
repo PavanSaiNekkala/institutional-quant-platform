@@ -3,11 +3,7 @@ from core.database import Database
 conn = Database.connection()
 
 print("\nRow Count")
-print(
-    conn.execute(
-        "SELECT COUNT(*) FROM stock_metadata"
-    ).fetchall()
-)
+print(conn.execute("SELECT COUNT(*) FROM stock_metadata").fetchall())
 
 print("\nTop 10 Stocks")
 print(

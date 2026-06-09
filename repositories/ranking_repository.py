@@ -4,7 +4,6 @@ from core.database import Database
 
 
 class RankingRepository:
-
     @staticmethod
     def get_institutional_rankings():
 

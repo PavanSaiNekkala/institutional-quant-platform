@@ -1,13 +1,12 @@
 import queue
 import threading
-import time
 
 # =========================================================
 # TASK QUEUE
 # =========================================================
 
-class TaskQueue:
 
+class TaskQueue:
     def __init__(self):
 
         self.queue = queue.Queue()
@@ -20,26 +19,9 @@ class TaskQueue:
     # ADD TASK
     # =====================================================
 
-    def add_task(
+    def add_task(self, func, *args, **kwargs):
 
-        self,
-
-        func,
-
-        *args,
-
-        **kwargs
-    ):
-
-        self.queue.put(
-
-            (
-
-                func,
-                args,
-                kwargs
-            )
-        )
+        self.queue.put((func, args, kwargs))
 
     # =====================================================
     # WORKER
@@ -48,62 +30,33 @@ class TaskQueue:
     def worker(self):
 
         while self.running:
-
             try:
+                func, args, kwargs = self.queue.get(timeout=1)
 
-                func, args, kwargs = self.queue.get(
+                result = func(*args, **kwargs)
 
-                    timeout=1
-                )
-
-                result = func(
-
-                    *args,
-
-                    **kwargs
-                )
-
-                self.results.append(
-
-                    result
-                )
+                self.results.append(result)
 
                 self.queue.task_done()
 
             except queue.Empty:
-
                 continue
 
             except Exception as e:
-
-                print(
-
-                    f"TASK ERROR: {e}"
-                )
+                print(f"TASK ERROR: {e}")
 
     # =====================================================
     # START WORKERS
     # =====================================================
 
-    def start_workers(
-
-        self,
-
-        num_workers=4
-    ):
+    def start_workers(self, num_workers=4):
 
         self.running = True
 
         self.threads = []
 
         for _ in range(num_workers):
-
-            thread = threading.Thread(
-
-                target=self.worker,
-
-                daemon=True
-            )
+            thread = threading.Thread(target=self.worker, daemon=True)
 
             thread.start()
 

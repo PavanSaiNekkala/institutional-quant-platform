@@ -1,104 +1,50 @@
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # =========================================================
 # AUDIT DIRECTORY
 # =========================================================
 
-AUDIT_DIR = Path(
+AUDIT_DIR = Path("audit_logs")
 
-    "audit_logs"
-)
-
-AUDIT_DIR.mkdir(
-
-    exist_ok=True
-)
+AUDIT_DIR.mkdir(exist_ok=True)
 
 # =========================================================
 # LOG AI DECISION
 # =========================================================
 
-def log_ai_decision(
 
-    system_name,
+def log_ai_decision(system_name, decision_data):
 
-    decision_data
-):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    timestamp = datetime.now().strftime(
+    filename = AUDIT_DIR / f"{system_name}_{timestamp}.json"
 
-        "%Y%m%d_%H%M%S"
-    )
+    audit_record = {"timestamp": timestamp, "system": system_name, "decision": decision_data}
 
-    filename = (
-
-        AUDIT_DIR
-
-        / f"{system_name}_{timestamp}.json"
-    )
-
-    audit_record = {
-
-        "timestamp":
-
-            timestamp,
-
-        "system":
-
-            system_name,
-
-        "decision":
-
-            decision_data
-    }
-
-    with open(
-
-        filename,
-
-        "w"
-    ) as f:
-
-        json.dump(
-
-            audit_record,
-
-            f,
-
-            indent=4,
-
-            default=str
-        )
+    with open(filename, "w") as f:
+        json.dump(audit_record, f, indent=4, default=str)
 
     return filename
+
 
 # =========================================================
 # LOAD AUDIT FILE
 # =========================================================
 
-def load_audit(
 
-    filepath
-):
+def load_audit(filepath):
 
-    with open(
-
-        filepath,
-
-        "r"
-    ) as f:
-
+    with open(filepath) as f:
         return json.load(f)
+
 
 # =========================================================
 # LIST AUDIT FILES
 # =========================================================
 
+
 def list_audits():
 
-    return list(
-
-        AUDIT_DIR.glob("*.json")
-    )
+    return list(AUDIT_DIR.glob("*.json"))

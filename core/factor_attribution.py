@@ -1,54 +1,32 @@
 import pandas as pd
-import numpy as np
 
 # =========================================================
 # NORMALIZE FACTORS
 # =========================================================
 
-def normalize_factor(
 
-    series
-):
+def normalize_factor(series):
 
-    normalized = (
-
-        (series - series.mean())
-
-        /
-
-        (series.std() + 1e-9)
-    )
+    normalized = (series - series.mean()) / (series.std() + 1e-9)
 
     return normalized
+
 
 # =========================================================
 # FACTOR SCORE
 # =========================================================
 
-def factor_score(
 
-    factors,
-
-    weights
-):
+def factor_score(factors, weights):
 
     total = 0
 
     contributions = {}
 
     for factor_name, values in factors.items():
+        factor_weight = weights.get(factor_name, 0)
 
-        factor_weight = weights.get(
-
-            factor_name,
-
-            0
-        )
-
-        contribution = (
-
-            values * factor_weight
-        )
+        contribution = values * factor_weight
 
         contributions[factor_name] = contribution
 
@@ -56,63 +34,40 @@ def factor_score(
 
     return total, contributions
 
+
 # =========================================================
 # FACTOR CONTRIBUTION TABLE
 # =========================================================
 
-def contribution_table(
 
-    contributions
-):
+def contribution_table(contributions):
 
-    table = pd.DataFrame(
-
-        contributions
-    )
+    table = pd.DataFrame(contributions)
 
     return table
+
 
 # =========================================================
 # TOP FACTOR
 # =========================================================
 
-def dominant_factor(
 
-    latest_contributions
-):
+def dominant_factor(latest_contributions):
 
-    abs_values = {
+    abs_values = {k: abs(v) for k, v in latest_contributions.items()}
 
-        k: abs(v)
-
-        for k, v in latest_contributions.items()
-    }
-
-    dominant = max(
-
-        abs_values,
-
-        key=abs_values.get
-    )
+    dominant = max(abs_values, key=abs_values.get)
 
     return dominant
+
 
 # =========================================================
 # FACTOR STABILITY
 # =========================================================
 
-def factor_stability(
 
-    contribution_series
-):
+def factor_stability(contribution_series):
 
-    stability = (
-
-        contribution_series.mean()
-
-        /
-
-        (contribution_series.std() + 1e-9)
-    )
+    stability = contribution_series.mean() / (contribution_series.std() + 1e-9)
 
     return stability

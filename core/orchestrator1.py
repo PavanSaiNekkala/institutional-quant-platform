@@ -1,57 +1,26 @@
-import threading
 import time
 
-from ops.logger import (
-    log_info,
-    log_error
-)
-
-from ops.system_health import (
-    health_report
-)
-
-from ops.backup_manager import (
-    create_backup
-)
-
-from monitoring.alerts import (
-    AlertManager
-)
-
-from signals.live_signals import (
-    generate_live_signal
-)
-
-from portfolio.live_monitor import (
-    live_portfolio_report
-)
+from monitoring.alerts import AlertManager
+from ops.backup_manager import create_backup
+from ops.logger import log_error, log_info
+from ops.system_health import health_report
+from portfolio.live_monitor import live_portfolio_report
+from signals.live_signals import generate_live_signal
 
 # =========================================================
 # GLOBAL CONFIG
 # =========================================================
 
-SYMBOLS = [
+SYMBOLS = ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"]
 
-    "RELIANCE.NS",
-    "TCS.NS",
-    "INFY.NS",
-    "HDFCBANK.NS"
-]
-
-WEIGHTS = [
-
-    0.30,
-    0.25,
-    0.25,
-    0.20
-]
+WEIGHTS = [0.30, 0.25, 0.25, 0.20]
 
 # =========================================================
 # ORCHESTRATOR
 # =========================================================
 
-class InstitutionalOrchestrator:
 
+class InstitutionalOrchestrator:
     def __init__(self):
 
         self.alerts = AlertManager()
@@ -65,20 +34,12 @@ class InstitutionalOrchestrator:
     def run_health_check(self):
 
         try:
-
             report = health_report()
 
-            log_info(
-
-                f"Health Report: {report}"
-            )
+            log_info(f"Health Report: {report}")
 
         except Exception as e:
-
-            log_error(
-
-                f"Health Check Failed: {e}"
-            )
+            log_error(f"Health Check Failed: {e}")
 
     # =====================================================
     # LIVE SIGNALS
@@ -87,25 +48,13 @@ class InstitutionalOrchestrator:
     def run_signals(self):
 
         try:
-
             for symbol in SYMBOLS:
+                signal = generate_live_signal(symbol)
 
-                signal = generate_live_signal(
-
-                    symbol
-                )
-
-                log_info(
-
-                    f"Signal: {signal}"
-                )
+                log_info(f"Signal: {signal}")
 
         except Exception as e:
-
-            log_error(
-
-                f"Signal Engine Failed: {e}"
-            )
+            log_error(f"Signal Engine Failed: {e}")
 
     # =====================================================
     # PORTFOLIO MONITOR
@@ -114,25 +63,12 @@ class InstitutionalOrchestrator:
     def run_portfolio_monitor(self):
 
         try:
+            report = live_portfolio_report(SYMBOLS, WEIGHTS)
 
-            report = live_portfolio_report(
-
-                SYMBOLS,
-
-                WEIGHTS
-            )
-
-            log_info(
-
-                f"Portfolio Report: {report}"
-            )
+            log_info(f"Portfolio Report: {report}")
 
         except Exception as e:
-
-            log_error(
-
-                f"Portfolio Monitor Failed: {e}"
-            )
+            log_error(f"Portfolio Monitor Failed: {e}")
 
     # =====================================================
     # BACKUP
@@ -141,20 +77,12 @@ class InstitutionalOrchestrator:
     def run_backup(self):
 
         try:
-
             result = create_backup()
 
-            log_info(
-
-                f"Backup Created: {result}"
-            )
+            log_info(f"Backup Created: {result}")
 
         except Exception as e:
-
-            log_error(
-
-                f"Backup Failed: {e}"
-            )
+            log_error(f"Backup Failed: {e}")
 
     # =====================================================
     # ALERT TEST
@@ -162,27 +90,13 @@ class InstitutionalOrchestrator:
 
     def run_alerts(self):
 
-        self.alerts.signal_alert(
+        self.alerts.signal_alert("RELIANCE.NS", "BUY")
 
-            "RELIANCE.NS",
+        self.alerts.volatility_alert(0.40)
 
-            "BUY"
-        )
+        self.alerts.risk_alert(-0.15)
 
-        self.alerts.volatility_alert(
-
-            0.40
-        )
-
-        self.alerts.risk_alert(
-
-            -0.15
-        )
-
-        log_info(
-
-            f"Alerts: {self.alerts.get_alerts()}"
-        )
+        log_info(f"Alerts: {self.alerts.get_alerts()}")
 
     # =====================================================
     # MAIN LOOP
@@ -192,13 +106,9 @@ class InstitutionalOrchestrator:
 
         self.running = True
 
-        log_info(
-
-            "Institutional Orchestrator Started"
-        )
+        log_info("Institutional Orchestrator Started")
 
         while self.running:
-
             self.run_health_check()
 
             self.run_signals()
@@ -219,7 +129,4 @@ class InstitutionalOrchestrator:
 
         self.running = False
 
-        log_info(
-
-            "Institutional Orchestrator Stopped"
-        )
+        log_info("Institutional Orchestrator Stopped")

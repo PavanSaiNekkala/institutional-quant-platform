@@ -1,5 +1,5 @@
-import time
 import logging
+import time
 from functools import wraps
 
 # =========================================================
@@ -7,69 +7,37 @@ from functools import wraps
 # =========================================================
 
 logging.basicConfig(
-
     filename="institutional_platform.log",
-
     level=logging.INFO,
-
-    format="%(asctime)s | %(levelname)s | %(message)s"
+    format="%(asctime)s | %(levelname)s | %(message)s",
 )
 
 # =========================================================
 # SAFE EXECUTION DECORATOR
 # =========================================================
 
-def safe_execution(
 
-    retries=3,
-
-    delay=2
-):
+def safe_execution(retries=3, delay=2):
 
     def decorator(func):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
 
-            last_exception = None
-
             for attempt in range(retries):
-
                 try:
+                    result = func(*args, **kwargs)
 
-                    result = func(
-
-                        *args,
-
-                        **kwargs
-                    )
-
-                    logging.info(
-
-                        f"{func.__name__} SUCCESS"
-                    )
+                    logging.info(f"{func.__name__} SUCCESS")
 
                     return result
 
                 except Exception as e:
-
-                    last_exception = e
-
-                    logging.error(
-
-                        f"{func.__name__} FAILED "
-
-                        f"Attempt {attempt+1} "
-
-                        f"| Error: {e}"
-                    )
+                    logging.error(f"{func.__name__} FAILED Attempt {attempt + 1} | Error: {e}")
 
                     time.sleep(delay)
 
-            logging.critical(
-
-                f"{func.__name__} TOTAL FAILURE"
-            )
+            logging.critical(f"{func.__name__} TOTAL FAILURE")
 
             return None
 
@@ -77,12 +45,13 @@ def safe_execution(
 
     return decorator
 
+
 # =========================================================
 # CENTRALIZED LOGGER
 # =========================================================
 
-class InstitutionalLogger:
 
+class InstitutionalLogger:
     @staticmethod
     def info(message):
 

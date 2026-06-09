@@ -3,7 +3,6 @@ from portfolio.risk_parity import RiskParity
 
 
 class PortfolioService:
-
     @staticmethod
     def portfolio_summary():
 

@@ -1,12 +1,13 @@
 from datetime import datetime
+
 import pandas as pd
 
 # =========================================================
 # AI CONTROL PLANE
 # =========================================================
 
-class AIControlPlane:
 
+class AIControlPlane:
     def __init__(self):
 
         self.systems = {}
@@ -17,78 +18,30 @@ class AIControlPlane:
     # REGISTER SYSTEM
     # =====================================================
 
-    def register_system(
+    def register_system(self, name, status="ACTIVE"):
 
-        self,
+        self.systems[name] = {"status": status, "registered_at": datetime.now()}
 
-        name,
-
-        status="ACTIVE"
-    ):
-
-        self.systems[name] = {
-
-            "status":
-
-                status,
-
-            "registered_at":
-
-                datetime.now()
-        }
-
-        self.log_event(
-
-            f"{name} registered"
-        )
+        self.log_event(f"{name} registered")
 
     # =====================================================
     # UPDATE STATUS
     # =====================================================
 
-    def update_status(
-
-        self,
-
-        name,
-
-        status
-    ):
+    def update_status(self, name, status):
 
         if name in self.systems:
+            self.systems[name]["status"] = status
 
-            self.systems[name][
-
-                "status"
-
-            ] = status
-
-            self.log_event(
-
-                f"{name} status updated to {status}"
-            )
+            self.log_event(f"{name} status updated to {status}")
 
     # =====================================================
     # LOG EVENT
     # =====================================================
 
-    def log_event(
+    def log_event(self, message):
 
-        self,
-
-        message
-    ):
-
-        self.events.append({
-
-            "timestamp":
-
-                datetime.now(),
-
-            "event":
-
-                message
-        })
+        self.events.append({"timestamp": datetime.now(), "event": message})
 
     # =====================================================
     # SYSTEM SUMMARY
@@ -96,10 +49,7 @@ class AIControlPlane:
 
     def system_summary(self):
 
-        return pd.DataFrame(
-
-            self.systems
-        ).T
+        return pd.DataFrame(self.systems).T
 
     # =====================================================
     # EVENT LOG
@@ -107,7 +57,4 @@ class AIControlPlane:
 
     def event_log(self):
 
-        return pd.DataFrame(
-
-            self.events
-        )
+        return pd.DataFrame(self.events)

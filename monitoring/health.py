@@ -1,18 +1,22 @@
-import psutil
 import platform
 from datetime import datetime
+
+import psutil
 
 # =========================================================
 # CPU USAGE
 # =========================================================
 
+
 def cpu_usage():
 
     return psutil.cpu_percent()
 
+
 # =========================================================
 # MEMORY USAGE
 # =========================================================
+
 
 def memory_usage():
 
@@ -20,9 +24,11 @@ def memory_usage():
 
     return memory.percent
 
+
 # =========================================================
 # DISK USAGE
 # =========================================================
+
 
 def disk_usage():
 
@@ -30,46 +36,28 @@ def disk_usage():
 
     return disk.percent
 
+
 # =========================================================
 # SYSTEM INFO
 # =========================================================
 
+
 def system_info():
 
-    return {
+    return {"OS": platform.system(), "Release": platform.release(), "Machine": platform.machine()}
 
-        "OS":
-            platform.system(),
-
-        "Release":
-            platform.release(),
-
-        "Machine":
-            platform.machine()
-    }
 
 # =========================================================
 # HEALTH SNAPSHOT
 # =========================================================
 
+
 def health_snapshot():
 
     return {
-
-        "Timestamp":
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            ),
-
-        "CPU":
-            cpu_usage(),
-
-        "Memory":
-            memory_usage(),
-
-        "Disk":
-            disk_usage(),
-
-        "System":
-            system_info()
+        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "CPU": cpu_usage(),
+        "Memory": memory_usage(),
+        "Disk": disk_usage(),
+        "System": system_info(),
     }

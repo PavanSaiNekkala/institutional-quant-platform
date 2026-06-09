@@ -1,6 +1,7 @@
 import sqlite3
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
 
 # =========================================================
 # DATABASE PATH
@@ -12,12 +13,10 @@ DB_PATH = "research_lab.db"
 # INITIALIZE DATABASE
 # =========================================================
 
+
 def initialize_db():
 
-    conn = sqlite3.connect(
-
-        DB_PATH
-    )
+    conn = sqlite3.connect(DB_PATH)
 
     cursor = conn.cursor()
 
@@ -44,34 +43,22 @@ def initialize_db():
 
     conn.close()
 
+
 # =========================================================
 # INSERT EXPERIMENT
 # =========================================================
 
-def insert_experiment(
 
-    experiment_name,
+def insert_experiment(experiment_name, model, metric, status="ACTIVE"):
 
-    model,
-
-    metric,
-
-    status="ACTIVE"
-):
-
-    conn = sqlite3.connect(
-
-        DB_PATH
-    )
+    conn = sqlite3.connect(DB_PATH)
 
     cursor = conn.cursor()
 
-    timestamp = datetime.now().strftime(
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        "%Y-%m-%d %H:%M:%S"
-    )
-
-    cursor.execute("""
+    cursor.execute(
+        """
 
         INSERT INTO experiments (
 
@@ -89,64 +76,44 @@ def insert_experiment(
 
         VALUES (?, ?, ?, ?, ?)
 
-    """, (
-
-        experiment_name,
-
-        model,
-
-        metric,
-
-        status,
-
-        timestamp
-    ))
+    """,
+        (experiment_name, model, metric, status, timestamp),
+    )
 
     conn.commit()
 
     conn.close()
 
+
 # =========================================================
 # LOAD EXPERIMENTS
 # =========================================================
 
+
 def load_experiments():
 
-    conn = sqlite3.connect(
+    conn = sqlite3.connect(DB_PATH)
 
-        DB_PATH
-    )
-
-    df = pd.read_sql(
-
-        "SELECT * FROM experiments",
-
-        conn
-    )
+    df = pd.read_sql("SELECT * FROM experiments", conn)
 
     conn.close()
 
     return df
 
+
 # =========================================================
 # UPDATE STATUS
 # =========================================================
 
-def update_status(
 
-    experiment_id,
+def update_status(experiment_id, status):
 
-    status
-):
-
-    conn = sqlite3.connect(
-
-        DB_PATH
-    )
+    conn = sqlite3.connect(DB_PATH)
 
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
 
         UPDATE experiments
 
@@ -154,12 +121,9 @@ def update_status(
 
         WHERE id = ?
 
-    """, (
-
-        status,
-
-        experiment_id
-    ))
+    """,
+        (status, experiment_id),
+    )
 
     conn.commit()
 

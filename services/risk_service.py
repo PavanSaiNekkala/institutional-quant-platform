@@ -3,7 +3,6 @@ from risk.var import calculate_var
 
 
 class RiskService:
-
     @staticmethod
     def portfolio_risk(portfolio):
 

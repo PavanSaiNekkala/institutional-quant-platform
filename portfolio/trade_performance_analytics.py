@@ -4,14 +4,9 @@ import pandas as pd
 # TRADE PERFORMANCE ANALYTICS
 # =========================================================
 
+
 class TradePerformanceAnalytics:
-
-    def __init__(
-
-        self,
-
-        pnl_dataframe
-    ):
+    def __init__(self, pnl_dataframe):
 
         self.df = pnl_dataframe.copy()
 
@@ -22,25 +17,13 @@ class TradePerformanceAnalytics:
     def clean(self):
 
         if self.df.empty:
-
             return
 
-        numeric_cols = [
-
-            "Realized PnL",
-            "Unrealized PnL"
-        ]
+        numeric_cols = ["Realized PnL", "Unrealized PnL"]
 
         for col in numeric_cols:
-
             if col in self.df.columns:
-
-                self.df[col] = pd.to_numeric(
-
-                    self.df[col],
-
-                    errors="coerce"
-                )
+                self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
 
     # =====================================================
     # WIN RATE
@@ -49,31 +32,16 @@ class TradePerformanceAnalytics:
     def win_rate(self):
 
         if self.df.empty:
-
             return 0
 
-        wins = len(
-
-            self.df[
-
-                self.df["Realized PnL"]
-
-                > 0
-            ]
-        )
+        wins = len(self.df[self.df["Realized PnL"] > 0])
 
         total = len(self.df)
 
         if total == 0:
-
             return 0
 
-        return round(
-
-            (wins / total) * 100,
-
-            2
-        )
+        return round((wins / total) * 100, 2)
 
     # =====================================================
     # AVERAGE GAIN
@@ -81,25 +49,12 @@ class TradePerformanceAnalytics:
 
     def average_gain(self):
 
-        gains = self.df[
-
-            self.df["Realized PnL"]
-
-            > 0
-        ]
+        gains = self.df[self.df["Realized PnL"] > 0]
 
         if gains.empty:
-
             return 0
 
-        return round(
-
-            gains["Realized PnL"]
-
-            .mean(),
-
-            2
-        )
+        return round(gains["Realized PnL"].mean(), 2)
 
     # =====================================================
     # AVERAGE LOSS
@@ -107,25 +62,12 @@ class TradePerformanceAnalytics:
 
     def average_loss(self):
 
-        losses = self.df[
-
-            self.df["Realized PnL"]
-
-            < 0
-        ]
+        losses = self.df[self.df["Realized PnL"] < 0]
 
         if losses.empty:
-
             return 0
 
-        return round(
-
-            losses["Realized PnL"]
-
-            .mean(),
-
-            2
-        )
+        return round(losses["Realized PnL"].mean(), 2)
 
     # =====================================================
     # PROFIT FACTOR
@@ -133,33 +75,14 @@ class TradePerformanceAnalytics:
 
     def profit_factor(self):
 
-        gross_profit = self.df[
+        gross_profit = self.df[self.df["Realized PnL"] > 0]["Realized PnL"].sum()
 
-            self.df["Realized PnL"]
-
-            > 0
-        ]["Realized PnL"].sum()
-
-        gross_loss = abs(
-
-            self.df[
-
-                self.df["Realized PnL"]
-
-                < 0
-            ]["Realized PnL"].sum()
-        )
+        gross_loss = abs(self.df[self.df["Realized PnL"] < 0]["Realized PnL"].sum())
 
         if gross_loss == 0:
-
             return None
 
-        return round(
-
-            gross_profit / gross_loss,
-
-            2
-        )
+        return round(gross_profit / gross_loss, 2)
 
     # =====================================================
     # EXPECTANCY
@@ -173,26 +96,11 @@ class TradePerformanceAnalytics:
 
         avg_gain = self.average_gain()
 
-        avg_loss = abs(
+        avg_loss = abs(self.average_loss())
 
-            self.average_loss()
-        )
+        expectancy = (win_rate * avg_gain) - (loss_rate * avg_loss)
 
-        expectancy = (
-
-            (win_rate * avg_gain)
-
-            -
-
-            (loss_rate * avg_loss)
-        )
-
-        return round(
-
-            expectancy,
-
-            2
-        )
+        return round(expectancy, 2)
 
     # =====================================================
     # FULL REPORT
@@ -203,24 +111,9 @@ class TradePerformanceAnalytics:
         self.clean()
 
         return {
-
-            "Win Rate %":
-
-                self.win_rate(),
-
-            "Average Gain":
-
-                self.average_gain(),
-
-            "Average Loss":
-
-                self.average_loss(),
-
-            "Profit Factor":
-
-                self.profit_factor(),
-
-            "Expectancy":
-
-                self.expectancy()
+            "Win Rate %": self.win_rate(),
+            "Average Gain": self.average_gain(),
+            "Average Loss": self.average_loss(),
+            "Profit Factor": self.profit_factor(),
+            "Expectancy": self.expectancy(),
         }

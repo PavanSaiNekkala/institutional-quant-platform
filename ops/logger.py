@@ -5,15 +5,9 @@ from pathlib import Path
 # LOG DIRECTORY
 # =========================================================
 
-LOG_DIR = Path(
+LOG_DIR = Path("logs")
 
-    "logs"
-)
-
-LOG_DIR.mkdir(
-
-    exist_ok=True
-)
+LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / "institutional_quant.log"
 
@@ -22,71 +16,48 @@ LOG_FILE = LOG_DIR / "institutional_quant.log"
 # =========================================================
 
 logging.basicConfig(
-
     level=logging.INFO,
-
-    format=(
-
-        "%(asctime)s | "
-
-        "%(levelname)s | "
-
-        "%(message)s"
-    ),
-
-    handlers=[
-
-        logging.FileHandler(LOG_FILE),
-
-        logging.StreamHandler()
-    ]
+    format=("%(asctime)s | %(levelname)s | %(message)s"),
+    handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler()],
 )
 
-logger = logging.getLogger(
-
-    "InstitutionalQuant"
-)
+logger = logging.getLogger("InstitutionalQuant")
 
 # =========================================================
 # INFO LOG
 # =========================================================
 
-def log_info(
 
-    message
-):
+def log_info(message):
 
     logger.info(message)
+
 
 # =========================================================
 # WARNING LOG
 # =========================================================
 
-def log_warning(
 
-    message
-):
+def log_warning(message):
 
     logger.warning(message)
+
 
 # =========================================================
 # ERROR LOG
 # =========================================================
 
-def log_error(
 
-    message
-):
+def log_error(message):
 
     logger.error(message)
+
 
 # =========================================================
 # CRITICAL LOG
 # =========================================================
 
-def log_critical(
 
-    message
-):
+def log_critical(message):
 
     logger.critical(message)

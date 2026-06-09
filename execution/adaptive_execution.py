@@ -1,41 +1,21 @@
-import pandas as pd
-import numpy as np
 import time
+
+import numpy as np
+import pandas as pd
 
 # =========================================================
 # TWAP EXECUTION
 # =========================================================
 
-def twap_execution(
 
-    broker,
+def twap_execution(broker, symbol, total_quantity, intervals=5, delay=1):
 
-    symbol,
-
-    total_quantity,
-
-    intervals=5,
-
-    delay=1
-):
-
-    slice_qty = int(
-
-        total_quantity / intervals
-    )
+    slice_qty = int(total_quantity / intervals)
 
     executions = []
 
     for i in range(intervals):
-
-        result = broker.place_order(
-
-            symbol,
-
-            slice_qty,
-
-            "BUY"
-        )
+        result = broker.place_order(symbol, slice_qty, "BUY")
 
         result["slice"] = i + 1
 
@@ -45,52 +25,24 @@ def twap_execution(
 
         time.sleep(delay)
 
-    return pd.DataFrame(
+    return pd.DataFrame(executions)
 
-        executions
-    )
 
 # =========================================================
 # VWAP EXECUTION
 # =========================================================
 
-def vwap_execution(
 
-    broker,
-
-    symbol,
-
-    total_quantity,
-
-    volume_profile
-):
+def vwap_execution(broker, symbol, total_quantity, volume_profile):
 
     executions = []
 
-    volume_profile = (
+    volume_profile = np.array(volume_profile) / np.sum(volume_profile)
 
-        np.array(volume_profile)
-
-        / np.sum(volume_profile)
-    )
-
-    quantities = (
-
-        volume_profile
-
-        * total_quantity
-    ).astype(int)
+    quantities = (volume_profile * total_quantity).astype(int)
 
     for i, qty in enumerate(quantities):
-
-        result = broker.place_order(
-
-            symbol,
-
-            int(qty),
-
-            "BUY"
-        )
+        result = broker.place_order(symbol, int(qty), "BUY")
 
         result["slice"] = i + 1
 
@@ -98,60 +50,20 @@ def vwap_execution(
 
         executions.append(result)
 
-    return pd.DataFrame(
+    return pd.DataFrame(executions)
 
-        executions
-    )
 
 # =========================================================
 # ADAPTIVE EXECUTION
 # =========================================================
 
-def adaptive_execution(
 
-    broker,
-
-    symbol,
-
-    quantity,
-
-    volatility
-):
+def adaptive_execution(broker, symbol, quantity, volatility):
 
     if volatility > 0.03:
-
-        return twap_execution(
-
-            broker,
-
-            symbol,
-
-            quantity,
-
-            intervals=10,
-
-            delay=0.5
-        )
+        return twap_execution(broker, symbol, quantity, intervals=10, delay=0.5)
 
     else:
+        profile = [0.10, 0.15, 0.20, 0.25, 0.20, 0.10]
 
-        profile = [
-
-            0.10,
-            0.15,
-            0.20,
-            0.25,
-            0.20,
-            0.10
-        ]
-
-        return vwap_execution(
-
-            broker,
-
-            symbol,
-
-            quantity,
-
-            profile
-        )
+        return vwap_execution(broker, symbol, quantity, profile)

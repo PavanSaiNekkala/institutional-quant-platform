@@ -3,77 +3,32 @@
 # =========================================================
 
 PLATFORM_CONFIG = {
-
     # =====================================================
     # UNIVERSE
     # =====================================================
-
-    "universe": {
-
-        "top_n": 25,
-
-        "ranking_file":
-
-            "ranked_universe.xlsx"
-    },
-
+    "universe": {"top_n": 25, "ranking_file": "ranked_universe.xlsx"},
     # =====================================================
     # BACKTESTING
     # =====================================================
-
-    "backtesting": {
-
-        "initial_capital": 100000,
-
-        "default_period": "1y"
-    },
-
+    "backtesting": {"initial_capital": 100000, "default_period": "1y"},
     # =====================================================
     # PAPER TRADING
     # =====================================================
-
-    "paper_trading": {
-
-        "initial_cash": 100000
-    },
-
+    "paper_trading": {"initial_cash": 100000},
     # =====================================================
     # RISK
     # =====================================================
-
-    "risk": {
-
-        "target_volatility": 0.15,
-
-        "volatility_threshold": 0.25
-    },
-
+    "risk": {"target_volatility": 0.15, "volatility_threshold": 0.25},
     # =====================================================
     # EXECUTION
     # =====================================================
-
-    "execution": {
-
-        "slippage_bps": 5,
-
-        "transaction_cost_bps": 2
-    },
-
+    "execution": {"slippage_bps": 5, "transaction_cost_bps": 2},
     # =====================================================
     # CACHE
     # =====================================================
-
-    "cache": {
-
-        "market_data_period": "1y"
-    },
-
+    "cache": {"market_data_period": "1y"},
     # =====================================================
     # DASHBOARD
     # =====================================================
-
-    "dashboard": {
-
-        "layout": "wide"
-    }
+    "dashboard": {"layout": "wide"},
 }

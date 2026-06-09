@@ -1,108 +1,64 @@
-from prometheus_client import (
-    Counter,
-    Gauge,
-    Histogram,
-    start_http_server
-)
-
-import time
+from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 # =========================================================
 # METRICS
 # =========================================================
 
-scan_counter = Counter(
+scan_counter = Counter("institutional_scans_total", "Total institutional scans")
 
-    "institutional_scans_total",
+scan_latency = Histogram("institutional_scan_latency_seconds", "Institutional scan latency")
 
-    "Total institutional scans"
-)
+active_positions = Gauge("institutional_active_positions", "Active portfolio positions")
 
-scan_latency = Histogram(
-
-    "institutional_scan_latency_seconds",
-
-    "Institutional scan latency"
-)
-
-active_positions = Gauge(
-
-    "institutional_active_positions",
-
-    "Active portfolio positions"
-)
-
-system_health = Gauge(
-
-    "institutional_system_health",
-
-    "System health score"
-)
+system_health = Gauge("institutional_system_health", "System health score")
 
 # =========================================================
 # START METRICS SERVER
 # =========================================================
 
-def start_metrics_server(
 
-    port=8000
-):
+def start_metrics_server(port=8000):
 
     start_http_server(port)
 
-    print(
+    print(f"\nPROMETHEUS METRICS ACTIVE ON PORT {port}")
 
-        f"\nPROMETHEUS METRICS ACTIVE "
-
-        f"ON PORT {port}"
-    )
 
 # =========================================================
 # RECORD SCAN
 # =========================================================
 
+
 def record_scan():
 
     scan_counter.inc()
+
 
 # =========================================================
 # RECORD LATENCY
 # =========================================================
 
-def record_latency(
 
-    duration
-):
+def record_latency(duration):
 
-    scan_latency.observe(
+    scan_latency.observe(duration)
 
-        duration
-    )
 
 # =========================================================
 # UPDATE POSITIONS
 # =========================================================
 
-def update_positions(
 
-    positions
-):
+def update_positions(positions):
 
-    active_positions.set(
+    active_positions.set(positions)
 
-        positions
-    )
 
 # =========================================================
 # UPDATE HEALTH
 # =========================================================
 
-def update_health(
 
-    score
-):
+def update_health(score):
 
-    system_health.set(
-
-        score
-    )
+    system_health.set(score)

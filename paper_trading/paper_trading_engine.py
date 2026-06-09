@@ -2,28 +2,22 @@ import pandas as pd
 import yfinance as yf
 
 from paper_trading.portfolio_storage import (
-
     initialize_database,
-    save_cash,
     load_cash,
-    save_position,
     load_positions,
+    load_trades,
+    save_cash,
+    save_position,
     save_trade,
-    load_trades
 )
 
 # =========================================================
 # PAPER TRADING ENGINE
 # =========================================================
 
+
 class PaperTradingEngine:
-
-    def __init__(
-
-        self,
-
-        initial_cash=100000
-    ):
+    def __init__(self, initial_cash=100000):
 
         # =================================================
         # INITIALIZE DATABASE
@@ -38,95 +32,55 @@ class PaperTradingEngine:
         self.cash = load_cash()
 
         if self.cash is None:
-
             self.cash = initial_cash
 
             save_cash(self.cash)
 
         self.positions = load_positions()
 
-        self.trade_history = (
-
-            load_trades()
-
-            .to_dict(
-
-                orient="records"
-            )
-        )
+        self.trade_history = load_trades().to_dict(orient="records")
 
     # =====================================================
     # GET MARKET PRICE
     # =====================================================
 
-    def get_price(
-
-        self,
-
-        symbol
-    ):
+    def get_price(self, symbol):
 
         try:
-
-            data = yf.download(
-
-                symbol,
-
-                period="5d",
-
-                progress=False,
-
-                auto_adjust=True
-            )
+            data = yf.download(symbol, period="5d", progress=False, auto_adjust=True)
 
             if data.empty:
-
                 return None
 
             close = data["Close"]
 
             if isinstance(close, pd.DataFrame):
-
                 close = close.iloc[:, 0]
 
             close = close.dropna()
 
             if len(close) == 0:
-
                 return None
 
             return float(close.iloc[-1])
 
-        except:
-
+        except Exception:
             return None
 
     # =====================================================
     # BUY
     # =====================================================
 
-    def buy(
+    def buy(self, symbol, quantity):
 
-        self,
-
-        symbol,
-
-        quantity
-    ):
-
-        price = self.get_price(
-
-            symbol
-        )
+        price = self.get_price(symbol)
 
         if price is None:
-
             return "PRICE ERROR"
 
         cost = price * quantity
 
         if cost > self.cash:
-
             return "INSUFFICIENT CASH"
 
         # =================================================
@@ -135,68 +89,31 @@ class PaperTradingEngine:
 
         self.cash -= cost
 
-        save_cash(
-
-            self.cash
-        )
+        save_cash(self.cash)
 
         # =================================================
         # UPDATE POSITIONS
         # =================================================
 
-        self.positions[symbol] = (
+        self.positions[symbol] = self.positions.get(symbol, 0) + quantity
 
-            self.positions.get(
-
-                symbol,
-
-                0
-            )
-
-            + quantity
-        )
-
-        save_position(
-
-            symbol,
-
-            self.positions[symbol]
-        )
+        save_position(symbol, self.positions[symbol])
 
         # =================================================
         # SAVE TRADE
         # =================================================
 
         trade = {
-
             "Action": "BUY",
-
             "Symbol": symbol,
-
             "Quantity": quantity,
-
             "Price": round(price, 2),
-
-            "Cost": round(cost, 2)
+            "Cost": round(cost, 2),
         }
 
-        self.trade_history.append(
+        self.trade_history.append(trade)
 
-            trade
-        )
-
-        save_trade(
-
-            "BUY",
-
-            symbol,
-
-            quantity,
-
-            round(price, 2),
-
-            round(cost, 2)
-        )
+        save_trade("BUY", symbol, quantity, round(price, 2), round(cost, 2))
 
         return "BUY EXECUTED"
 
@@ -204,31 +121,14 @@ class PaperTradingEngine:
     # SELL
     # =====================================================
 
-    def sell(
+    def sell(self, symbol, quantity):
 
-        self,
-
-        symbol,
-
-        quantity
-    ):
-
-        if (
-
-            symbol not in self.positions
-
-            or self.positions[symbol] < quantity
-        ):
-
+        if symbol not in self.positions or self.positions[symbol] < quantity:
             return "INSUFFICIENT POSITION"
 
-        price = self.get_price(
-
-            symbol
-        )
+        price = self.get_price(symbol)
 
         if price is None:
-
             return "PRICE ERROR"
 
         proceeds = price * quantity
@@ -239,10 +139,7 @@ class PaperTradingEngine:
 
         self.cash += proceeds
 
-        save_cash(
-
-            self.cash
-        )
+        save_cash(self.cash)
 
         # =================================================
         # UPDATE POSITION
@@ -251,50 +148,25 @@ class PaperTradingEngine:
         self.positions[symbol] -= quantity
 
         if self.positions[symbol] <= 0:
-
             self.positions[symbol] = 0
 
-        save_position(
-
-            symbol,
-
-            self.positions[symbol]
-        )
+        save_position(symbol, self.positions[symbol])
 
         # =================================================
         # SAVE TRADE
         # =================================================
 
         trade = {
-
             "Action": "SELL",
-
             "Symbol": symbol,
-
             "Quantity": quantity,
-
             "Price": round(price, 2),
-
-            "Proceeds": round(proceeds, 2)
+            "Proceeds": round(proceeds, 2),
         }
 
-        self.trade_history.append(
+        self.trade_history.append(trade)
 
-            trade
-        )
-
-        save_trade(
-
-            "SELL",
-
-            symbol,
-
-            quantity,
-
-            round(price, 2),
-
-            round(proceeds, 2)
-        )
+        save_trade("SELL", symbol, quantity, round(price, 2), round(proceeds, 2))
 
         return "SELL EXECUTED"
 
@@ -307,22 +179,13 @@ class PaperTradingEngine:
         total_value = self.cash
 
         for symbol, quantity in self.positions.items():
-
             if quantity <= 0:
-
                 continue
 
-            price = self.get_price(
-
-                symbol
-            )
+            price = self.get_price(symbol)
 
             if price:
-
-                total_value += (
-
-                    price * quantity
-                )
+                total_value += price * quantity
 
         return round(total_value, 2)
 
@@ -332,30 +195,11 @@ class PaperTradingEngine:
 
     def report(self):
 
-        active_positions = {
-
-            k: v
-
-            for k, v in self.positions.items()
-
-            if v > 0
-        }
+        active_positions = {k: v for k, v in self.positions.items() if v > 0}
 
         return {
-
-            "Cash":
-
-                round(self.cash, 2),
-
-            "Positions":
-
-                active_positions,
-
-            "Portfolio Value":
-
-                self.portfolio_value(),
-
-            "Trades":
-
-                self.trade_history
+            "Cash": round(self.cash, 2),
+            "Positions": active_positions,
+            "Portfolio Value": self.portfolio_value(),
+            "Trades": self.trade_history,
         }

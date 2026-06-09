@@ -13,23 +13,11 @@ from sklearn.preprocessing import MinMaxScaler
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-INPUT_FILE = (
-    BASE_DIR
-    / "data"
-    / "conviction_scores.csv"
-)
+INPUT_FILE = BASE_DIR / "data" / "conviction_scores.csv"
 
-OUTPUT_FILE = (
-    BASE_DIR
-    / "data"
-    / "expected_returns.csv"
-)
+OUTPUT_FILE = BASE_DIR / "data" / "expected_returns.csv"
 
-NEWS_FILE = (
-    BASE_DIR
-    / "data"
-    / "news_rankings.csv"
-)
+NEWS_FILE = BASE_DIR / "data" / "news_rankings.csv"
 
 # =========================================================
 # LOAD
@@ -46,76 +34,37 @@ print("✅ Data Loaded")
 # =========================================================
 
 if "NEWS_ALPHA" not in df.columns:
-
     df["NEWS_ALPHA"] = 50
 
 if "NEWS_SCORE" not in df.columns:
-
     df["NEWS_SCORE"] = 0
 
-df["NEWS_ALPHA"] = (
-    pd.to_numeric(
-        df["NEWS_ALPHA"],
-        errors="coerce"
-    )
-    .fillna(50)
-)
+df["NEWS_ALPHA"] = pd.to_numeric(df["NEWS_ALPHA"], errors="coerce").fillna(50)
 
-df["NEWS_SCORE"] = (
-    pd.to_numeric(
-        df["NEWS_SCORE"],
-        errors="coerce"
-    )
-    .fillna(0)
-)
+df["NEWS_SCORE"] = pd.to_numeric(df["NEWS_SCORE"], errors="coerce").fillna(0)
 # =========================================================
 # NUMERIC CLEAN
 # =========================================================
 
-numeric_cols = [
-
-    "MULTI_FACTOR_SCORE",
-
-    "ENTRY_SCORE",
-
-    "CONVICTION_SCORE",
-
-    "NEWS_ALPHA"
-
-]
+numeric_cols = ["MULTI_FACTOR_SCORE", "ENTRY_SCORE", "CONVICTION_SCORE", "NEWS_ALPHA"]
 
 for col in numeric_cols:
-
     if col not in df.columns:
-
         df[col] = 0
 
-    df[col] = pd.to_numeric(
-
-        df[col],
-
-        errors="coerce"
-
-    ).fillna(0)
+    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
 # =========================================================
 # PREDICTION SCORE
 # =========================================================
 
-print(
-    "\n🧠 Building Prediction Engine..."
-)
+print("\n🧠 Building Prediction Engine...")
 
 df["PREDICTION_SCORE"] = (
-
-      df["MULTI_FACTOR_SCORE"] * 0.40
-
+    df["MULTI_FACTOR_SCORE"] * 0.40
     + df["CONVICTION_SCORE"] * 0.25
-
     + df["ENTRY_SCORE"] * 3
-
     + df["NEWS_ALPHA"] * 0.15
-
 )
 
 # =========================================================
@@ -124,88 +73,36 @@ df["PREDICTION_SCORE"] = (
 
 scaler = MinMaxScaler()
 
-df["PRED_SCORE_NORM"] = (
-    scaler.fit_transform(
-        df[["PREDICTION_SCORE"]]
-    )
-)
+df["PRED_SCORE_NORM"] = scaler.fit_transform(df[["PREDICTION_SCORE"]])
 
 # =========================================================
 # EXPECTED RETURNS
 # =========================================================
 
-print(
-    "\n📈 Calculating Expected Returns..."
-)
+print("\n📈 Calculating Expected Returns...")
 
-df["EXPECTED_RETURN_5D"] = (
-    1
-    + (
-        df["PRED_SCORE_NORM"]
-        * 4
-    )
-)
+df["EXPECTED_RETURN_5D"] = 1 + (df["PRED_SCORE_NORM"] * 4)
 
-df["EXPECTED_RETURN_15D"] = (
-    df["EXPECTED_RETURN_5D"]
-    * 2.2
-)
+df["EXPECTED_RETURN_15D"] = df["EXPECTED_RETURN_5D"] * 2.2
 
 # Base Return
 
-df["EXPECTED_RETURN_30D"] = (
-
-    df["EXPECTED_RETURN_5D"]
-
-    * 3.5
-
-)
+df["EXPECTED_RETURN_30D"] = df["EXPECTED_RETURN_5D"] * 3.5
 
 # News Adjustment
 
-df["EXPECTED_RETURN_30D"] = (
-
-    df["EXPECTED_RETURN_30D"]
-
-    *
-
-    (
-
-        1
-
-        +
-
-        (
-            df["NEWS_ALPHA"]
-            - 50
-        )
-
-        / 500
-
-    )
-
-)
+df["EXPECTED_RETURN_30D"] = df["EXPECTED_RETURN_30D"] * (1 + (df["NEWS_ALPHA"] - 50) / 500)
 
 # =========================================================
 # HOLDING PERIOD
 # =========================================================
 
-df["EST_HOLD_DAYS"] = (
-
-    10
-
-    +
-
-    (
-        df["PRED_SCORE_NORM"]
-        * 25
-    )
-
-).round(0).astype(int)
+df["EST_HOLD_DAYS"] = (10 + (df["PRED_SCORE_NORM"] * 25)).round(0).astype(int)
 
 # =========================================================
 # SIGNAL ENGINE
 # =========================================================
+
 
 def signal(score):
 
@@ -224,10 +121,7 @@ def signal(score):
     return "EXIT"
 
 
-df["SIGNAL"] = (
-    df["PRED_SCORE_NORM"]
-    .apply(signal)
-)
+df["SIGNAL"] = df["PRED_SCORE_NORM"].apply(signal)
 
 # =========================================================
 # ROUNDING
@@ -240,59 +134,35 @@ for col in [
 ]:
     df[col] = df[col].round(2)
 
-df["PREDICTION_SCORE"] = (
-    df["PREDICTION_SCORE"]
-    .round(4)
-)
+df["PREDICTION_SCORE"] = df["PREDICTION_SCORE"].round(4)
 
-df["PRED_SCORE_NORM"] = (
-    df["PRED_SCORE_NORM"]
-    .round(4)
-)
+df["PRED_SCORE_NORM"] = df["PRED_SCORE_NORM"].round(4)
 
 # =========================================================
 # SORT
 # =========================================================
 
-df = df.sort_values(
-    by="PREDICTION_SCORE",
-    ascending=False
-)
+df = df.sort_values(by="PREDICTION_SCORE", ascending=False)
 
-df["PREDICTION_RANK"] = (
-    range(
-        1,
-        len(df) + 1
-    )
-)
+df["PREDICTION_RANK"] = range(1, len(df) + 1)
 
 # =========================================================
 # SAVE
 # =========================================================
 
-df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+df.to_csv(OUTPUT_FILE, index=False)
 
 # =========================================================
 # OUTPUT
 # =========================================================
 
-print(
-    "\n✅ Expected Return Engine Complete"
-)
+print("\n✅ Expected Return Engine Complete")
+
+print(f"\n📁 Saved To:\n{OUTPUT_FILE}")
+
+print("\n🏆 TOP PREDICTIONS:\n")
 
 print(
-    f"\n📁 Saved To:\n{OUTPUT_FILE}"
-)
-
-print(
-    "\n🏆 TOP PREDICTIONS:\n"
-)
-
-print(
-
     df[
         [
             "PREDICTION_RANK",
@@ -303,7 +173,5 @@ print(
             "EXPECTED_RETURN_30D",
             "EST_HOLD_DAYS",
         ]
-    ]
-    .head(20)
-
+    ].head(20)
 )

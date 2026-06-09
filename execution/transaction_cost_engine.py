@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 # =========================================================
 # FILES
@@ -7,17 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-BLOTTER_FILE = (
-    ROOT
-    / "data"
-    / "trade_blotter.csv"
-)
+BLOTTER_FILE = ROOT / "data" / "trade_blotter.csv"
 
-OUTPUT_FILE = (
-    ROOT
-    / "data"
-    / "trade_blotter_costed.csv"
-)
+OUTPUT_FILE = ROOT / "data" / "trade_blotter_costed.csv"
 
 # =========================================================
 # COST SETTINGS
@@ -34,58 +27,25 @@ IMPACT_COST = 0.0005
 
 print("\n📥 Loading Trade Blotter...")
 
-df = pd.read_csv(
-    BLOTTER_FILE
-)
+df = pd.read_csv(BLOTTER_FILE)
 
 # =========================================================
 # TOTAL COST %
 # =========================================================
 
-TOTAL_COST_RATE = (
-
-    BROKERAGE
-
-    +
-
-    STT
-
-    +
-
-    SLIPPAGE
-
-    +
-
-    IMPACT_COST
-)
+TOTAL_COST_RATE = BROKERAGE + STT + SLIPPAGE + IMPACT_COST
 
 # =========================================================
 # COSTS
 # =========================================================
 
-df["TRANSACTION_COST"] = (
-
-    df["ORDER_VALUE"]
-
-    *
-
-    TOTAL_COST_RATE
-
-).round(2)
+df["TRANSACTION_COST"] = (df["ORDER_VALUE"] * TOTAL_COST_RATE).round(2)
 
 # =========================================================
 # NET TRADE VALUE
 # =========================================================
 
-df["NET_ORDER_VALUE"] = (
-
-    df["ORDER_VALUE"]
-
-    -
-
-    df["TRANSACTION_COST"]
-
-).round(2)
+df["NET_ORDER_VALUE"] = (df["ORDER_VALUE"] - df["TRANSACTION_COST"]).round(2)
 
 # =========================================================
 # PORTFOLIO TOTALS
@@ -101,10 +61,7 @@ net = df["NET_ORDER_VALUE"].sum()
 # SAVE
 # =========================================================
 
-df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+df.to_csv(OUTPUT_FILE, index=False)
 
 # =========================================================
 # REPORT
@@ -112,43 +69,22 @@ df.to_csv(
 
 print("\n✅ Transaction Costs Applied")
 
-print("\nGross Value :", round(gross,2))
-print("Cost Value  :", round(cost,2))
-print("Net Value   :", round(net,2))
+print("\nGross Value :", round(gross, 2))
+print("Cost Value  :", round(cost, 2))
+print("Net Value   :", round(net, 2))
 
 print("\nCost %")
 
-print(
-
-    round(
-        (cost / gross) * 100,
-        3
-    )
-)
+print(round((cost / gross) * 100, 3))
 
 print("\n📁 Saved:")
 
-print(
-    OUTPUT_FILE
-)
+print(OUTPUT_FILE)
 
 print("\n🏆 Highest Cost Trades:\n")
 
 print(
-
-    df[
-        [
-            "Symbol",
-            "ACTION",
-            "ORDER_VALUE",
-            "TRANSACTION_COST"
-        ]
-    ]
-
-    .sort_values(
-        by="TRANSACTION_COST",
-        ascending=False
-    )
-
+    df[["Symbol", "ACTION", "ORDER_VALUE", "TRANSACTION_COST"]]
+    .sort_values(by="TRANSACTION_COST", ascending=False)
     .head(20)
 )

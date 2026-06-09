@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 # =========================================================
 # FILES
@@ -7,17 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = (
-    ROOT
-    / "data"
-    / "sector_controlled_portfolio.csv"
-)
+PORTFOLIO_FILE = ROOT / "data" / "sector_controlled_portfolio.csv"
 
-OUTPUT_FILE = (
-    ROOT
-    / "data"
-    / "position_sized_portfolio.csv"
-)
+OUTPUT_FILE = ROOT / "data" / "position_sized_portfolio.csv"
 
 # =========================================================
 # SETTINGS
@@ -32,9 +25,7 @@ MIN_WEIGHT = 0.00
 
 print("\n📥 Loading Portfolio...")
 
-portfolio_df = pd.read_csv(
-    PORTFOLIO_FILE
-)
+portfolio_df = pd.read_csv(PORTFOLIO_FILE)
 
 df = portfolio_df.copy()
 
@@ -42,115 +33,51 @@ df = portfolio_df.copy()
 # POSITION SCORE
 # =========================================================
 
-df["ENTRY_SCORE"] = (
-    df["ENTRY_SCORE"]
-    .fillna(0)
-)
+df["ENTRY_SCORE"] = df["ENTRY_SCORE"].fillna(0)
 
-df["POSITION_SCORE"] = (
-
-      (df["MULTI_FACTOR_SCORE"] ** 2)
-
-    * (1 + df["ENTRY_SCORE"] / 10)
-
-)
+df["POSITION_SCORE"] = (df["MULTI_FACTOR_SCORE"] ** 2) * (1 + df["ENTRY_SCORE"] / 10)
 
 # =========================================================
 # NORMALIZED WEIGHTS
 # =========================================================
 
-total_score = (
-    df["POSITION_SCORE"]
-    .sum()
-)
+total_score = df["POSITION_SCORE"].sum()
 if total_score <= 0:
-
-    raise ValueError(
-        "POSITION_SCORE total is zero."
-    )
-df["TARGET_WEIGHT"] = (
-
-    df["POSITION_SCORE"]
-
-    /
-
-    total_score
-)
+    raise ValueError("POSITION_SCORE total is zero.")
+df["TARGET_WEIGHT"] = df["POSITION_SCORE"] / total_score
 
 # =========================================================
 # APPLY LIMITS
 # =========================================================
 
-df["TARGET_WEIGHT"] = (
+df["TARGET_WEIGHT"] = df["TARGET_WEIGHT"].clip(upper=MAX_WEIGHT)
 
-    df["TARGET_WEIGHT"]
-
-    .clip(
-        upper=MAX_WEIGHT
-    )
-)
-
-df["TARGET_WEIGHT"] = (
-
-    df["TARGET_WEIGHT"]
-
-    /
-
-    df["TARGET_WEIGHT"].sum()
-)
+df["TARGET_WEIGHT"] = df["TARGET_WEIGHT"] / df["TARGET_WEIGHT"].sum()
 
 # =========================================================
 # PERCENT FORMAT
 # =========================================================
 
-df["TARGET_WEIGHT_%"] = (
-
-    df["TARGET_WEIGHT"]
-
-    * 100
-
-).round(2)
+df["TARGET_WEIGHT_%"] = (df["TARGET_WEIGHT"] * 100).round(2)
 
 # =========================================================
 # SORT
 # =========================================================
 
-df = df.sort_values(
-
-    by="TARGET_WEIGHT",
-
-    ascending=False
-)
+df = df.sort_values(by="TARGET_WEIGHT", ascending=False)
 
 # =========================================================
 # SAVE
 # =========================================================
 
-df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+df.to_csv(OUTPUT_FILE, index=False)
 
 print("\n✅ Position Sizing Complete")
 
 print("\n📁 Saved:")
 
-print(
-    OUTPUT_FILE
-)
+print(OUTPUT_FILE)
 
 print("\n🏆 Portfolio Weights:\n")
 
-print(
-
-    df[
-        [
-            "Symbol",
-                "MULTI_FACTOR_SCORE",
-                "ENTRY_SCORE",
-                "TARGET_WEIGHT_%"
-        ]
-    ]
-
-    .head(20)
-)
+print(df[["Symbol", "MULTI_FACTOR_SCORE", "ENTRY_SCORE", "TARGET_WEIGHT_%"]].head(20))

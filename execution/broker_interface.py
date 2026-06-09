@@ -1,14 +1,11 @@
-from abc import (
-    ABC,
-    abstractmethod
-)
+from abc import ABC, abstractmethod
 
 # =========================================================
 # ABSTRACT BROKER
 # =========================================================
 
-class BrokerInterface(ABC):
 
+class BrokerInterface(ABC):
     @abstractmethod
     def connect(self):
 
@@ -20,16 +17,7 @@ class BrokerInterface(ABC):
         pass
 
     @abstractmethod
-    def place_order(
-
-        self,
-
-        symbol,
-
-        quantity,
-
-        side
-    ):
+    def place_order(self, symbol, quantity, side):
 
         pass
 

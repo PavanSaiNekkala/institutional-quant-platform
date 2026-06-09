@@ -2,7 +2,6 @@ from core.database import Database
 
 
 class StockRepository:
-
     @staticmethod
     def get_all():
         conn = Database.connection()
@@ -16,8 +15,11 @@ class StockRepository:
     def get_by_symbol(symbol: str):
         conn = Database.connection()
 
-        return conn.execute("""
+        return conn.execute(
+            """
             SELECT *
             FROM stock_metadata
             WHERE symbol = ?
-        """, [symbol]).df()
+        """,
+            [symbol],
+        ).df()

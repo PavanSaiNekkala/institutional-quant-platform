@@ -3,16 +3,16 @@
 # FINAL ENTERPRISE INSTITUTIONAL QUANT DASHBOARD
 # =========================================================
 
-import streamlit as st
-import pandas as pd
+import time
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
-import yfinance as yf
+import pandas as pd
 import plotly.express as px
 import pytz
-import time
-
-from pathlib import Path
-from datetime import datetime
+import streamlit as st
+import yfinance as yf
 
 # =========================================================
 # PAGE CONFIG
@@ -22,14 +22,15 @@ st.set_page_config(
     page_title="Institutional Quant Platform",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # =========================================================
 # GLOBAL CSS
 # =========================================================
 
-st.markdown("""
+st.markdown(
+    """
 <style>
 
 /* =====================================================
@@ -206,13 +207,16 @@ MOBILE RESPONSIVE
 }
 
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # =========================================================
 # HEADER
 # =========================================================
 
-st.markdown("""
+st.markdown(
+    """
 <div style="
     font-size:42px;
     font-weight:900;
@@ -220,9 +224,12 @@ st.markdown("""
 ">
 📊 Institutional Quant Platform
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-st.markdown("""
+st.markdown(
+    """
 <div style="
     font-size:16px;
     color:#6B7280;
@@ -230,13 +237,13 @@ st.markdown("""
 ">
 Enterprise Institutional Analytics Dashboard
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 india = pytz.timezone("Asia/Kolkata")
 
-st.caption(
-    f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}"
-)
+st.caption(f"Updated: {datetime.now(india).strftime('%d-%m-%Y %I:%M:%S %p IST')}")
 
 st.markdown("---")
 
@@ -246,21 +253,11 @@ st.markdown("---")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-excel_path = (
-    ROOT_DIR /
-    "data" /
-    "valid_stocks.xlsx"
-)
+excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
 
 universe_df = pd.read_excel(excel_path)
 
-stocks = (
-    universe_df.iloc[:,0]
-    .dropna()
-    .astype(str)
-    .str.upper()
-    .tolist()
-)
+stocks = universe_df.iloc[:, 0].dropna().astype(str).str.upper().tolist()
 
 stocks = [s for s in stocks if ".NS" in s]
 
@@ -271,47 +268,25 @@ stocks = list(dict.fromkeys(stocks))
 # =========================================================
 
 with st.sidebar:
-
     st.markdown("## ⚙️ Dashboard Controls")
 
     st.markdown("---")
 
     signal_filter = st.multiselect(
-        "📈 Trade Signal Filter",
-        options=[
-            "STRONG_BUY",
-            "BUY",
-            "WATCH",
-            "HOLD",
-            "AVOID"
-        ]
+        "📈 Trade Signal Filter", options=["STRONG_BUY", "BUY", "WATCH", "HOLD", "AVOID"]
     )
 
-    min_score = st.slider(
-        "Minimum Institutional Score",
-        0,
-        100,
-        60
-    )
+    min_score = st.slider("Minimum Institutional Score", 0, 100, 60)
 
-    search_stock = st.text_input(
-        "Search Stock",
-        placeholder="Type stock name..."
-    )
+    search_stock = st.text_input("Search Stock", placeholder="Type stock name...")
 
     if search_stock:
-
-        matches = [
-            s for s in stocks
-            if search_stock.upper() in s.upper()
-        ][:10]
+        matches = [s for s in stocks if search_stock.upper() in s.upper()][:10]
 
         if matches:
-
             st.markdown("### 🔍 Matching Stocks")
 
             for m in matches:
-
                 st.markdown(
                     f"""
                     <div style="
@@ -326,14 +301,12 @@ with st.sidebar:
                     {m}
                     </div>
                     """,
-                    unsafe_allow_html=True
+                    unsafe_allow_html=True,
                 )
 
     st.markdown("---")
 
-    st.success(
-        f"✅ NSE Universe Loaded: {len(stocks)}"
-    )
+    st.success(f"✅ NSE Universe Loaded: {len(stocks)}")
 
 # =========================================================
 # COLORS
@@ -344,23 +317,26 @@ signal_colors = {
     "BUY": "#32CD32",
     "WATCH": "#F59E0B",
     "HOLD": "#3B82F6",
-    "AVOID": "#DC2626"
+    "AVOID": "#DC2626",
 }
 
 # =========================================================
 # SAFE ROUND
 # =========================================================
 
+
 def safe_round(x, n=2):
 
     try:
         return round(float(x), n)
-    except:
+    except Exception:
         return 0
+
 
 # =========================================================
 # ANALYSIS ENGINE
 # =========================================================
+
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def run_analysis(stock_list):
@@ -383,11 +359,9 @@ def run_analysis(stock_list):
     status_placeholder = st.empty()
 
     for i in range(0, total, batch_size):
-
-        batch = stock_list[i:i+batch_size]
+        batch = stock_list[i : i + batch_size]
 
         try:
-
             data = yf.download(
                 tickers=batch,
                 period="6mo",
@@ -395,26 +369,21 @@ def run_analysis(stock_list):
                 auto_adjust=True,
                 progress=False,
                 threads=False,
-                group_by="ticker"
+                group_by="ticker",
             )
 
-        except:
-
+        except Exception:
             for symbol in batch:
-
                 if symbol not in failed_stocks:
                     failed_stocks.add(symbol)
 
             continue
 
         for symbol in batch:
-
             processed += 1
 
             try:
-
                 if symbol not in data.columns.levels[0]:
-
                     if symbol not in failed_stocks:
                         failed_stocks.add(symbol)
 
@@ -423,28 +392,18 @@ def run_analysis(stock_list):
                 close = data[symbol]["Close"].dropna()
 
                 if len(close) < 40:
-
                     if symbol not in failed_stocks:
                         failed_stocks.add(symbol)
 
                     continue
 
-                momentum = (
-                    close.iloc[-1]
-                    / close.iloc[-20]
-                ) - 1
+                momentum = (close.iloc[-1] / close.iloc[-20]) - 1
 
                 returns = close.pct_change().dropna()
 
-                sharpe = (
-                    returns.mean()
-                    / max(returns.std(), 0.0001)
-                ) * np.sqrt(252)
+                sharpe = (returns.mean() / max(returns.std(), 0.0001)) * np.sqrt(252)
 
-                score = (
-                    momentum * 0.6
-                    + sharpe * 0.4
-                )
+                score = momentum * 0.6 + sharpe * 0.4
 
                 # =====================================================
                 # SIGNAL CLASSIFICATION
@@ -465,41 +424,32 @@ def run_analysis(stock_list):
                 else:
                     signal = "AVOID"
 
-                results.append({
-                    "Symbol": symbol,
-                    "CMP": safe_round(close.iloc[-1]),
-                    "Momentum": safe_round(momentum * 100),
-                    "Sharpe": safe_round(sharpe),
-                    "Final Score": safe_round(score),
-                    "Classification": signal
-                })
-                
+                results.append(
+                    {
+                        "Symbol": symbol,
+                        "CMP": safe_round(close.iloc[-1]),
+                        "Momentum": safe_round(momentum * 100),
+                        "Sharpe": safe_round(sharpe),
+                        "Final Score": safe_round(score),
+                        "Classification": signal,
+                    }
+                )
+
                 successful += 1
 
-            except:
-
+            except Exception:
                 if symbol not in failed_stocks:
                     failed_stocks.add(symbol)
 
-
             elapsed = (time.time() - start_time) / 60
 
-            estimated_total = (
-                elapsed / max(processed,1)
-            ) * total
+            estimated_total = (elapsed / max(processed, 1)) * total
 
-            remaining_minutes = round(
-                max(estimated_total - elapsed, 0),
-                1
-            )
+            remaining_minutes = round(max(estimated_total - elapsed, 0), 1)
 
-            completion_pct = round(
-                (processed / total) * 100,
-                1
-            )
+            completion_pct = round((processed / total) * 100, 1)
 
             if processed % 10 == 0:
-
                 status_html = f"""
                 <div class="processing-container" style="
                     background:white;
@@ -745,13 +695,11 @@ def run_analysis(stock_list):
 
                 with status_placeholder:
                     st.html(status_html)
-                    
+
     status_placeholder.empty()
-    
-    return (
-        pd.DataFrame(results),
-        failed_stocks
-    )
+
+    return (pd.DataFrame(results), failed_stocks)
+
 
 # =========================================================
 # RUN ANALYSIS
@@ -760,7 +708,6 @@ def run_analysis(stock_list):
 results, failed_stocks = run_analysis(stocks)
 
 if results.empty:
-
     st.error("No valid results.")
     st.stop()
 
@@ -768,30 +715,15 @@ if results.empty:
 # FILTERS
 # =========================================================
 
-results["Percentile"] = (
-    results["Final Score"] * 100
-)
+results["Percentile"] = results["Final Score"] * 100
 
-results = results[
-    results["Percentile"] >= min_score
-]
+results = results[results["Percentile"] >= min_score]
 
 if signal_filter:
-
-    results = results[
-        results["Classification"]
-        .isin(signal_filter)
-    ]
+    results = results[results["Classification"].isin(signal_filter)]
 
 if search_stock:
-
-    results = results[
-        results["Symbol"]
-        .str.contains(
-            search_stock.upper(),
-            na=False
-        )
-    ]
+    results = results[results["Symbol"].str.contains(search_stock.upper(), na=False)]
 
 # =========================================================
 # KPI CARDS
@@ -799,47 +731,30 @@ if search_stock:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-k1,k2,k3,k4 = st.columns(4)
+k1, k2, k3, k4 = st.columns(4)
 
 with k1:
     st.metric("NSE Universe", len(stocks))
 
 with k2:
-    st.metric(
-        "Processed Stocks",
-        len(results)
-    )
+    st.metric("Processed Stocks", len(results))
 
 with k3:
-    st.metric(
-        "Filtered Opportunities",
-        len(results)
-    )
+    st.metric("Filtered Opportunities", len(results))
 
 with k4:
-    st.metric(
-        "Failed Stocks",
-        len(set(failed_stocks))
-    )
+    st.metric("Failed Stocks", len(set(failed_stocks)))
 
 # =========================================================
 # CHARTS
 # =========================================================
 
-left,right = st.columns(2)
+left, right = st.columns(2)
 
 with left:
+    signal_data = results["Classification"].value_counts().reset_index()
 
-    signal_data = (
-        results["Classification"]
-        .value_counts()
-        .reset_index()
-    )
-
-    signal_data.columns = [
-        "Signal",
-        "Count"
-    ]
+    signal_data.columns = ["Signal", "Count"]
 
     fig1 = px.pie(
         signal_data,
@@ -848,21 +763,14 @@ with left:
         hole=0.6,
         color="Signal",
         color_discrete_map=signal_colors,
-        title="Signal Distribution"
+        title="Signal Distribution",
     )
 
-    fig1.update_layout(
-        height=380,
-        margin=dict(l=10,r=10,t=40,b=10)
-    )
+    fig1.update_layout(height=380, margin=dict(l=10, r=10, t=40, b=10))
 
-    st.plotly_chart(
-        fig1,
-        use_container_width=True
-    )
+    st.plotly_chart(fig1, use_container_width=True)
 
 with right:
-
     fig2 = px.scatter(
         results,
         x="Momentum",
@@ -871,18 +779,12 @@ with right:
         size="Final Score",
         hover_name="Symbol",
         color_discrete_map=signal_colors,
-        title="Risk Reward Opportunity Matrix"
+        title="Risk Reward Opportunity Matrix",
     )
 
-    fig2.update_layout(
-        height=380,
-        margin=dict(l=10,r=10,t=40,b=10)
-    )
+    fig2.update_layout(height=380, margin=dict(l=10, r=10, t=40, b=10))
 
-    st.plotly_chart(
-        fig2,
-        use_container_width=True
-    )
+    st.plotly_chart(fig2, use_container_width=True)
 
 # =========================================================
 # TABLE
@@ -891,10 +793,5 @@ with right:
 st.markdown("## 🏦 Institutional Rankings")
 
 st.dataframe(
-    results.sort_values(
-        "Final Score",
-        ascending=False
-    ),
-    use_container_width=True,
-    height=550
+    results.sort_values("Final Score", ascending=False), use_container_width=True, height=550
 )

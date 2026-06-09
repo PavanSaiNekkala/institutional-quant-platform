@@ -1,12 +1,13 @@
 from datetime import datetime
+
 import pandas as pd
 
 # =========================================================
 # RESEARCH LAB
 # =========================================================
 
-class ResearchLab:
 
+class ResearchLab:
     def __init__(self):
 
         self.experiments = []
@@ -15,68 +16,27 @@ class ResearchLab:
     # REGISTER EXPERIMENT
     # =====================================================
 
-    def register_experiment(
-
-        self,
-
-        name,
-
-        hypothesis,
-
-        model,
-
-        metric
-    ):
+    def register_experiment(self, name, hypothesis, model, metric):
 
         experiment = {
-
-            "Experiment":
-
-                name,
-
-            "Hypothesis":
-
-                hypothesis,
-
-            "Model":
-
-                model,
-
-            "Metric":
-
-                metric,
-
-            "Timestamp":
-
-                datetime.now(),
-
-            "Status":
-
-                "ACTIVE"
+            "Experiment": name,
+            "Hypothesis": hypothesis,
+            "Model": model,
+            "Metric": metric,
+            "Timestamp": datetime.now(),
+            "Status": "ACTIVE",
         }
 
-        self.experiments.append(
-
-            experiment
-        )
+        self.experiments.append(experiment)
 
     # =====================================================
     # UPDATE STATUS
     # =====================================================
 
-    def update_status(
-
-        self,
-
-        experiment_name,
-
-        status
-    ):
+    def update_status(self, experiment_name, status):
 
         for exp in self.experiments:
-
             if exp["Experiment"] == experiment_name:
-
                 exp["Status"] = status
 
     # =====================================================
@@ -85,10 +45,7 @@ class ResearchLab:
 
     def research_summary(self):
 
-        return pd.DataFrame(
-
-            self.experiments
-        )
+        return pd.DataFrame(self.experiments)
 
     # =====================================================
     # ACTIVE EXPERIMENTS
@@ -96,13 +53,6 @@ class ResearchLab:
 
     def active_experiments(self):
 
-        active = [
-
-            e
-
-            for e in self.experiments
-
-            if e["Status"] == "ACTIVE"
-        ]
+        active = [e for e in self.experiments if e["Status"] == "ACTIVE"]
 
         return pd.DataFrame(active)

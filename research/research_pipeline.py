@@ -1,30 +1,18 @@
 from datetime import datetime
+
 import pandas as pd
-import numpy as np
 
-from research.alpha_mining import (
-    alpha_report
-)
-
-from research.walk_forward import (
-    walk_forward_validation,
-    validation_summary
-)
-
-from research.alpha_decay import (
-    alpha_decay_analysis
-)
-
-from research.bayesian_optimization import (
-    optimize_strategy
-)
+from research.alpha_decay import alpha_decay_analysis
+from research.alpha_mining import alpha_report
+from research.bayesian_optimization import optimize_strategy
+from research.walk_forward import validation_summary, walk_forward_validation
 
 # =========================================================
 # RESEARCH PIPELINE
 # =========================================================
 
-class ResearchPipeline:
 
+class ResearchPipeline:
     def __init__(self):
 
         self.results = []
@@ -33,12 +21,7 @@ class ResearchPipeline:
     # RUN PIPELINE
     # =====================================================
 
-    def run_pipeline(
-
-        self,
-
-        prices
-    ):
+    def run_pipeline(self, prices):
 
         timestamp = datetime.now()
 
@@ -46,33 +29,21 @@ class ResearchPipeline:
         # ALPHA MINING
         # =================================================
 
-        alpha = alpha_report(
-
-            prices
-        )
+        alpha = alpha_report(prices)
 
         # =================================================
         # WALK FORWARD
         # =================================================
 
-        wf_results = walk_forward_validation(
+        wf_results = walk_forward_validation(prices)
 
-            prices
-        )
-
-        wf_summary = validation_summary(
-
-            wf_results
-        )
+        wf_summary = validation_summary(wf_results)
 
         # =================================================
         # ALPHA DECAY
         # =================================================
 
-        decay_report, _ = alpha_decay_analysis(
-
-            prices
-        )
+        decay_report, _ = alpha_decay_analysis(prices)
 
         # =================================================
         # OPTIMIZATION
@@ -80,45 +51,18 @@ class ResearchPipeline:
 
         returns = prices.pct_change().dropna()
 
-        optimization = optimize_strategy(
-
-            returns
-        )
+        optimization = optimize_strategy(returns)
 
         pipeline_result = {
-
-            "Timestamp":
-
-                timestamp,
-
-            "Top Alpha Factor":
-
-                alpha.iloc[0]["Factor"],
-
-            "Top Alpha Score":
-
-                round(
-                    alpha.iloc[0]["Alpha Score"],
-                    4
-                ),
-
-            "Average Validation MSE":
-
-                wf_summary["Average MSE"],
-
-            "Recent IC":
-
-                decay_report["Recent IC"],
-
-            "Optimization Score":
-
-                optimization["Best Score"]
+            "Timestamp": timestamp,
+            "Top Alpha Factor": alpha.iloc[0]["Factor"],
+            "Top Alpha Score": round(alpha.iloc[0]["Alpha Score"], 4),
+            "Average Validation MSE": wf_summary["Average MSE"],
+            "Recent IC": decay_report["Recent IC"],
+            "Optimization Score": optimization["Best Score"],
         }
 
-        self.results.append(
-
-            pipeline_result
-        )
+        self.results.append(pipeline_result)
 
         return pipeline_result
 
@@ -128,7 +72,4 @@ class ResearchPipeline:
 
     def pipeline_history(self):
 
-        return pd.DataFrame(
-
-            self.results
-        )
+        return pd.DataFrame(self.results)

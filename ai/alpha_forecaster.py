@@ -1,166 +1,65 @@
 import pandas as pd
-import numpy as np
-
-from sklearn.ensemble import (
-    RandomForestRegressor
-)
-
-from sklearn.model_selection import (
-    train_test_split
-)
-
-from sklearn.metrics import (
-    mean_squared_error
-)
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 
 # =========================================================
 # FEATURE ENGINEERING
 # =========================================================
 
-def build_features(
 
-    prices
-):
+def build_features(prices):
 
     df = pd.DataFrame()
 
-    df["returns"] = (
+    df["returns"] = prices.pct_change()
 
-        prices.pct_change()
-    )
+    df["volatility"] = df["returns"].rolling(20).std()
 
-    df["volatility"] = (
+    df["momentum"] = prices / prices.shift(20)
 
-        df["returns"]
+    df["moving_avg"] = prices.rolling(20).mean()
 
-        .rolling(20)
-
-        .std()
-    )
-
-    df["momentum"] = (
-
-        prices
-
-        / prices.shift(20)
-    )
-
-    df["moving_avg"] = (
-
-        prices
-
-        .rolling(20)
-
-        .mean()
-    )
-
-    df["target"] = (
-
-        df["returns"]
-
-        .shift(-1)
-    )
+    df["target"] = df["returns"].shift(-1)
 
     df = df.dropna()
 
     return df
 
+
 # =========================================================
 # TRAIN MODEL
 # =========================================================
 
-def train_alpha_model(
 
-    prices
-):
+def train_alpha_model(prices):
 
-    df = build_features(
+    df = build_features(prices)
 
-        prices
-    )
-
-    X = df[[
-
-        "volatility",
-        "momentum",
-        "moving_avg"
-    ]]
+    X = df[["volatility", "momentum", "moving_avg"]]
 
     y = df["target"]
 
-    X_train, X_test, y_train, y_test = (
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-        train_test_split(
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
 
-            X,
+    model.fit(X_train, y_train)
 
-            y,
+    predictions = model.predict(X_test)
 
-            test_size=0.2,
+    mse = mean_squared_error(y_test, predictions)
 
-            shuffle=False
-        )
-    )
+    return {"model": model, "mse": mse, "features": X_test, "predictions": predictions}
 
-    model = RandomForestRegressor(
-
-        n_estimators=100,
-
-        random_state=42
-    )
-
-    model.fit(
-
-        X_train,
-
-        y_train
-    )
-
-    predictions = model.predict(
-
-        X_test
-    )
-
-    mse = mean_squared_error(
-
-        y_test,
-
-        predictions
-    )
-
-    return {
-
-        "model":
-
-            model,
-
-        "mse":
-
-            mse,
-
-        "features":
-
-            X_test,
-
-        "predictions":
-
-            predictions
-    }
 
 # =========================================================
 # FORECAST NEXT RETURN
 # =========================================================
 
-def forecast_next_return(
 
-    model,
+def forecast_next_return(model, latest_features):
 
-    latest_features
-):
-
-    prediction = model.predict(
-
-        latest_features
-    )
+    prediction = model.predict(latest_features)
 
     return prediction[0]

@@ -1,8 +1,8 @@
+import time
+from pathlib import Path
+
 import pandas as pd
 import yfinance as yf
-import time
-
-from pathlib import Path
 
 # =========================================================
 # PATHS
@@ -20,49 +20,26 @@ OUTPUT_FILE = ROOT_DIR / "data" / "market_caps.csv"
 
 df = pd.read_excel(NSE_FILE)
 
-possible_cols = [
-    "Stock",
-    "Symbol",
-    "SYMBOL",
-    "symbol"
-]
+possible_cols = ["Stock", "Symbol", "SYMBOL", "symbol"]
 
 symbol_col = None
 
 for col in possible_cols:
-
     if col in df.columns:
-
         symbol_col = col
 
         break
 
 if symbol_col is None:
+    raise Exception(f"Symbol column not found. Available columns: {df.columns.tolist()}")
 
-    raise Exception(
-        f"Symbol column not found. "
-        f"Available columns: {df.columns.tolist()}"
-    )
-
-symbols = (
-    df[symbol_col]
-    .dropna()
-    .astype(str)
-    .str.strip()
-    .unique()
-    .tolist()
-)
+symbols = df[symbol_col].dropna().astype(str).str.strip().unique().tolist()
 
 # =========================================================
 # FORMAT NSE SYMBOLS
 # =========================================================
 
-symbols = [
-
-    s.replace(".NS", "") + ".NS"
-
-    for s in symbols
-]
+symbols = [s.replace(".NS", "") + ".NS" for s in symbols]
 
 print(f"\n✅ Loaded Stocks: {len(symbols)}")
 
@@ -75,25 +52,15 @@ results = []
 BATCH_SIZE = 50
 
 for start in range(0, len(symbols), BATCH_SIZE):
+    batch = symbols[start : start + BATCH_SIZE]
 
-    batch = symbols[start:start + BATCH_SIZE]
-
-    print(
-        f"\n🚀 Processing Batch "
-        f"{start + 1} to "
-        f"{start + len(batch)}"
-    )
+    print(f"\n🚀 Processing Batch {start + 1} to {start + len(batch)}")
 
     try:
-
-        tickers = yf.Tickers(
-            " ".join(batch)
-        )
+        tickers = yf.Tickers(" ".join(batch))
 
         for symbol in batch:
-
             try:
-
                 ticker = tickers.tickers[symbol]
 
                 market_cap = 0
@@ -103,16 +70,9 @@ for start in range(0, len(symbols), BATCH_SIZE):
                 # =========================================
 
                 try:
-
-                    market_cap = (
-                        ticker.fast_info.get(
-                            "market_cap",
-                            0
-                        )
-                    )
+                    market_cap = ticker.fast_info.get("market_cap", 0)
 
                 except Exception:
-
                     pass
 
                 # =========================================
@@ -120,52 +80,20 @@ for start in range(0, len(symbols), BATCH_SIZE):
                 # =========================================
 
                 if not market_cap:
-
                     try:
-
-                        market_cap = (
-                            ticker.info.get(
-                                "marketCap",
-                                0
-                            )
-                        )
+                        market_cap = ticker.info.get("marketCap", 0)
 
                     except Exception:
-
                         pass
 
-                print(
-                    f"✅ {symbol} | "
-                    f"{market_cap}"
-                )
+                print(f"✅ {symbol} | {market_cap}")
 
-                results.append({
+                results.append({"Symbol": symbol.replace(".NS", ""), "MarketCap": market_cap})
 
-                    "Symbol": symbol.replace(
-                        ".NS",
-                        ""
-                    ),
+            except Exception:
+                print(f"❌ {symbol} | ERROR")
 
-                    "MarketCap": market_cap
-
-                })
-
-            except Exception as e:
-
-                print(
-                    f"❌ {symbol} | ERROR"
-                )
-
-                results.append({
-
-                    "Symbol": symbol.replace(
-                        ".NS",
-                        ""
-                    ),
-
-                    "MarketCap": 0
-
-                })
+                results.append({"Symbol": symbol.replace(".NS", ""), "MarketCap": 0})
 
         # =============================================
         # SAVE AFTER EACH BATCH
@@ -173,14 +101,9 @@ for start in range(0, len(symbols), BATCH_SIZE):
 
         temp_df = pd.DataFrame(results)
 
-        temp_df.to_csv(
-            OUTPUT_FILE,
-            index=False
-        )
+        temp_df.to_csv(OUTPUT_FILE, index=False)
 
-        print(
-            f"💾 Auto Saved"
-        )
+        print("💾 Auto Saved")
 
         # =============================================
         # SMALL COOL DOWN
@@ -189,10 +112,7 @@ for start in range(0, len(symbols), BATCH_SIZE):
         time.sleep(2)
 
     except Exception as e:
-
-        print(
-            f"❌ Batch Failed: {e}"
-        )
+        print(f"❌ Batch Failed: {e}")
 
 # =========================================================
 # FINAL DATAFRAME
@@ -200,39 +120,23 @@ for start in range(0, len(symbols), BATCH_SIZE):
 
 market_cap_df = pd.DataFrame(results)
 
-market_cap_df = market_cap_df.drop_duplicates(
-    subset=["Symbol"]
-)
+market_cap_df = market_cap_df.drop_duplicates(subset=["Symbol"])
 
-market_cap_df = market_cap_df.sort_values(
-    by="MarketCap",
-    ascending=False
-)
+market_cap_df = market_cap_df.sort_values(by="MarketCap", ascending=False)
 
 # =========================================================
 # SAVE FINAL CSV
 # =========================================================
 
-market_cap_df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+market_cap_df.to_csv(OUTPUT_FILE, index=False)
 
 # =========================================================
 # SUMMARY
 # =========================================================
 
-success = len(
-    market_cap_df[
-        market_cap_df["MarketCap"] > 0
-    ]
-)
+success = len(market_cap_df[market_cap_df["MarketCap"] > 0])
 
-failed = len(
-    market_cap_df[
-        market_cap_df["MarketCap"] <= 0
-    ]
-)
+failed = len(market_cap_df[market_cap_df["MarketCap"] <= 0])
 
 print("\n================================")
 
@@ -242,8 +146,6 @@ print(f"✅ Success: {success}")
 
 print(f"❌ Failed: {failed}")
 
-print(
-    f"📁 File: {OUTPUT_FILE}"
-)
+print(f"📁 File: {OUTPUT_FILE}")
 
 print("================================\n")

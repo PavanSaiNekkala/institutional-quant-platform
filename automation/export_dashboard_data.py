@@ -1,7 +1,7 @@
 import sys
-import pandas as pd
-
 from pathlib import Path
+
+import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,69 +11,36 @@ sys.path.append(str(ROOT_DIR))
 # EXPORT DIRECTORY
 # =========================================================
 
-EXPORT_DIR = (
+EXPORT_DIR = ROOT_DIR / "cache" / "dashboard_exports"
 
-    ROOT_DIR
-
-    / "cache"
-
-    / "dashboard_exports"
-)
-
-EXPORT_DIR.mkdir(
-
-    parents=True,
-
-    exist_ok=True
-)
+EXPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 # =========================================================
 # EXPORT RANKED UNIVERSE
 # =========================================================
 
+
 def export_ranked_universe():
 
-    source = (
-
-        ROOT_DIR
-
-        / "ranked_universe.xlsx"
-    )
+    source = ROOT_DIR / "ranked_universe.xlsx"
 
     if not source.exists():
-
-        print(
-
-            "\nRANKED UNIVERSE MISSING\n"
-        )
+        print("\nRANKED UNIVERSE MISSING\n")
 
         return
 
     df = pd.read_excel(source)
 
-    output = (
+    output = EXPORT_DIR / "ranked_universe.parquet"
 
-        EXPORT_DIR
+    df.to_parquet(output, index=False)
 
-        / "ranked_universe.parquet"
-    )
+    print("\nRANKED UNIVERSE EXPORTED\n")
 
-    df.to_parquet(
-
-        output,
-
-        index=False
-    )
-
-    print(
-
-        "\nRANKED UNIVERSE EXPORTED\n"
-    )
 
 # =========================================================
 # MAIN
 # =========================================================
 
 if __name__ == "__main__":
-
     export_ranked_universe()
