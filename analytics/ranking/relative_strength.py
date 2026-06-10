@@ -91,8 +91,26 @@ print(f"\n✅ Loaded {len(symbols)} symbols")
 
 print("\n📥 Downloading Benchmark...")
 
-benchmark_df = yf.download(
-    BENCHMARK, period=DOWNLOAD_PERIOD, auto_adjust=True, progress=False, threads=False
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+BENCHMARK_FILE = (
+    ROOT_DIR
+    / "data"
+    / "raw"
+    / "benchmark.csv"
+)
+
+benchmark_df = pd.read_csv(
+    BENCHMARK_FILE,
+    parse_dates=["Date"]
+)
+
+benchmark_df = benchmark_df.sort_values(
+    "Date"
+)
+
+benchmark_df = benchmark_df.set_index(
+    "Date"
 )
 
 # =========================================================

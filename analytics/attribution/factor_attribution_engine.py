@@ -1,12 +1,16 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
 
+from analytics.utilities.schema_validator import validate_columns
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
 # =========================================================
 # FILES
 # =========================================================
-
-ROOT = Path(__file__).resolve().parents[2]
 
 PORTFOLIO_FILE = ROOT / "data" / "portfolio" / "optimised_portfolio.csv"
 
@@ -24,11 +28,34 @@ OUTPUT_STOCK_ATTRIBUTION = ROOT / "data" / "processed" / "factor_attribution_by_
 
 print("\n📥 Loading Data...")
 
-portfolio = pd.read_csv(PORTFOLIO_FILE)
+portfolio = validate_columns(
+    PORTFOLIO_FILE,
+    [
+        "Symbol",
+    ],
+)
 
-factor_df = pd.read_csv(FACTOR_FILE)
+factor_df = validate_columns(
+    FACTOR_FILE,
+    [
+        "Symbol",
+        "FACTOR_MOMENTUM",
+        "FACTOR_SHARPE",
+        "FACTOR_ALPHA",
+        "FACTOR_RS",
+        "FACTOR_SECTOR",
+        "FACTOR_ENTRY",
+        "FACTOR_LIQUIDITY",
+    ],
+)
 
-expected_df = pd.read_csv(EXPECTED_FILE)
+expected_df = validate_columns(
+    EXPECTED_FILE,
+    [
+        "Symbol",
+        "EXPECTED_RETURN_30D",
+    ],
+)
 
 # =========================================================
 # SYMBOL CLEANUP

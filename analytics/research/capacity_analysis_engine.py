@@ -19,11 +19,12 @@ OUTPUT_FILE = ROOT / "data" / "processed" / "capacity_report.csv"
 # =========================================================
 
 TEST_CAPITALS = [
-    1_000_000,  # 10 Lakh
-    5_000_000,  # 50 Lakh
-    10_000_000,  # 1 Crore
-    50_000_000,  # 5 Crore
-    100_000_000,  # 10 Crore
+    1_000_000,      # 10 lakh
+    5_000_000,      # 50 lakh
+    10_000_000,     # 1 crore
+    25_000_000,     # 2.5 crore
+    50_000_000,     # 5 crore
+    100_000_000,    # 10 crore
 ]
 
 MAX_ADV_USAGE = 0.05
@@ -70,16 +71,21 @@ if weight_col is None:
 
 adv_col = None
 
-for col in ["AVG_DAILY_VALUE", "AVG_DAILY_TURNOVER", "ADV", "LIQUIDITY_SCORE"]:
+for col in [
+    "ADV_RUPEES",
+    "TRADED_VALUE",
+    "AVG_DAILY_VALUE",
+    "AVG_DAILY_TURNOVER",
+    "ADV",
+]:
     if col in master.columns:
         adv_col = col
 
         break
 
 if adv_col is None:
-    print("\n⚠ No ADV column found.")
-
-    print("Using LIQUIDITY_SCORE proxy.")
+    print("\nℹ No ADV column found in factor_model_rankings.csv")
+    print("Loading TRADED_VALUE from liquidity_scores.csv")
 
 # =========================================================
 # MERGE
@@ -90,17 +96,107 @@ merge_cols = ["Symbol"]
 if adv_col:
     merge_cols.append(adv_col)
 
-df = portfolio.merge(master[merge_cols], on="Symbol", how="left")
+df = portfolio.merge(
+    master[merge_cols],
+    on="Symbol",
+    how="left",
+)
 
 # =========================================================
-# CREATE ADV IF MISSING
+# RESOLVE ADV COLUMN
+# =========================================================
+
+if adv_col:
+
+    possible_cols = [
+        adv_col,
+        f"{adv_col}_x",
+        f"{adv_col}_y",
+    ]
+
+    found = None
+
+    for col in possible_cols:
+        if col in df.columns:
+            found = col
+            break
+
+    adv_col = found
+
+# =========================================================
+# LOAD LIQUIDITY FILE IF NEEDED
 # =========================================================
 
 if adv_col is None:
-    df["ADV_PROXY"] = 1_00_00_000
 
-    adv_col = "ADV_PROXY"
+    liquidity_file = (
+        ROOT
+        / "data"
+        / "processed"
+        / "liquidity_scores.csv"
+    )
 
+    if not liquidity_file.exists():
+
+        raise FileNotFoundError(
+            f"Missing liquidity file:\n{liquidity_file}"
+        )
+
+    print("\n📥 Loading Liquidity Scores...")
+
+    liquidity = pd.read_csv(liquidity_file)
+
+    required = [
+        "Symbol",
+        "TRADED_VALUE",
+    ]
+
+    missing = [
+        c
+        for c in required
+        if c not in liquidity.columns
+    ]
+
+    if missing:
+        raise ValueError(
+            f"Missing columns in liquidity file: {missing}"
+        )
+
+    df = df.merge(
+        liquidity[
+            [
+                "Symbol",
+                "TRADED_VALUE",
+            ]
+        ].rename(
+            columns={
+                "TRADED_VALUE": "ADV_RUPEES"
+            }
+        ),
+        on="Symbol",
+        how="left",
+    )
+
+adv_col = "ADV_RUPEES"
+
+# =========================================================
+# CLEAN ADV DATA
+# =========================================================
+
+df[adv_col] = pd.to_numeric(
+    df[adv_col],
+    errors="coerce",
+)
+
+df = df[
+    df[adv_col] > 0
+].copy()
+
+if len(df) == 0:
+
+    raise ValueError(
+        "No securities with positive liquidity."
+    )
 # =========================================================
 # NORMALIZE WEIGHTS
 # =========================================================
@@ -128,11 +224,24 @@ for capital in TEST_CAPITALS:
 
     avg_days = round(temp["DAYS_TO_EXIT"].mean(), 2)
 
+    bottleneck_stock = temp.loc[
+        temp["ADV_USAGE"].idxmax(),
+        "Symbol"
+    ]
+
+    portfolio_capacity = (
+        temp[adv_col] * MAX_ADV_USAGE
+    ) / temp[weight_col]
+
+    max_capacity = portfolio_capacity.min()
+
     results.append(
         {
             "Capital": capital,
             "Max_ADV_Usage_%": max_adv,
             "Avg_Days_To_Exit": avg_days,
+            "Bottleneck_Stock": bottleneck_stock,
+            "Estimated_Max_Capacity": round(max_capacity, 0),
             "Pass_5pct_ADV_Rule": max_adv <= 5,
         }
     )

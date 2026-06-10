@@ -11,6 +11,8 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 INPUT_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
+MASTER_FILE = ROOT_DIR / "data" / "raw" / "security_master.csv"
+
 OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "factor_model_rankings.csv"
 
 # =========================================================
@@ -20,6 +22,14 @@ OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "factor_model_rankings.csv"
 print("\n📥 Loading Ranking Data...")
 
 df = pd.read_csv(INPUT_FILE)
+
+df["Symbol"] = (
+    df["Symbol"]
+    .astype(str)
+    .str.upper()
+    .str.replace(".NS", "", regex=False)
+    .str.strip()
+)
 
 print("✅ Ranking Data Loaded")
 print("\n===== FACTOR MODEL INPUT =====")
@@ -93,6 +103,7 @@ else:
 LIQUIDITY_FILE = ROOT_DIR / "data" / "processed" / "liquidity_scores.csv"
 
 try:
+
     liquidity_df = pd.read_csv(LIQUIDITY_FILE)
 
     liquidity_df["Symbol"] = (
@@ -103,13 +114,49 @@ try:
         .str.strip()
     )
 
-    df = df.merge(liquidity_df[["Symbol", "LIQUIDITY_SCORE"]], on="Symbol", how="left")
+    liquidity_cols = [
+        "Symbol",
+        "ADV_RUPEES",
+        "AVG_20D_VOLUME",
+        "LIQUIDITY_SCORE",
+        "LIQUIDITY_BUCKET",
+    ]
 
-    df["LIQUIDITY_SCORE"] = df["LIQUIDITY_SCORE"].fillna(0)
+    available_cols = [
+        c
+        for c in liquidity_cols
+        if c in liquidity_df.columns
+    ]
+
+    df = df.merge(
+        liquidity_df[available_cols],
+        on="Symbol",
+        how="left",
+    )
+
+    for col in [
+        "ADV_RUPEES",
+        "AVG_20D_VOLUME",
+        "LIQUIDITY_SCORE",
+    ]:
+
+        if col in df.columns:
+            df[col] = df[col].fillna(0)
+
+    if "LIQUIDITY_BUCKET" in df.columns:
+        df["LIQUIDITY_BUCKET"] = (
+            df["LIQUIDITY_BUCKET"]
+            .fillna("UNKNOWN")
+        )
 
 except Exception as e:
+
     print(f"Liquidity merge failed: {e}")
+
+    df["ADV_RUPEES"] = 0
+    df["AVG_20D_VOLUME"] = 0
     df["LIQUIDITY_SCORE"] = 0
+    df["LIQUIDITY_BUCKET"] = "UNKNOWN"
 
 print("\nBEFORE FACTOR ENGINE")
 
@@ -121,9 +168,67 @@ print("\nMatched ENTRY_SCORE:", df["ENTRY_SCORE"].notna().sum())
 
 print("Non-Zero ENTRY_SCORE:", (df["ENTRY_SCORE"].fillna(0) > 0).sum())
 
+
+MASTER_FILE = ROOT_DIR / "data/raw/security_master.csv"
+
+if MASTER_FILE.exists():
+
+    master_df = pd.read_csv(MASTER_FILE)
+
+    master_df["Symbol"] = (
+        master_df["Symbol"]
+        .astype(str)
+        .str.upper()
+        .str.replace(".NS","",regex=False)
+        .str.strip()
+    )
+
+    merge_cols = [
+        "Symbol",
+        "Sector",
+        "Industry",
+        "Market_Cap"
+    ]
+
+    available_cols = [
+        c
+        for c in merge_cols
+        if c in master_df.columns
+    ]
+
+    df = df.merge(
+        master_df[available_cols],
+        on="Symbol",
+        how="left",
+        suffixes=("", "_MASTER")
+    )
+
+    if "Sector_MASTER" in df.columns:
+
+        df["Sector"] = (
+            df["Sector"]
+            .fillna(df["Sector_MASTER"])
+        )
+
+        df.drop(
+            columns=["Sector_MASTER"],
+            inplace=True
+        )
+
 # =========================================================
 # FACTOR ENGINE
 # =========================================================
+print("\nApplying Liquidity Filter...")
+
+before = len(df)
+
+df = df[
+    df["ADV_RUPEES"] >= 5e7
+]
+
+print(
+    f"Removed {before-len(df)} illiquid stocks"
+)
 
 print("\n🧠 Building Institutional Factors...")
 
@@ -185,25 +290,48 @@ else:
 # ENTRY FACTOR
 # ---------------------------------------------------------
 
-df["FACTOR_ENTRY"] = df["ENTRY_SCORE"].rank(pct=True) * 100
+df["FACTOR_ENTRY"] = (
+    df["ENTRY_SCORE"]
+    .fillna(0)
+)
+
 # ---------------------------------------------------------
 # LIQUIDITY FACTOR
 # ---------------------------------------------------------
 
-df["FACTOR_LIQUIDITY"] = df["LIQUIDITY_SCORE"].rank(pct=True) * 100
+df["FACTOR_LIQUIDITY"] = (
+    df["LIQUIDITY_SCORE"]
+    .fillna(0)
+)
+
+if "Market_Cap" in df.columns:
+
+    df["FACTOR_MARKET_CAP"] = (
+        np.log(
+            df["Market_Cap"].fillna(0) + 1
+        )
+        .rank(pct=True)
+        * 100
+    )
+
+else:
+
+    df["FACTOR_MARKET_CAP"] = 50
+
 # =========================================================
 # FINAL FACTOR MODEL SCORE
 # =========================================================
 
 df["MULTI_FACTOR_SCORE"] = (
-    (df["FACTOR_ALPHA"] * 0.20)
-    + (df["FACTOR_MOMENTUM"] * 0.15)
-    + (df["FACTOR_RS"] * 0.20)
-    + (df["FACTOR_SHARPE"] * 0.10)
-    + (df["FACTOR_LOW_VOL"] * 0.10)
-    + (df["FACTOR_SECTOR"] * 0.05)
-    + (df["FACTOR_ENTRY"] * 0.15)
-    + (df["FACTOR_LIQUIDITY"] * 0.05)
+      df["FACTOR_ALPHA"] * 0.20
+    + df["FACTOR_RS"] * 0.20
+    + df["FACTOR_MOMENTUM"] * 0.15
+    + df["FACTOR_ENTRY"] * 0.15
+    + df["FACTOR_SHARPE"] * 0.10
+    + df["FACTOR_LOW_VOL"] * 0.05
+    + df["FACTOR_SECTOR"] * 0.05
+    + df["FACTOR_LIQUIDITY"] * 0.05
+    + df["FACTOR_MARKET_CAP"] * 0.05
 )
 
 # =========================================================

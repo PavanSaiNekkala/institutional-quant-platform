@@ -11,32 +11,46 @@ from openpyxl.styles import Font
 
 ROOT = Path(__file__).resolve().parents[2]
 
-DATA_DIR = ROOT / "data"
+DATA_DIR_POR = ROOT / "data" / "portfolio"
 
-OUTPUT_FILE = DATA_DIR / "monthly_factsheet.xlsx"
+DATA_DIR_PRC = ROOT / "data" / "processed"
+
+DATA_DIR_REP = ROOT / "data" / "reports"
+
+OUTPUT_FILE = DATA_DIR_REP / "monthly_factsheet.xlsx"
 
 # =========================================================
 # HELPER
 # =========================================================
 
-
 def safe_load(file_name):
 
-    file_path = DATA_DIR / file_name
+    portfolio_files = {
+        "optimised_portfolio.csv",
+        "rebalance_plan.csv",
+        "stoploss_signals.csv",
+        "walk_forward_stats.csv",
+        "portfolio_risk_summary.csv",
+        "performance_attribution.csv",
+        "portfolio_returns.csv",
+        "execution_orders.csv",
+    }
+
+    if file_name in portfolio_files:
+        file_path = DATA_DIR_POR / file_name
+    else:
+        file_path = DATA_DIR_PRC / file_name
 
     if not file_path.exists():
-        print(f"⚠ Missing: {file_name}")
-
+        print(f"⚠ Missing: {file_path}")
         return None
 
     try:
         return pd.read_csv(file_path)
 
     except Exception as e:
-        print(f"⚠ Failed loading {file_name}: {e}")
-
+        print(f"⚠ Failed loading {file_path}: {e}")
         return None
-
 
 # =========================================================
 # LOAD FILES
@@ -48,7 +62,7 @@ regime_df = safe_load("market_regime.csv")
 
 portfolio_df = safe_load("optimised_portfolio.csv")
 
-risk_df = safe_load("portfolio_risk_report.csv")
+risk_df = safe_load("portfolio_risk_summary.csv")
 
 factor_df = safe_load("performance_attribution.csv")
 

@@ -1,0 +1,20 @@
+Metric,Value
+Total Return,0.6814
+CAGR,0.9
+Volatility,0.2304
+Sharpe Ratio,3.6464
+Sortino Ratio,5.7869
+Calmar Ratio,5.5382
+Max Drawdown,-0.1625
+Win Rate,57.8431
+Benchmark CAGR,-0.0425
+Benchmark Volatility,0.1462
+Benchmark Drawdown,-0.1485
+Excess Return,0.9425
+Tracking Error,0.1439
+Beta,1.2672
+Alpha,0.9699
+Information Ratio,4.7491
+Treynor Ratio,0.6629
+Upside Capture,173.4105
+Downside Capture,90.5661

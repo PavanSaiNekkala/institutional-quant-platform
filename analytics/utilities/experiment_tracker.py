@@ -11,17 +11,17 @@ ROOT = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT / "data"
 
-TRACKER_FILE = DATA_DIR / "strategy_versions.csv"
+TRACKER_FILE = DATA_DIR / "processed" / "strategy_versions.csv"
 
 # =========================================================
 # INPUT FILES
 # =========================================================
 
-STATS_FILE = DATA_DIR / "walk_forward_stats.csv"
+STATS_FILE = DATA_DIR / "portfolio" / "walk_forward_stats.csv"
 
-REGIME_FILE = DATA_DIR / "market_regime.csv"
+REGIME_FILE = DATA_DIR / "processed" / "market_regime.csv"
 
-PORTFOLIO_FILE = DATA_DIR / "optimised_portfolio.csv"
+PORTFOLIO_FILE = DATA_DIR / "portfolio" / "optimised_portfolio.csv"
 
 # =========================================================
 # HELPER

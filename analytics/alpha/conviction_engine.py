@@ -1,14 +1,18 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+from analytics.utilities.schema_validator import validate_columns
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 # =========================================================
 # PATHS
 # =========================================================
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-
-DATA_DIR = ROOT_DIR / "data"
+DATA_DIR = ROOT / "data"
 
 FACTOR_FILE = DATA_DIR / "processed" / "factor_model_rankings.csv"
 
@@ -36,9 +40,26 @@ if news_df.empty:
 
 print("\n📥 Loading Data...")
 
-factor_df = pd.read_csv(FACTOR_FILE)
+factor_df = validate_columns(
+    FACTOR_FILE,
+    [
+        "Symbol",
+        "MULTI_FACTOR_SCORE",
+        "LIQUIDITY_SCORE",
+        "FACTOR_MOMENTUM",
+        "FACTOR_SHARPE",
+        "FACTOR_ALPHA",
+        "RS_COMPOSITE",
+    ],
+)
 
-entry_df = pd.read_csv(ENTRY_FILE)
+entry_df = validate_columns(
+    ENTRY_FILE,
+    [
+        "Symbol",
+        "ENTRY_SCORE",
+    ],
+)
 
 # =========================================================
 # NORMALIZE SYMBOLS

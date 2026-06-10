@@ -24,15 +24,15 @@ PORTFOLIO_VALUE = 1000000
 # PATHS
 # =========================================================
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
-PORTFOLIO_FILE = ROOT_DIR / "data" / "portfolio_allocation.csv"
+PORTFOLIO_FILE = ROOT_DIR / "data" / "portfolio" / "portfolio_allocation.csv"
 
-RISK_REPORT_FILE = ROOT_DIR / "data" / "portfolio_risk_report.csv"
+RISK_REPORT_FILE = ROOT_DIR / "data" / "portfolio" / "portfolio_risk_report.csv"
 
-CORRELATION_FILE = ROOT_DIR / "data" / "correlation_matrix.csv"
+CORRELATION_FILE = ROOT_DIR / "data" / "processed" / "correlation_matrix.csv"
 
-RISK_METRICS_FILE = ROOT_DIR / "data" / "risk_metrics.csv"
+RISK_METRICS_FILE = ROOT_DIR / "data" / "portfolio" / "risk_metrics.csv"
 
 
 # =========================================================

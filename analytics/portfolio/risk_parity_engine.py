@@ -1,14 +1,18 @@
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import yfinance as yf
 
+from analytics.utilities.schema_validator import validate_columns
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
 # =========================================================
 # FILES
 # =========================================================
-
-ROOT = Path(__file__).resolve().parents[2]
 
 INPUT_FILE = ROOT / "data" / "portfolio" / "position_sized_portfolio.csv"
 
@@ -26,7 +30,15 @@ LOOKBACK_DAYS = 252
 
 print("\n📥 Loading Portfolio...")
 
-df = pd.read_csv(INPUT_FILE)
+
+df = validate_columns(
+    INPUT_FILE,
+    [
+        "Symbol",
+        "MULTI_FACTOR_SCORE",
+        "ENTRY_SCORE",
+    ],
+)
 
 # =========================================================
 # SYMBOL CLEANUP

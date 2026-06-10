@@ -253,7 +253,7 @@ st.markdown("---")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-excel_path = ROOT_DIR / "data" / "valid_stocks.xlsx"
+excel_path = ROOT_DIR / "data" / "raw" / "valid_stocks.xlsx"
 
 universe_df = pd.read_excel(excel_path)
 

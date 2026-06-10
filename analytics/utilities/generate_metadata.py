@@ -1,5 +1,6 @@
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
@@ -8,142 +9,314 @@ import yfinance as yf
 # CONFIG
 # =====================================================
 
-INPUT_FILE = "data/raw/updated_stocks.xlsx"
-OUTPUT_FILE = "data/raw/stock_metadata.csv"
-
-MAX_WORKERS = 3
-BATCH_SIZE = 25
-BATCH_DELAY = 3
+MAX_WORKERS = 2
 
 # =====================================================
-# LOAD STOCKS
+# PATHS
 # =====================================================
 
-print("\n📥 Loading stocks...")
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
-df = pd.read_excel(INPUT_FILE)
+MASTER_FILE = (
+    ROOT_DIR
+    / "data"
+    / "master"
+    / "security_master_source.csv"
+)
 
-if "Symbol" in df.columns:
-    symbol_col = "Symbol"
+OUTPUT_FILE = (
+    ROOT_DIR
+    / "data"
+    / "raw"
+    / "stock_metadata.csv"
+)
 
-elif "Stock" in df.columns:
-    symbol_col = "Stock"
+DIAGNOSTIC_FILE = (
+    ROOT_DIR
+    / "data"
+    / "logs"
+    / "metadata_failures.csv"
+)
 
-else:
-    raise ValueError(f"❌ Expected Symbol or Stock column. Found: {list(df.columns)}")
+TODAY = datetime.today().strftime("%Y-%m-%d")
 
-symbols = df[symbol_col].dropna().astype(str).str.strip().unique().tolist()
+# =====================================================
+# LOAD MASTER
+# =====================================================
 
-symbols = [str(s).upper().replace(".NS", "") + ".NS" for s in symbols]
+print("\n📥 Loading Security Master Source...")
 
-TOTAL = len(symbols)
+master = pd.read_csv(MASTER_FILE)
 
-print(f"✅ Column Used : {symbol_col}")
-print(f"✅ Total Stocks: {TOTAL}")
+if "Symbol" not in master.columns:
+    raise Exception(
+        "Symbol column missing in security_master_source.csv"
+    )
+
+master["Symbol"] = (
+    master["Symbol"]
+    .astype(str)
+    .str.upper()
+    .str.strip()
+)
+
+symbols = (
+    master["Symbol"]
+    .drop_duplicates()
+    .tolist()
+)
+
+print(f"Universe Size: {len(symbols):,}")
+
+# =====================================================
+# LOAD CACHE
+# =====================================================
+
+cache = {}
+
+if OUTPUT_FILE.exists():
+
+    old = pd.read_csv(OUTPUT_FILE)
+
+    if (
+        "Symbol" in old.columns
+        and "Market_Cap" in old.columns
+    ):
+
+        old["Symbol"] = (
+            old["Symbol"]
+            .astype(str)
+            .str.upper()
+            .str.strip()
+        )
+
+        old["Market_Cap"] = pd.to_numeric(
+            old["Market_Cap"],
+            errors="coerce"
+        ).fillna(0)
+
+        cache = (
+            old.set_index("Symbol")
+            .to_dict("index")
+        )
+
+print(f"Cache Records: {len(cache):,}")
+
+# =====================================================
+# DIAGNOSTICS
+# =====================================================
+
+failures = []
+
+cache_hits = 0
+yahoo_downloads = 0
 
 # =====================================================
 # FETCH FUNCTION
 # =====================================================
 
+def get_market_cap(symbol):
 
-def fetch_metadata(symbol):
+    global cache_hits
+    global yahoo_downloads
 
-    for _attempt in range(3):
-        try:
-            ticker = yf.Ticker(symbol)
+    # ---------------------------------------------
+    # CACHE FIRST
+    # ---------------------------------------------
 
-            info = ticker.info
+    if symbol in cache:
 
-            sector = info.get("sector") or info.get("sectorDisp") or "Unknown"
+        cached_cap = cache[symbol].get(
+            "Market_Cap",
+            0
+        )
 
-            industry = info.get("industry") or info.get("industryDisp") or "Unknown"
+        if pd.notna(cached_cap) and cached_cap > 0:
 
-            market_cap = info.get("marketCap") or getattr(ticker, "fast_info", {}).get(
-                "market_cap", 0
-            )
+            cache_hits += 1
 
             return {
                 "Symbol": symbol,
-                "Sector": sector,
-                "Industry": industry,
-                "Market_Cap": market_cap,
+                "Market_Cap": cached_cap,
+                "Last_Updated": cache[symbol].get(
+                    "Last_Updated",
+                    TODAY
+                ),
+                "Source": "CACHE",
             }
 
-        except Exception:
-            time.sleep(2)
+    # ---------------------------------------------
+    # YAHOO DOWNLOAD
+    # ---------------------------------------------
 
-    return {"Symbol": symbol, "Sector": "Unknown", "Industry": "Unknown", "Market_Cap": 0}
+    try:
 
+        ticker = yf.Ticker(
+            f"{symbol}.NS"
+        )
+
+        fast = dict(
+            ticker.fast_info
+        )
+
+        market_cap = (
+            fast.get("marketCap")
+            or fast.get("market_cap")
+            or 0
+        )
+
+        yahoo_downloads += 1
+
+        return {
+            "Symbol": symbol,
+            "Market_Cap": market_cap,
+            "Last_Updated": TODAY,
+            "Source": "YAHOO",
+        }
+
+    except Exception as e:
+
+        error_msg = str(e)
+
+        reason = "DOWNLOAD_FAILED"
+
+        if (
+            "rate" in error_msg.lower()
+            or "too many requests"
+            in error_msg.lower()
+        ):
+            reason = "RATE_LIMIT"
+
+        failures.append(
+            {
+                "Symbol": symbol,
+                "Reason": reason,
+                "Error": error_msg,
+                "Timestamp": TODAY,
+            }
+        )
+
+        # fallback to cache if available
+
+        if symbol in cache:
+
+            return {
+                "Symbol": symbol,
+                "Market_Cap": cache[symbol].get(
+                    "Market_Cap",
+                    0
+                ),
+                "Last_Updated": cache[symbol].get(
+                    "Last_Updated",
+                    TODAY
+                ),
+                "Source": "CACHE_FALLBACK",
+            }
+
+        return {
+            "Symbol": symbol,
+            "Market_Cap": 0,
+            "Last_Updated": TODAY,
+            "Source": reason,
+        }
 
 # =====================================================
-# PROCESS IN BATCHES
+# RUN
 # =====================================================
+
+print("\n🚀 Generating Metadata...")
 
 results = []
 
-completed = 0
+with ThreadPoolExecutor(
+    max_workers=MAX_WORKERS
+) as executor:
 
-print("\n" + "=" * 70)
-print("🚀 GENERATING STOCK METADATA")
-print("=" * 70)
+    futures = {
+        executor.submit(
+            get_market_cap,
+            symbol
+        ): symbol
+        for symbol in symbols
+    }
 
-for batch_start in range(0, TOTAL, BATCH_SIZE):
-    batch = symbols[batch_start : batch_start + BATCH_SIZE]
+    total = len(futures)
 
-    batch_no = (batch_start // BATCH_SIZE) + 1
+    for idx, future in enumerate(
+        as_completed(futures),
+        start=1,
+    ):
 
-    print(f"\n📦 Batch {batch_no} | {len(batch)} Stocks")
+        results.append(
+            future.result()
+        )
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(fetch_metadata, symbol): symbol for symbol in batch}
+        if idx % 50 == 0:
 
-        for future in as_completed(futures):
-            row = future.result()
-
-            results.append(row)
-
-            completed += 1
-
-            print(f"[{completed}/{TOTAL}] {row['Symbol']} | {row['Sector']} | {row['Industry']}")
-
-    # ==========================================
-    # AUTOSAVE
-    # ==========================================
-
-    pd.DataFrame(results).to_csv(OUTPUT_FILE, index=False)
-
-    print(f"\n💾 Autosaved {completed} records")
-
-    # ==========================================
-    # COOL DOWN
-    # ==========================================
-
-    if batch_start + BATCH_SIZE < TOTAL:
-        print(f"\n⏳ Cooling down {BATCH_DELAY}s...")
-
-        time.sleep(BATCH_DELAY)
+            print(
+                f"{idx:,}/{total:,}"
+            )
 
 # =====================================================
-# FINAL SAVE
+# BUILD OUTPUT
 # =====================================================
 
 metadata = pd.DataFrame(results)
 
-metadata = metadata.drop_duplicates(subset=["Symbol"])
+metadata["Market_Cap"] = pd.to_numeric(
+    metadata["Market_Cap"],
+    errors="coerce"
+).fillna(0)
 
-metadata["Market_Cap"] = pd.to_numeric(metadata["Market_Cap"], errors="coerce").fillna(0)
+metadata = (
+    metadata
+    .drop_duplicates("Symbol")
+    .sort_values(
+        "Market_Cap",
+        ascending=False
+    )
+    .reset_index(drop=True)
+)
 
-metadata = metadata.sort_values("Market_Cap", ascending=False)
+# =====================================================
+# SAVE
+# =====================================================
 
-metadata.to_csv(OUTPUT_FILE, index=False)
+OUTPUT_FILE.parent.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+metadata.to_csv(
+    OUTPUT_FILE,
+    index=False
+)
+
+# =====================================================
+# SAVE FAILURES
+# =====================================================
+
+if failures:
+
+    DIAGNOSTIC_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    pd.DataFrame(
+        failures
+    ).to_csv(
+        DIAGNOSTIC_FILE,
+        index=False,
+    )
 
 # =====================================================
 # SUMMARY
 # =====================================================
 
-success = len(metadata[(metadata["Sector"] != "Unknown") & (metadata["Industry"] != "Unknown")])
-
-failed = len(metadata[metadata["Sector"] == "Unknown"])
+missing = (
+    metadata["Market_Cap"] == 0
+).sum()
 
 print("\n" + "=" * 70)
 
@@ -151,13 +324,46 @@ print("🏁 METADATA GENERATION COMPLETE")
 
 print("=" * 70)
 
-print(f"📊 Total Stocks : {TOTAL}")
-print(f"✅ Success      : {success}")
-print(f"❌ Unknown      : {failed}")
+print(
+    f"Stocks            : {len(metadata):,}"
+)
 
-if TOTAL > 0:
-    print(f"📈 Success Rate : {round(success / TOTAL * 100, 2)}%")
+print(
+    f"Cache Hits        : {cache_hits:,}"
+)
 
-print(f"\n💾 Saved: {OUTPUT_FILE}")
+print(
+    f"Yahoo Downloads   : {yahoo_downloads:,}"
+)
+
+print(
+    f"Failures          : {len(failures):,}"
+)
+
+print(
+    f"Missing MarketCap : {missing:,}"
+)
+
+if failures:
+
+    rate_limits = sum(
+        1
+        for x in failures
+        if x["Reason"] == "RATE_LIMIT"
+    )
+
+    print(
+        f"Rate Limited      : {rate_limits:,}"
+    )
+
+    print(
+        f"\nFailure Report:\n"
+        f"{DIAGNOSTIC_FILE}"
+    )
+
+print(
+    f"\nSaved:\n"
+    f"{OUTPUT_FILE}"
+)
 
 print("=" * 70)

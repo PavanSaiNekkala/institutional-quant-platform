@@ -9,9 +9,26 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 
-RETURNS_FILE = ROOT / "data" / "portfolio_returns.csv"
+PORTFOLIO_FILE = (
+    ROOT
+    / "data"
+    / "portfolio"
+    / "portfolio_returns.csv"
+)
 
-OUTPUT_FILE = ROOT / "data" / "performance_analytics.csv"
+BENCHMARK_FILE = (
+    ROOT
+    / "data"
+    / "market"
+    / "benchmark_returns.csv"
+)
+
+OUTPUT_FILE = (
+    ROOT
+    / "data"
+    / "portfolio"
+    / "performance_analytics.csv"
+)
 
 # =========================================================
 # SETTINGS
@@ -21,51 +38,89 @@ RISK_FREE_RATE = 0.06
 TRADING_DAYS = 252
 
 # =========================================================
-# LOAD
+# LOAD PORTFOLIO
 # =========================================================
 
-print("\n📥 Loading Returns...")
+print("\n📥 Loading Portfolio Returns...")
 
-if not RETURNS_FILE.exists():
-    raise FileNotFoundError(f"Missing: {RETURNS_FILE}")
+if not PORTFOLIO_FILE.exists():
+    raise FileNotFoundError(
+        f"Missing file:\n{PORTFOLIO_FILE}"
+    )
 
-df = pd.read_csv(RETURNS_FILE)
+portfolio = pd.read_csv(PORTFOLIO_FILE)
 
-# =========================================================
-# VALIDATION
-# =========================================================
+required_cols = ["Portfolio_Return"]
 
-required = ["Portfolio_Return"]
-
-missing = [c for c in required if c not in df.columns]
+missing = [
+    c
+    for c in required_cols
+    if c not in portfolio.columns
+]
 
 if missing:
-    raise ValueError(f"Missing columns: {missing}")
+    raise ValueError(
+        f"Missing columns: {missing}"
+    )
+
+portfolio["Portfolio_Return"] = pd.to_numeric(
+    portfolio["Portfolio_Return"],
+    errors="coerce",
+)
+
+portfolio = portfolio.dropna(
+    subset=["Portfolio_Return"]
+)
 
 # =========================================================
-# RETURNS
+# DATE HANDLING
 # =========================================================
 
-returns = df["Portfolio_Return"].dropna()
+if "Date" in portfolio.columns:
+    portfolio["Date"] = pd.to_datetime(
+        portfolio["Date"]
+    )
+
+returns = portfolio["Portfolio_Return"]
 
 if len(returns) < 30:
-    raise ValueError("Need at least 30 return observations.")
+    raise ValueError(
+        "Need at least 30 return observations."
+    )
 
 # =========================================================
-# BASIC METRICS
+# PORTFOLIO METRICS
 # =========================================================
 
-cumulative = (1 + returns).cumprod()
+equity_curve = (
+    1 + returns
+).cumprod()
 
-total_return = cumulative.iloc[-1] - 1
+total_return = (
+    equity_curve.iloc[-1] - 1
+)
 
-years = len(returns) / TRADING_DAYS
+years = max(
+    len(returns) / TRADING_DAYS,
+    1 / TRADING_DAYS,
+)
 
-cagr = (cumulative.iloc[-1] ** (1 / years)) - 1
+cagr = (
+    equity_curve.iloc[-1]
+    ** (1 / years)
+) - 1
 
-volatility = returns.std() * np.sqrt(TRADING_DAYS)
+volatility = (
+    returns.std()
+    * np.sqrt(TRADING_DAYS)
+)
 
-sharpe = (cagr - RISK_FREE_RATE) / volatility
+sharpe = (
+    (cagr - RISK_FREE_RATE)
+    / volatility
+    if volatility > 0
+    else np.nan
+)
 
 # =========================================================
 # SORTINO
@@ -74,9 +129,18 @@ sharpe = (cagr - RISK_FREE_RATE) / volatility
 downside = returns[returns < 0]
 
 if len(downside) > 0:
-    downside_vol = downside.std() * np.sqrt(TRADING_DAYS)
 
-    sortino = (cagr - RISK_FREE_RATE) / downside_vol
+    downside_vol = (
+        downside.std()
+        * np.sqrt(TRADING_DAYS)
+    )
+
+    sortino = (
+        (cagr - RISK_FREE_RATE)
+        / downside_vol
+        if downside_vol > 0
+        else np.nan
+    )
 
 else:
     sortino = np.nan
@@ -85,109 +149,298 @@ else:
 # DRAWDOWN
 # =========================================================
 
-rolling_max = cumulative.cummax()
+rolling_max = equity_curve.cummax()
 
-drawdown = (cumulative / rolling_max) - 1
+drawdown = (
+    equity_curve
+    / rolling_max
+) - 1
 
 max_drawdown = drawdown.min()
 
-# =========================================================
-# CALMAR
-# =========================================================
-
-if max_drawdown != 0:
-    calmar = cagr / abs(max_drawdown)
-
-else:
-    calmar = np.nan
+calmar = (
+    cagr / abs(max_drawdown)
+    if max_drawdown != 0
+    else np.nan
+)
 
 # =========================================================
 # WIN RATE
 # =========================================================
 
-win_rate = (returns > 0).mean() * 100
+win_rate = (
+    returns > 0
+).mean() * 100
 
 # =========================================================
-# BENCHMARK
+# BENCHMARK DEFAULTS
 # =========================================================
+
+benchmark_cagr = np.nan
+benchmark_volatility = np.nan
+benchmark_drawdown = np.nan
 
 beta = np.nan
 alpha = np.nan
 information_ratio = np.nan
 treynor = np.nan
 
-if "Benchmark_Return" in df.columns:
-    benchmark = df["Benchmark_Return"].dropna()
+tracking_error = np.nan
+excess_return = np.nan
 
-    common = min(len(returns), len(benchmark))
+upside_capture = np.nan
+downside_capture = np.nan
 
-    r = returns.tail(common)
+# =========================================================
+# BENCHMARK ANALYTICS
+# =========================================================
 
-    b = benchmark.tail(common)
+if BENCHMARK_FILE.exists():
 
-    covariance = np.cov(r, b)[0, 1]
+    benchmark_df = pd.read_csv(
+        BENCHMARK_FILE
+    )
 
-    variance = np.var(b)
+    if (
+        "Date" in benchmark_df.columns
+        and "Benchmark_Return" in benchmark_df.columns
+        and "Date" in portfolio.columns
+    ):
 
-    if variance != 0:
-        beta = covariance / variance
+        benchmark_df["Date"] = pd.to_datetime(
+            benchmark_df["Date"]
+        )
 
-    benchmark_cagr = ((1 + b).prod() ** (TRADING_DAYS / len(b))) - 1
+        benchmark_df["Benchmark_Return"] = pd.to_numeric(
+            benchmark_df["Benchmark_Return"],
+            errors="coerce",
+        )
 
-    alpha = cagr - (RISK_FREE_RATE + beta * (benchmark_cagr - RISK_FREE_RATE))
+        merged = pd.merge(
+            portfolio[
+                ["Date", "Portfolio_Return"]
+            ],
+            benchmark_df[
+                ["Date", "Benchmark_Return"]
+            ],
+            on="Date",
+            how="inner",
+        )
 
-    active_return = r - b
+        merged = merged.dropna()
 
-    tracking_error = active_return.std() * np.sqrt(TRADING_DAYS)
+        print(
+            f"\n✅ Benchmark merged ({len(merged)} observations)"
+        )
 
-    if tracking_error != 0:
-        information_ratio = (active_return.mean() * TRADING_DAYS) / tracking_error
+        if len(merged) >= 30:
 
-    if beta not in [0, np.nan]:
-        treynor = (cagr - RISK_FREE_RATE) / beta
+            r = merged["Portfolio_Return"]
+
+            b = merged["Benchmark_Return"]
+
+            # =====================================
+            # Benchmark Metrics
+            # =====================================
+
+            benchmark_curve = (
+                1 + b
+            ).cumprod()
+
+            benchmark_years = max(
+                len(b) / TRADING_DAYS,
+                1 / TRADING_DAYS,
+            )
+
+            benchmark_cagr = (
+                benchmark_curve.iloc[-1]
+                ** (1 / benchmark_years)
+            ) - 1
+
+            benchmark_volatility = (
+                b.std()
+                * np.sqrt(TRADING_DAYS)
+            )
+
+            benchmark_dd = (
+                benchmark_curve
+                / benchmark_curve.cummax()
+            ) - 1
+
+            benchmark_drawdown = (
+                benchmark_dd.min()
+            )
+
+            # =====================================
+            # Beta
+            # =====================================
+
+            benchmark_variance = b.var()
+
+            if benchmark_variance > 0:
+
+                beta = (
+                    r.cov(b)
+                    / benchmark_variance
+                )
+
+            # =====================================
+            # Alpha
+            # =====================================
+
+            if pd.notna(beta):
+
+                alpha = (
+                    cagr
+                    - (
+                        RISK_FREE_RATE
+                        + beta
+                        * (
+                            benchmark_cagr
+                            - RISK_FREE_RATE
+                        )
+                    )
+                )
+
+            # =====================================
+            # Active Return
+            # =====================================
+
+            active_return = (
+                r - b
+            )
+
+            excess_return = (
+                cagr
+                - benchmark_cagr
+            )
+
+            tracking_error = (
+                active_return.std()
+                * np.sqrt(TRADING_DAYS)
+            )
+
+            if (
+                pd.notna(tracking_error)
+                and tracking_error > 0
+            ):
+
+                information_ratio = (
+                    active_return.mean()
+                    * TRADING_DAYS
+                ) / tracking_error
+
+            # =====================================
+            # Treynor
+            # =====================================
+
+            if (
+                pd.notna(beta)
+                and abs(beta) > 1e-9
+            ):
+
+                treynor = (
+                    cagr
+                    - RISK_FREE_RATE
+                ) / beta
+
+            # =====================================
+            # Upside Capture
+            # =====================================
+
+            up_market = b > 0
+
+            if up_market.sum() > 0:
+
+                benchmark_up = (
+                    b[up_market]
+                    .mean()
+                )
+
+                if benchmark_up != 0:
+
+                    upside_capture = (
+                        r[up_market].mean()
+                        / benchmark_up
+                    ) * 100
+
+            # =====================================
+            # Downside Capture
+            # =====================================
+
+            down_market = b < 0
+
+            if down_market.sum() > 0:
+
+                benchmark_down = (
+                    b[down_market]
+                    .mean()
+                )
+
+                if benchmark_down != 0:
+
+                    downside_capture = (
+                        r[down_market].mean()
+                        / benchmark_down
+                    ) * 100
 
 # =========================================================
 # OUTPUT
 # =========================================================
 
+metrics = [
+    ("Total Return", total_return),
+    ("CAGR", cagr),
+    ("Volatility", volatility),
+    ("Sharpe Ratio", sharpe),
+    ("Sortino Ratio", sortino),
+    ("Calmar Ratio", calmar),
+    ("Max Drawdown", max_drawdown),
+    ("Win Rate", win_rate),
+
+    ("Benchmark CAGR", benchmark_cagr),
+    ("Benchmark Volatility", benchmark_volatility),
+    ("Benchmark Drawdown", benchmark_drawdown),
+
+    ("Excess Return", excess_return),
+    ("Tracking Error", tracking_error),
+
+    ("Beta", beta),
+    ("Alpha", alpha),
+    ("Information Ratio", information_ratio),
+    ("Treynor Ratio", treynor),
+
+    ("Upside Capture", upside_capture),
+    ("Downside Capture", downside_capture),
+]
+
 results = pd.DataFrame(
-    {
-        "Metric": [
-            "Total Return",
-            "CAGR",
-            "Volatility",
-            "Sharpe Ratio",
-            "Sortino Ratio",
-            "Calmar Ratio",
-            "Max Drawdown",
-            "Win Rate",
-            "Beta",
-            "Alpha",
-            "Information Ratio",
-            "Treynor Ratio",
-        ],
-        "Value": [
-            round(total_return, 4),
-            round(cagr, 4),
-            round(volatility, 4),
-            round(sharpe, 4),
-            round(sortino, 4),
-            round(calmar, 4),
-            round(max_drawdown, 4),
-            round(win_rate, 2),
-            round(beta, 4) if pd.notna(beta) else np.nan,
-            round(alpha, 4) if pd.notna(alpha) else np.nan,
-            round(information_ratio, 4) if pd.notna(information_ratio) else np.nan,
-            round(treynor, 4) if pd.notna(treynor) else np.nan,
-        ],
-    }
+    metrics,
+    columns=[
+        "Metric",
+        "Value",
+    ],
+)
+
+results["Value"] = (
+    results["Value"]
+    .astype(float)
+    .round(4)
 )
 
 # =========================================================
 # SAVE
 # =========================================================
 
-results.to_csv(OUTPUT_FILE, index=False)
+OUTPUT_FILE.parent.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+results.to_csv(
+    OUTPUT_FILE,
+    index=False,
+)
 
 # =========================================================
 # REPORT
@@ -195,7 +448,7 @@ results.to_csv(OUTPUT_FILE, index=False)
 
 print("\n✅ Performance Analytics Complete")
 
-print(f"\n📁 Saved: {OUTPUT_FILE}")
+print(f"\n📁 Saved:\n{OUTPUT_FILE}")
 
 print("\n📊 Metrics:\n")
 

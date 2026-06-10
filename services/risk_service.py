@@ -1,4 +1,4 @@
-from risk.risk_engine import RiskEngine
+from analytics.risk.risk_engine import RiskEngine
 from risk.var import calculate_var
 
 

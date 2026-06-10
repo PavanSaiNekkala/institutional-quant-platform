@@ -29,45 +29,107 @@ EXECUTION_DIR = ROOT_DIR / "execution"
 # =========================================================
 
 PIPELINE = [
+
+    # =====================================================
+    # MASTER DATA
+    # =====================================================
+
+    {
+        "script": "master/build_security_master.py",
+        "requires": [],
+        "produces": [
+            "raw/security_master.csv"
+        ],
+    },
+
+    # =====================================================
+    # RANKING INPUTS
+    # =====================================================
+
     {
         "script": "ranking/entry_quality_engine.py",
-        "requires": ["processed/cross_sectional_rankings.csv"],
-        "produces": ["processed/entry_quality_scores.csv"],
+        "requires": [
+            "processed/cross_sectional_rankings.csv"
+        ],
+        "produces": [
+            "processed/entry_quality_scores.csv"
+        ],
     },
+
     {
         "script": "ranking/liquidity_engine.py",
-        "requires": ["processed/cross_sectional_rankings.csv"],
-        "produces": ["processed/liquidity_scores.csv"],
+        "requires": [],
+        "produces": [
+            "processed/liquidity_scores.csv"
+        ],
     },
+
     {
         "script": "research/news_engine.py",
-        "requires": ["processed/cross_sectional_rankings.csv"],
-        "produces": ["processed/news_rankings.csv"],
+        "requires": [
+            "processed/cross_sectional_rankings.csv"
+        ],
+        "produces": [
+            "processed/news_rankings.csv"
+        ],
+        "optional": True,
     },
+
+    # =====================================================
+    # FACTOR MODEL
+    # =====================================================
+
     {
         "script": "ranking/factor_model.py",
         "requires": [
             "processed/cross_sectional_rankings.csv",
             "processed/entry_quality_scores.csv",
             "processed/liquidity_scores.csv",
+            "raw/security_master.csv",
         ],
-        "produces": ["processed/factor_model_rankings.csv"],
+        "produces": [
+            "processed/factor_model_rankings.csv"
+        ],
     },
+
+    # =====================================================
+    # MARKET REGIME
+    # =====================================================
+
     {
         "script": "regime/market_breadth_engine.py",
-        "requires": ["processed/factor_model_rankings.csv"],
-        "produces": ["processed/market_breadth.csv"],
+        "requires": [
+            "processed/factor_model_rankings.csv"
+        ],
+        "produces": [
+            "processed/market_breadth.csv"
+        ],
     },
+
     {
         "script": "regime/regime_engine.py",
-        "requires": ["processed/market_breadth.csv"],
-        "produces": ["processed/market_regime.csv"],
+        "requires": [
+            "processed/market_breadth.csv"
+        ],
+        "produces": [
+            "processed/market_regime.csv"
+        ],
     },
+
+    # =====================================================
+    # ALPHA ENGINES
+    # =====================================================
+
     {
         "script": "alpha/expected_return_engine.py",
-        "requires": ["processed/factor_model_rankings.csv"],
-        "produces": ["processed/expected_returns.csv"],
+        "requires": [
+            "processed/factor_model_rankings.csv"
+        ],
+        "produces": [
+            "processed/expected_returns.csv"
+        ],
     },
+
     {
         "script": "alpha/conviction_engine.py",
         "requires": [
@@ -75,177 +137,241 @@ PIPELINE = [
             "processed/entry_quality_scores.csv",
             "processed/expected_returns.csv",
         ],
-        "produces": ["processed/conviction_scores.csv"],
-    },
-    {
-        "script": "portfolio/turnover_control.py",
-        "requires": ["processed/conviction_scores.csv"],
-        "produces": ["portfolio/target_portfolio.csv"],
-    },
-    {
-        "script": "portfolio/position_sizing_engine.py",
-        "requires": ["portfolio/target_portfolio.csv"],
-        "produces": ["portfolio/position_sized_portfolio.csv"],
-    },
-    {
-        "script": "portfolio/risk_parity_engine.py",
-        "requires": ["portfolio/position_sized_portfolio.csv"],
-        "produces": ["portfolio/risk_parity_portfolio.csv"],
-    },
-    {
-        "script": "portfolio/sector_exposure_engine.py",
-        "requires": ["portfolio/risk_parity_portfolio.csv"],
-        "produces": ["portfolio/sector_controlled_portfolio.csv"],
-    },
-    {
-        "script": "portfolio/portfolio_optimiser.py",
-        "requires": ["portfolio/sector_controlled_portfolio.csv"],
-        "produces": ["optimised_portfolio.csv"],
-    },
-    {
-        "script": "ranking/entry_quality_engine.py",
-        "requires": [],
-        "produces": ["processed/entry_quality_scores.csv"],
-    },
-    {
-        "script": "ranking/factor_model.py",
-        "requires": ["processed/cross_sectional_rankings.csv"],
-        "produces": ["processed/factor_model_rankings.csv"],
-    },
-    {
-        "script": "research/news_engine.py",
-        "requires": ["processed/cross_sectional_rankings.csv"],
-        "produces": ["processed/news_rankings.csv"],
-    },
-    {
-        "script": "regime/market_breadth_engine.py",
-        "requires": ["processed/factor_model_rankings.csv"],
-        "produces": ["processed/market_breadth.csv"],
-    },
-    {
-        "script": "regime/regime_engine.py",
-        "requires": ["processed/market_breadth.csv"],
-        "produces": ["processed/market_regime.csv"],
-    },
-    {
-        "script": "alpha/expected_return_engine.py",
-        "requires": ["processed/factor_model_rankings.csv"],
-        "produces": ["processed/expected_returns.csv"],
-    },
-    {
-        "script": "alpha/conviction_engine.py",
-        "requires": [
-            "processed/factor_model_rankings.csv",
-            "processed/entry_quality_scores.csv",
-            "processed/expected_returns.csv",
+        "produces": [
+            "processed/conviction_scores.csv"
         ],
-        "produces": ["processed/conviction_scores.csv"],
     },
+
+    # =====================================================
+    # PORTFOLIO CONSTRUCTION
+    # =====================================================
+
     {
         "script": "portfolio/turnover_control.py",
-        "requires": ["processed/conviction_scores.csv"],
-        "produces": ["portfolio/target_portfolio.csv"],
+        "requires": [
+            "processed/conviction_scores.csv"
+        ],
+        "produces": [
+            "portfolio/target_portfolio.csv"
+        ],
     },
+
     {
         "script": "portfolio/position_sizing_engine.py",
-        "requires": ["portfolio/target_portfolio.csv"],
-        "produces": ["portfolio/position_sized_portfolio.csv"],
+        "requires": [
+            "portfolio/target_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio/position_sized_portfolio.csv"
+        ],
     },
+
     {
         "script": "portfolio/risk_parity_engine.py",
-        "requires": ["portfolio/position_sized_portfolio.csv"],
-        "produces": ["portfolio/risk_parity_portfolio.csv"],
+        "requires": [
+            "portfolio/position_sized_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio/risk_parity_portfolio.csv"
+        ],
     },
+
     {
         "script": "portfolio/sector_exposure_engine.py",
-        "requires": ["portfolio/risk_parity_portfolio.csv"],
-        "produces": ["portfolio/sector_controlled_portfolio.csv"],
+        "requires": [
+            "portfolio/risk_parity_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio/sector_controlled_portfolio.csv"
+        ],
     },
+
     {
         "script": "portfolio/portfolio_optimiser.py",
-        "requires": ["portfolio/sector_controlled_portfolio.csv"],
-        "produces": ["optimised_portfolio.csv"],
+        "requires": [
+            "portfolio/sector_controlled_portfolio.csv"
+        ],
+        "produces": [
+            "optimised_portfolio.csv"
+        ],
     },
+
+    # =====================================================
+    # RISK
+    # =====================================================
+
     {
         "script": "risk/risk_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["portfolio_risk_report.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio_risk_report.csv"
+        ],
     },
+
     {
         "script": "attribution/factor_attribution_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["factor_attribution.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "factor_attribution.csv"
+        ],
     },
+
+    # =====================================================
+    # REBALANCE
+    # =====================================================
+
     {
         "script": "portfolio/rebalance_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["rebalance_plan.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "rebalance_plan.csv"
+        ],
     },
+
     {
         "script": "execution/stop_loss_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["stoploss_signals.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "stoploss_signals.csv"
+        ],
     },
+
     {
         "script": "portfolio/portfolio_lifecycle_engine.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["portfolio_lifecycle.csv", "current_positions.csv", "exited_positions.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "portfolio_lifecycle.csv",
+            "current_positions.csv",
+            "exited_positions.csv",
+        ],
     },
+
     {
         "script": "execution/final_execution_engine.py",
-        "requires": ["rebalance_plan.csv", "stoploss_signals.csv"],
-        "produces": ["execution_orders.csv"],
+        "requires": [
+            "rebalance_plan.csv",
+            "stoploss_signals.csv"
+        ],
+        "produces": [
+            "execution_orders.csv"
+        ],
     },
+
+    # =====================================================
+    # MONITORING
+    # =====================================================
+
     {
         "script": "portfolio/portfolio_monitor_engine.py",
-        "requires": ["optimised_portfolio.csv", "current_positions.csv"],
-        "produces": ["portfolio_monitor.csv"],
-        "optional": True,
+        "requires": [
+            "optimised_portfolio.csv",
+            "current_positions.csv",
+        ],
+        "produces": [
+            "portfolio_monitor.csv"
+        ],
     },
+
     {
         "script": "portfolio/portfolio_returns_engine.py",
-        "requires": ["portfolio_monitor.csv"],
-        "produces": ["portfolio_returns.csv"],
-        "optional": True,
+        "requires": [
+            "portfolio_monitor.csv"
+        ],
+        "produces": [
+            "portfolio_returns.csv"
+        ],
     },
+
     {
         "script": "monitoring/performance_analytics_engine.py",
-        "requires": ["portfolio_returns.csv"],
-        "produces": ["performance_analytics.csv"],
-        "optional": True,
+        "requires": [
+            "portfolio_returns.csv"
+        ],
+        "produces": [
+            "performance_analytics.csv"
+        ],
     },
+
+    # =====================================================
+    # REPORTING
+    # =====================================================
+
     {
         "script": "utilities/monthly_factsheet_generator.py",
-        "requires": ["optimised_portfolio.csv", "portfolio_risk_report.csv"],
-        "produces": ["monthly_factsheet.xlsx"],
-        "optional": True,
+        "requires": [
+            "optimised_portfolio.csv",
+            "portfolio_risk_report.csv",
+        ],
+        "produces": [
+            "monthly_factsheet.xlsx"
+        ],
     },
-    {
-        "script": "utilities/experiment_tracker.py",
-        "requires": ["walk_forward_stats.csv", "market_regime.csv", "optimised_portfolio.csv"],
-        "produces": ["strategy_versions.csv"],
-        "optional": True,
-    },
+
+    # =====================================================
+    # OPTIONAL RESEARCH
+    # =====================================================
+
     {
         "script": "research/capacity_analysis_engine.py",
-        "requires": ["optimised_portfolio.csv", "factor_model_rankings.csv"],
-        "produces": ["capacity_report.csv"],
+        "requires": [
+            "optimised_portfolio.csv",
+            "processed/factor_model_rankings.csv",
+        ],
+        "produces": [
+            "capacity_report.csv"
+        ],
         "optional": True,
     },
+
     {
         "script": "monitoring/signal_database.py",
-        "requires": ["optimised_portfolio.csv"],
-        "produces": ["historical_signals.parquet", "historical_signals.csv"],
+        "requires": [
+            "optimised_portfolio.csv"
+        ],
+        "produces": [
+            "historical_signals.parquet",
+            "historical_signals.csv",
+        ],
         "optional": True,
     },
+
+    {
+        "script": "utilities/experiment_tracker.py",
+        "requires": [
+            "walk_forward_stats.csv",
+            "processed/market_regime.csv",
+            "optimised_portfolio.csv",
+        ],
+        "produces": [
+            "strategy_versions.csv"
+        ],
+        "optional": True,
+    },
+
     {
         "script": "utilities/strategy_version_control.py",
-        "requires": ["walk_forward_stats.csv", "market_regime.csv", "optimised_portfolio.csv"],
-        "produces": ["strategy_registry.csv"],
+        "requires": [
+            "walk_forward_stats.csv",
+            "processed/market_regime.csv",
+            "optimised_portfolio.csv",
+        ],
+        "produces": [
+            "strategy_registry.csv"
+        ],
         "optional": True,
     },
-]
 
+]
 
 # =========================================================
 # VALIDATION

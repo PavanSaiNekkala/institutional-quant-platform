@@ -15,7 +15,7 @@ RS_FILE = ROOT_DIR / "data" / "processed" / "institutional_rankings.csv"
 
 SECTOR_RS_FILE = ROOT_DIR / "data" / "processed" / "sector_relative_strength.csv"
 
-META_FILE = ROOT_DIR / "data" / "raw" / "stock_metadata.csv"
+META_FILE = ROOT_DIR / "data" / "raw" / "security_master.csv"
 
 OUTPUT_FILE = ROOT_DIR / "data" / "processed" / "cross_sectional_rankings.csv"
 
@@ -32,6 +32,23 @@ rs_df = pd.read_csv(RS_FILE)
 sector_df = pd.read_csv(SECTOR_RS_FILE)
 
 meta_df = pd.read_csv(META_FILE)
+
+required_meta_cols = [
+    "Symbol",
+    "Sector",
+    "Industry",
+    "Market_Cap",
+]
+
+missing = [
+    c for c in required_meta_cols
+    if c not in meta_df.columns
+]
+
+if missing:
+    raise Exception(
+        f"Missing columns in security_master.csv: {missing}"
+    )
 
 print("✅ Files Loaded")
 
@@ -56,6 +73,10 @@ rs_df["Symbol"] = clean_symbol(rs_df["Symbol"])
 
 meta_df["Symbol"] = clean_symbol(meta_df["Symbol"])
 
+meta_df = meta_df.drop_duplicates(
+    subset=["Symbol"]
+)
+
 # =========================================================
 # MERGE DATA
 # =========================================================
@@ -68,7 +89,18 @@ print("\n===== AFTER COPY =====")
 
 print(df[["Symbol", "Momentum", "Sharpe"]].head(10))
 
-df = pd.merge(df, meta_df[["Symbol", "Sector", "Industry", "Market_Cap"]], on="Symbol", how="left")
+meta_cols = [
+    "Symbol",
+    "Sector",
+    "Industry",
+    "Market_Cap",
+]
+
+df = df.merge(
+    meta_df[meta_cols],
+    on="Symbol",
+    how="left",
+)
 
 print("\n===== AFTER META MERGE =====")
 
@@ -89,6 +121,14 @@ print("✅ Merge Completed")
 df["Sector"] = df["Sector"].fillna("Unknown")
 
 df["Industry"] = df["Industry"].fillna("Unknown")
+
+df["Market_Cap"] = (
+    pd.to_numeric(
+        df["Market_Cap"],
+        errors="coerce",
+    )
+    .fillna(0)
+)
 
 # =========================================================
 # NUMERIC COLUMNS

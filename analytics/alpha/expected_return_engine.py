@@ -2,10 +2,16 @@
 # EXPECTED RETURN ENGINE
 # =========================================================
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+
+from analytics.utilities.schema_validator import validate_columns
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 # =========================================================
 # PATHS
@@ -28,6 +34,14 @@ print("\n📥 Loading Factor Model Rankings...")
 df = pd.read_csv(INPUT_FILE)
 
 print("✅ Data Loaded")
+
+df = validate_columns(
+    INPUT_FILE,
+    [
+        "Symbol",
+        "MULTI_FACTOR_SCORE",
+    ],
+)
 
 # =========================================================
 # NEWS VALIDATION

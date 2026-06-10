@@ -11,7 +11,7 @@ import yfinance as yf
 
 DOWNLOAD_PERIOD = "6mo"
 
-MAX_WORKERS = 10
+MAX_WORKERS = 3
 
 # =========================================================
 # PATHS
@@ -79,6 +79,7 @@ def calculate_liquidity(symbol):
         )
 
         if data.empty:
+            print(f"NO DATA -> {ticker}")
             return None
 
         if isinstance(data.columns, pd.MultiIndex):
@@ -87,24 +88,45 @@ def calculate_liquidity(symbol):
         if "Close" not in data.columns or "Volume" not in data.columns:
             return None
 
-        close = data["Close"]
+        close = data["Close"].squeeze()
 
-        volume = data["Volume"]
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
 
-        latest_price = close.iloc[-1]
+        volume = data["Volume"].squeeze()
 
-        avg_volume_20d = volume.rolling(20).mean().iloc[-1]
+        if isinstance(volume, pd.DataFrame):
+            volume = volume.iloc[:, 0]
+
+        latest_price = float(
+            close.iloc[-1]
+        )
+
+        if pd.isna(latest_price):
+            print(f"INVALID PRICE -> {ticker}")
+            return None
+
+        avg_volume_20d = float(
+            volume.rolling(20).mean().iloc[-1]
+        )
+
+        if pd.isna(avg_volume_20d):
+            print(f"INVALID VOLUME -> {ticker}")
+            return None
+
+        latest_price = float(latest_price)
+        avg_volume_20d = float(avg_volume_20d)
 
         traded_value = latest_price * avg_volume_20d
 
         return {
             "Symbol": symbol,
             "Close": round(latest_price, 2),
-            "AVG_20D_VOLUME": int(avg_volume_20d),
-            "TRADED_VALUE": round(traded_value, 2),
+            "AVG_20D_VOLUME": round(avg_volume_20d),
+            "ADV_RUPEES": round(traded_value, 2),
         }
-
-    except Exception:
+    except Exception as e:
+        print(f"ERROR -> {ticker} -> {e}")
         return None
 
 
@@ -135,6 +157,12 @@ with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
 liquidity_df = pd.DataFrame(results)
 
+print("\n===== DOWNLOAD SUMMARY =====")
+
+print("Universe:", len(symbols))
+print("Downloaded:", len(liquidity_df))
+print("Failed:", len(symbols) - len(liquidity_df))
+
 if liquidity_df.empty:
     raise Exception("❌ No liquidity data generated")
 
@@ -142,7 +170,9 @@ if liquidity_df.empty:
 # LIQUIDITY SCORE
 # =========================================================
 
-liquidity_df["LIQUIDITY_SCORE"] = liquidity_df["TRADED_VALUE"].rank(pct=True) * 100
+liquidity_df["LIQUIDITY_SCORE"] = (
+    liquidity_df["ADV_RUPEES"].rank(pct=True) * 100
+)
 
 liquidity_df["LIQUIDITY_RANK"] = liquidity_df["LIQUIDITY_SCORE"].rank(
     ascending=False, method="dense"
@@ -154,9 +184,9 @@ liquidity_df["LIQUIDITY_RANK"] = liquidity_df["LIQUIDITY_SCORE"].rank(
 
 liquidity_df["LIQUIDITY_BUCKET"] = np.select(
     [
-        liquidity_df["TRADED_VALUE"] >= 5e8,
-        liquidity_df["TRADED_VALUE"] >= 1e8,
-        liquidity_df["TRADED_VALUE"] >= 5e7,
+        liquidity_df["ADV_RUPEES"] >= 5e8,
+        liquidity_df["ADV_RUPEES"] >= 1e8,
+        liquidity_df["ADV_RUPEES"] >= 5e7
     ],
     ["HIGH", "MEDIUM", "LOW"],
     default="ILLIQUID",
@@ -198,4 +228,13 @@ print(f"\n📁 Saved:\n{OUTPUT_FILE}")
 
 print("\n🏆 Most Liquid Stocks:\n")
 
-print(liquidity_df[["Symbol", "TRADED_VALUE", "LIQUIDITY_SCORE", "LIQUIDITY_BUCKET"]].head(20))
+print(
+    liquidity_df[
+        [
+            "Symbol",
+            "ADV_RUPEES",
+            "LIQUIDITY_SCORE",
+            "LIQUIDITY_BUCKET",
+        ]
+    ].head(20)
+)

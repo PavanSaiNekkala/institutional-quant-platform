@@ -1,6 +1,10 @@
+import sys
 from pathlib import Path
 
-import pandas as pd
+from analytics.utilities.schema_validator import validate_columns
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 # =========================================================
 # FILES
@@ -25,17 +29,14 @@ MIN_WEIGHT = 0.02
 
 print("\n📥 Loading Portfolio...")
 
-df = pd.read_csv(INPUT_FILE)
-
-# =========================================================
-# VALIDATION
-# =========================================================
-
-required_cols = ["CONVICTION_SCORE", "EXPECTED_RETURN_30D", "VOLATILITY"]
-
-for col in required_cols:
-    if col not in df.columns:
-        raise ValueError(f"Missing column: {col}")
+df = validate_columns(
+    INPUT_FILE,
+    [
+        "CONVICTION_SCORE",
+        "EXPECTED_RETURN_30D",
+        "VOLATILITY",
+    ],
+)
 
 # =========================================================
 # FILL NA
